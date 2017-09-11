@@ -52,12 +52,24 @@ template <typename T>
 H5::DataSet createHDF5Dataset(H5::H5File& file, const H5std_string& datasetName, std::vector<hsize_t> dataDims) {
     // Create the dataset
     hsize_t dataRank = dataDims.size();
-    H5::DataSpace dataspace(dataRank, dataDims.data());
+    H5::DataSpace dataspace;
+    if (dataRank == 0) {
+        dataspace = H5::DataSpace();
+    }
+    else {
+        dataspace = H5::DataSpace(dataRank, dataDims.data());
+    }
     H5::DataType dataType = getHDF5Type<T>();
     H5::DataSet dataset = file.createDataSet(datasetName.c_str(), dataType, dataspace);
     
     // Return
     return dataset;
+}
+
+template <typename T>
+H5::DataSet createHDF5DatasetScalar(H5::H5File& file, const H5std_string& datasetName) {
+    std::vector<hsize_t> dataDims;
+    return createHDF5Dataset<T>(file, datasetName, dataDims);
 }
 
 template <typename T>
@@ -182,6 +194,14 @@ template <typename T>
 void writeSingleHDF5Array(H5::DataSet& dataset, std::vector<hsize_t> gridOffset, std::vector<hsize_t> arrayDims, T* output) {    
     HDFReadWriteParams parms = getReadWriteParametersForSingleHDF5Array<T>(dataset, gridOffset, arrayDims);
     writeHDF5SimpleArray<T>(dataset, parms, output);
+}
+
+template <typename T>
+void writeVectorToHDF5Array(H5::H5File& file, const std::string& dsetName, std::vector<T>& vec) {
+    std::vector<hsize_t> dataOffset;
+    std::vector<hsize_t> dataDims = {vec.size()};    
+    H5::DataSet dset = createHDF5Dataset<T>(file, dsetName, dataDims);
+    writeSingleHDF5Array<T>(dset, dataOffset, dataDims, vec.data());
 }
 
 } //END NAMESPACE HPP

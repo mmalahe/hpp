@@ -3,6 +3,8 @@
 
 #include <hpp/spectralUtilsCUDA.h>
 
+#include <hpp/hdfUtilsCpp.h>
+
 namespace hpp
 {
 #ifdef HPP_USE_CUDA
@@ -647,30 +649,32 @@ void SpectralPolycrystalCUDA<T,N>::writePoleHistogramsPy(std::ofstream& outfile,
 }
 
 template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::writeResultNumpy(std::string filename)
+void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
 {
-    std::ofstream outfile(filename.c_str());
+    H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
     
     // Problem output
-    outfile << "t_history = " << this->tHistory << std::endl;
-    outfile << "T_cauchy_history = " << this->TCauchyHistory << std::endl;
+    writeVectorToHDF5Array(outfile, "t_history", this->tHistory);
     
-    // Pole figure histograms
-    std::vector<VecCUDA<T,3>> poles;
-    poles.push_back(VecCUDA<T,3>{1,1,1});
-    poles.push_back(VecCUDA<T,3>{1,1,0});
-    poles.push_back(VecCUDA<T,3>{1,0,0});
-    poles.push_back(VecCUDA<T,3>{0,0,1});
-    poles.push_back(VecCUDA<T,3>{0,1,1});
-    this->writePoleHistogramsPy(outfile, "pole_histograms", poles);
-    
-    // Performance
-    outfile << "spectral_polycrystal_solve_time = " << solveTimer.getDuration() << std::endl;
-    outfile << "nTimestepsTaken = " << this->getNTimestepsTaken() << std::endl;
-    outfile << "nComponents = " << this->getNComponents() << std::endl;
-    outfile << "nFourierTermsComputedHardware = " << this->getNTermsComputedHardware() << std::endl;
-    outfile << "maxMemUsedGB = " << maxMemUsedGB << std::endl;
-    
+//    outfile << "t_history = " << this->tHistory << std::endl;
+//    outfile << "T_cauchy_history = " << this->TCauchyHistory << std::endl;
+//    
+//    // Pole figure histograms
+//    std::vector<VecCUDA<T,3>> poles;
+//    poles.push_back(VecCUDA<T,3>{1,1,1});
+//    poles.push_back(VecCUDA<T,3>{1,1,0});
+//    poles.push_back(VecCUDA<T,3>{1,0,0});
+//    poles.push_back(VecCUDA<T,3>{0,0,1});
+//    poles.push_back(VecCUDA<T,3>{0,1,1});
+//    this->writePoleHistogramsPy(outfile, "pole_histograms", poles);
+//    
+//    // Performance
+//    outfile << "spectral_polycrystal_solve_time = " << solveTimer.getDuration() << std::endl;
+//    outfile << "nTimestepsTaken = " << this->getNTimestepsTaken() << std::endl;
+//    outfile << "nComponents = " << this->getNComponents() << std::endl;
+//    outfile << "nFourierTermsComputedHardware = " << this->getNTermsComputedHardware() << std::endl;
+//    outfile << "maxMemUsedGB = " << maxMemUsedGB << std::endl;
+//    
     // Close
     outfile.close();
 }

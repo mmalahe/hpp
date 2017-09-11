@@ -97,7 +97,7 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
     polycrystal.evolve(experiment.tStart, experiment.tEnd, dt, experiment.F_of_t, experiment.L_of_t);
 
     // Write the result
-    polycrystal.writeResultNumpy(outputFilename);
+    polycrystal.writeResultHDF5(outputFilename);
     
     // Write out strain history
     if (comm_rank == 0) {

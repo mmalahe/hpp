@@ -17,9 +17,10 @@ do_spectral_solve = True
 
 do_iterative_solve_plot = False
 do_spectral_solve_plot = False
-#~ error_study_type = None
+
+error_study_type = None
 #~ error_study_type = 'n_terms'
-error_study_type = 'refinement_multiplier'
+#~ error_study_type = 'refinement_multiplier'
 #~ error_study_type = 'db_dim'
 
 spectral_performance_study_type = None
@@ -40,8 +41,8 @@ general_params['do_profile'] = False
 problem_params = {}
 problem_params['default_seed'] = True
 #~ problem_params['n_crystals'] = 2*22*768*2**5
-problem_params['n_crystals'] = 22*2*768
-#~ problem_params['n_crystals'] = 2*768
+#~ problem_params['n_crystals'] = 22*2*768
+problem_params['n_crystals'] = 2*768
 #~ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 problem_params['experiment_name'].append('mihaila2014_simple_shear')
@@ -57,7 +58,7 @@ spectral_db_params['db_dim'] = 128
 #~ spectral_db_params['db_dim'] = [8,16,32,64,128]
 spectral_db_params['refinement_multiplier'] = 128
 #~ spectral_db_params['refinement_multiplier'] = [1,2,4,8,16,32,64,128]
-spectral_db_params['refinement_multiplier'] = [1,4,16,64,128]
+#~ spectral_db_params['refinement_multiplier'] = [1,4,16,64,128]
 spectral_db_params['use_unified_coeff_order'] = True  
 
 # Iterative solve parameters
@@ -75,7 +76,7 @@ spectral_solve_params.update(problem_params)
 spectral_solve_params.update(spectral_db_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
-spectral_solve_params['n_terms'] = 2**11
+spectral_solve_params['n_terms'] = 2**14
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(7,16)]
 

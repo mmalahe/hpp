@@ -163,7 +163,7 @@ class SpectralSolveRun(GenericRun):
             self.executable = os.path.join(bin_dir,"spectralSolve")
         
         # Filename    
-        self['results_filename'] = self['name']+"_result_spectral.txt"
+        self['results_filename'] = self['name']+"_result_spectral.hdf5"
         self['db_filename'] = getSpectralDatabaseFilename(self['db_dir'], self['db_dim'], self['use_unified_coeff_order'])  
     
     def run(self):
@@ -229,37 +229,40 @@ class SpectralSolveRun(GenericRun):
         return getStrainStressFromResultsFile(self['results_filename'])
         
     def getGigatermsComputationRate(self):
-        # Fetch outputs        
-        exec(open(self['results_filename']))
-        elapsed = spectral_polycrystal_solve_time
+        pass
+        #~ # Fetch outputs        
+        #~ exec(open(self['results_filename']))
+        #~ elapsed = spectral_polycrystal_solve_time
         
-        if elapsed > 0:        
-            # Overall profiling stats
-            nFourierTermsComputed = nTimestepsTaken*self['n_crystals']*self['n_terms']*nComponents
-            print "elapsed = ", elapsed
-            print "gigaterms computed =", nFourierTermsComputed/1.0e9
-            print "gigaterms/second =", (nFourierTermsComputed/elapsed)/1.0e9
+        #~ if elapsed > 0:        
+            #~ # Overall profiling stats
+            #~ nFourierTermsComputed = nTimestepsTaken*self['n_crystals']*self['n_terms']*nComponents
+            #~ print "elapsed = ", elapsed
+            #~ print "gigaterms computed =", nFourierTermsComputed/1.0e9
+            #~ print "gigaterms/second =", (nFourierTermsComputed/elapsed)/1.0e9
             
-            # Implementation makes use of symmetries in real data, so the actual
-            # number of terms computed at the hardware level is a little over half
-            #print "gigaterms computed (hardware)=", nFourierTermsComputedHardware/1e9
-            #print "gigaterms/second (hardware) =", (nFourierTermsComputedHardware/elapsed)/1.0e9
-            print "terms/terms(hardware) =", float(nFourierTermsComputed)/nFourierTermsComputedHardware
+            #~ # Implementation makes use of symmetries in real data, so the actual
+            #~ # number of terms computed at the hardware level is a little over half
+            #~ #print "gigaterms computed (hardware)=", nFourierTermsComputedHardware/1e9
+            #~ #print "gigaterms/second (hardware) =", (nFourierTermsComputedHardware/elapsed)/1.0e9
+            #~ print "terms/terms(hardware) =", float(nFourierTermsComputed)/nFourierTermsComputedHardware
             
-            print "strain steps/second = ", nTimestepsTaken/elapsed
+            #~ print "strain steps/second = ", nTimestepsTaken/elapsed
             
-            return (nFourierTermsComputed/elapsed)/1.0e9
-        else:
-            return 0
+            #~ return (nFourierTermsComputed/elapsed)/1.0e9
+        #~ else:
+            #~ return 0
     
     def getMaxMemUsedGB(self):
+        pass
         # Fetch outputs        
-        exec(open(self['results_filename']))
-        return maxMemUsedGB
+        #~ exec(open(self['results_filename']))
+        #~ return maxMemUsedGB
         
     def getPoleHistograms(self):
-        exec(open(self['results_filename']))
-        return pole_histograms
+        pass
+        #~ exec(open(self['results_filename']))
+        #~ return pole_histograms
 
 def expandRunsByListParameter(runs, paramName, paramValList):
     expanded_runs = []

@@ -182,7 +182,7 @@ public:
 
     // Write
     void writePoleHistogramsPy(std::ofstream& outfile, std::string pyVariableName, const std::vector<VecCUDA<T,3>>& poles);
-    void writeResultNumpy(std::string filename);
+    void writeResultHDF5(std::string filename);
     
     // Extras
     unsigned int getNTimestepsTaken();
