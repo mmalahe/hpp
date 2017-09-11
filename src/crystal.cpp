@@ -930,7 +930,7 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
 }
 
 template <typename U>
-void Polycrystal<U>::writeResultNumpy(std::string filename) {
+void Polycrystal<U>::writeResultHDF5(std::string filename) {
     // Calculate local orientations
     std::vector<U> alphasLocal(crystal_list.size());
     std::vector<U> betasLocal(crystal_list.size());
@@ -955,14 +955,28 @@ void Polycrystal<U>::writeResultNumpy(std::string filename) {
     
     if (comm_rank == 0) {
         // Open output file
-        std::ofstream outfile(filename.c_str());
+        H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
         
         // Write out orientations
-        outfile << "euler_angles = " << anglesGlobalRoot << std::endl;
+        std::vector<hsize_t> crystalDims = {anglesGlobalRoot.size()};
+        std::vector<hsize_t> angleDims = {3};
+        H5::DataSet anglesDset = createHDF5GridOfArrays<U>(outfile, "eulerAngles", crystalDims, angleDims);
+        for (unsigned int i=0; i<anglesGlobalRoot.size(); i++) {
+            std::vector<hsize_t> offset = {i};
+            auto angle = anglesGlobalRoot[i];
+            std::vector<U> angleData = {angle.alpha, angle.beta, angle.gamma};
+            writeSingleHDF5Array<U>(anglesDset, offset, angleDims, angleData.data());
+        }
         
-        // Write out histories
-        outfile << "t_history = " << this->t_history << std::endl;
-        outfile << "T_cauchy_history = " << this->T_cauchy_history << std::endl;
+        // Stress history
+        writeVectorToHDF5Array(outfile, "tHistory", this->t_history);    
+        std::vector<hsize_t> timeDims = {this->T_cauchy_history.size()};
+        std::vector<hsize_t> tensorDims = {3,3};
+        H5::DataSet TCauchyDset = createHDF5GridOfArrays<U>(outfile, "TCauchyHistory", timeDims, tensorDims);
+        for (unsigned int i=0; i<this->T_cauchy_history.size(); i++) {
+            std::vector<hsize_t> offset = {i};
+            this->T_cauchy_history[i].writeToExistingHDF5Dataset(TCauchyDset, offset);
+        }
         
         // Close
         outfile.close();

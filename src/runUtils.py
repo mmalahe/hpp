@@ -100,7 +100,7 @@ class IterativeSolveRun(GenericRun):
         else:
             bin_dir = getBinDir("release")
         self.executable = os.path.join(bin_dir,"iterativeSolve")
-        self['results_filename'] = self['name']+"_result_iterative.txt"
+        self['results_filename'] = self['name']+"_result_iterative.hdf5"
     
     def run(self):
         # Derived parameters
@@ -148,8 +148,12 @@ class IterativeSolveRun(GenericRun):
     def getStrainAndStress(self):
         return getStrainStressFromResultsFile(self['results_filename'])
         
-    def getPoleHistograms(self):
-        exec(open(self['results_filename']))
+    def getPoleHistograms(self):        
+        # Extract
+        results = h5py.File(self['results_filename'], "r")
+        euler_angles = []
+        for i in range(results['eulerAngles'].shape[0]):
+            euler_angles.append(results['eulerAngles'][i,:])
         return getPoleHistograms(euler_angles)
 
 class SpectralSolveRun(GenericRun):

@@ -407,7 +407,7 @@ public:
     }
 
     // Write
-    void writeResultNumpy(std::string filename);
+    void writeResultHDF5(std::string filename);
     
     // Getters
     const std::vector<U>& getTHistory() const {return t_history;}

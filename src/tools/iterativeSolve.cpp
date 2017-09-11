@@ -61,21 +61,13 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     kalidindi_polycrystal.evolve(experiment.tStart, experiment.tEnd, dt_initial, experiment.F_of_t);
     
     // Write out results
-    kalidindi_polycrystal.writeResultNumpy(output_filename);
+    kalidindi_polycrystal.writeResultHDF5(output_filename);
     
     // Write out strain history
     if (comm_rank == 0) {
-        // Open output file
-        std::ofstream outfile(output_filename, std::ofstream::app);
-        
-        // Strain history
-        std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, kalidindi_polycrystal.getTHistory());
-        outfile << "true_strain_history = ";
-        hpp::operator<<(outfile, trueStrainHistory);
-        outfile << std::endl;
-        
-        // Close
-        outfile.close();
+        std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, kalidindi_polycrystal.getTHistory());        
+        H5::H5File outfile(output_filename, H5F_ACC_RDWR);
+        hpp::writeVectorToHDF5Array(outfile, "trueStrainHistory", trueStrainHistory);
     }
 }
 

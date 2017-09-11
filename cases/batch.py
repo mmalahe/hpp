@@ -41,8 +41,8 @@ general_params['do_profile'] = False
 problem_params = {}
 problem_params['default_seed'] = True
 #~ problem_params['n_crystals'] = 2*22*768*2**5
-problem_params['n_crystals'] = 22*2*768
-#~ problem_params['n_crystals'] = 2*768
+#~ problem_params['n_crystals'] = 22*2*768
+problem_params['n_crystals'] = 2*768
 #~ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 problem_params['experiment_name'].append('mihaila2014_simple_shear')
@@ -109,8 +109,8 @@ if error_study_type != None:
     doErrorStudy(spectral_solve_runs[-1], spectral_solve_runs[:-1], error_study_type)
     
     # Comparison with iterative solver
-    #~ assert(len(iterative_solve_runs) == 1)
-    #~ doErrorStudy(iterative_solve_runs[0], spectral_solve_runs, error_study_type)
+    assert(len(iterative_solve_runs) == 1)
+    doErrorStudy(iterative_solve_runs[0], spectral_solve_runs, error_study_type)
     
 # Performance studies
 if spectral_performance_study_type != None:
