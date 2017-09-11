@@ -603,7 +603,7 @@ void SpectralPolycrystalCUDA<T,N>::evolve(T tStart, T tEnd, T dt, std::function<
  * @param poles the poles to plot
  */
 template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::writePoleHistogramsPy(std::ofstream& outfile, std::string pyVariableName, const std::vector<VecCUDA<T,3>>& poles) {
+void SpectralPolycrystalCUDA<T,N>::writePoleHistogramsHDF5(H5::H5File& outfile, std::string dsetBaseName, const std::vector<VecCUDA<T,3>>& poles) {
     // Histogram configuration
     const unsigned int histDim = 1024;
     CudaKernelConfig histKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)HISTOGRAM_POLES_EQUAL_AREA<T, histDim>, nCrystals);
@@ -611,23 +611,9 @@ void SpectralPolycrystalCUDA<T,N>::writePoleHistogramsPy(std::ofstream& outfile,
     dim3 dB = histKernelCfg.dB;
     
     // Begin writing
-    outfile << pyVariableName << " = {";
-    for (unsigned int i=0; i<poles.size(); i++) {
-        // Start new dictionary entry
-        if (i != 0) {
-            outfile << ", ";
-        }
-        outfile << std::endl;
-        
-        // Write pole
-        auto poleH = poles[i];
-        outfile << "\'";
-        for (auto val : poleH) {
-            outfile << (int)val;
-        }
-        outfile << "\' : ";
-        
+    for (unsigned int i=0; i<poles.size(); i++) {        
         // Generate histogram
+        auto poleH = poles[i];
         std::shared_ptr<VecCUDA<T,3>> poleD = makeDeviceCopySharedPtr(poleH);    
         Tensor2CUDA<T,histDim,histDim>* histHPtr = new Tensor2CUDA<T,histDim,histDim>;
         std::shared_ptr<Tensor2CUDA<T,histDim,histDim>> histD = makeDeviceCopySharedPtrFromPtr(histHPtr);        
@@ -637,15 +623,18 @@ void SpectralPolycrystalCUDA<T,N>::writePoleHistogramsPy(std::ofstream& outfile,
         copyToHost(histD, histHPtr);
         
         // Write histogram
-        outfile << *(histHPtr);
+        std::string dsetName = dsetBaseName + "_";        
+        for (auto val : poleH) {
+            dsetName += std::to_string((int)val);
+        }
+        std::vector<hsize_t> dataDims = {histDim, histDim};
+        auto dset = createHDF5Dataset<T>(outfile, dsetName, dataDims);
+        std::vector<hsize_t> offset; //no offset
+        histHPtr->writeToExistingHDF5Dataset(dset, offset);
         
         // Free
         delete histHPtr;
     }
-   
-    // Finish writing
-    outfile << std::endl;
-    outfile << "}" << std::endl;
 }
 
 template <typename T, unsigned int N>
@@ -663,17 +652,14 @@ void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
         this->TCauchyHistory[i].writeToExistingHDF5Dataset(TCauchyDset, offset);
     }
     
-//    outfile << "t_history = " << this->tHistory << std::endl;
-//    outfile << "T_cauchy_history = " << this->TCauchyHistory << std::endl;
-//    
-//    // Pole figure histograms
-//    std::vector<VecCUDA<T,3>> poles;
-//    poles.push_back(VecCUDA<T,3>{1,1,1});
-//    poles.push_back(VecCUDA<T,3>{1,1,0});
-//    poles.push_back(VecCUDA<T,3>{1,0,0});
-//    poles.push_back(VecCUDA<T,3>{0,0,1});
-//    poles.push_back(VecCUDA<T,3>{0,1,1});
-//    this->writePoleHistogramsPy(outfile, "pole_histograms", poles);
+    // Pole figure histograms
+    std::vector<VecCUDA<T,3>> poles;
+    poles.push_back(VecCUDA<T,3>{1,1,1});
+    poles.push_back(VecCUDA<T,3>{1,1,0});
+    poles.push_back(VecCUDA<T,3>{1,0,0});
+    poles.push_back(VecCUDA<T,3>{0,0,1});
+    poles.push_back(VecCUDA<T,3>{0,1,1});
+    this->writePoleHistogramsHDF5(outfile, "pole_histograms", poles);
 //    
 //    // Performance
 //    outfile << "spectral_polycrystal_solve_time = " << solveTimer.getDuration() << std::endl;

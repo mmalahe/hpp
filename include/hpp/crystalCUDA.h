@@ -181,7 +181,7 @@ public:
     void evolve(T t_start, T t_end, T dt, std::function<hpp::Tensor2<T>(T t)> F_of_t, std::function<hpp::Tensor2<T>(T t)> L_of_t);
 
     // Write
-    void writePoleHistogramsPy(std::ofstream& outfile, std::string pyVariableName, const std::vector<VecCUDA<T,3>>& poles);
+    void writePoleHistogramsHDF5(H5::H5File& outfile, std::string pyVariableName, const std::vector<VecCUDA<T,3>>& poles);
     void writeResultHDF5(std::string filename);
     
     // Extras
