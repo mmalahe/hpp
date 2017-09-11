@@ -1,5 +1,8 @@
 # Profiling
 *.pyprof
 
+# Python products
+*.pyc
+
 # Images
 *.png
