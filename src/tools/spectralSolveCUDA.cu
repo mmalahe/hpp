@@ -101,17 +101,10 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
     
     // Write out strain history
     if (comm_rank == 0) {
-        // Open output file
-        std::ofstream outfile(outputFilename, std::ofstream::app);
-        
         // Strain history
-        std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, polycrystal.getTHistory());
-        outfile << "true_strain_history = ";
-        hpp::operator<<(outfile, trueStrainHistory);
-        outfile << std::endl;
-        
-        // Close
-        outfile.close();
+        std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, polycrystal.getTHistory());        
+        H5::H5File outfile(outputFilename, H5F_ACC_RDWR);
+        hpp::writeVectorToHDF5Array(outfile, "trueStrainHistory", trueStrainHistory);  
     }
 }
     

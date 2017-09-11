@@ -659,7 +659,7 @@ void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
     poles.push_back(VecCUDA<T,3>{1,0,0});
     poles.push_back(VecCUDA<T,3>{0,0,1});
     poles.push_back(VecCUDA<T,3>{0,1,1});
-    this->writePoleHistogramsHDF5(outfile, "poleHistograms", poles);
+    this->writePoleHistogramsHDF5(outfile, "poleHistogram", poles);
     
     // Scalar attributes
     addAttribute(outfile, "spectralPolycrystalSolveTime", solveTimer.getDuration());

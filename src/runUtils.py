@@ -3,6 +3,7 @@ import copy
 from subprocess import call
 from numpy import array
 from crystal import *
+import h5py
 
 CPU_DEBUG_ARGS = ["gdb","--args"]
 GPU_DEBUG_ARGS = ["cuda-gdb","--args"]
@@ -67,14 +68,22 @@ class GenericRun(object):
         return self.__repr__()
 
 def getStrainStressFromResultsFile(filename, stress_unit='MPa'):
-    exec(open(filename))
-    true_strain_history = array(true_strain_history)
+    # Extract
+    results = h5py.File(filename, "r")
+    true_strain_history = results['trueStrainHistory']
+    T_cauchy_history = []
+    for i in range(results['TCauchyHistory'].shape[0]):
+        T_cauchy_history.append(results['TCauchyHistory'][i,:,:])
+    
+    # Scale
     if stress_unit == 'MPa':
         T_cauchy_history = [array(a)*1e3 for a in T_cauchy_history]
     elif stress_unit == 'GPa':
         T_cauchy_history = [array(a) for a in T_cauchy_history]
     else:
-        print "Not implemented stress unit \""+stress_unit+"\"."
+        print "Haven't implemented stress unit \""+stress_unit+"\"."
+    
+    # Return
     return true_strain_history, T_cauchy_history
     
 class IterativeSolveRun(GenericRun):
@@ -229,40 +238,41 @@ class SpectralSolveRun(GenericRun):
         return getStrainStressFromResultsFile(self['results_filename'])
         
     def getGigatermsComputationRate(self):
-        pass
-        #~ # Fetch outputs        
-        #~ exec(open(self['results_filename']))
-        #~ elapsed = spectral_polycrystal_solve_time
+        # Fetch outputs    
+        results = h5py.File(self['results_filename'], "r")
+        elapsed = results.attrs['spectralPolycrystalSolveTime']
         
-        #~ if elapsed > 0:        
-            #~ # Overall profiling stats
-            #~ nFourierTermsComputed = nTimestepsTaken*self['n_crystals']*self['n_terms']*nComponents
-            #~ print "elapsed = ", elapsed
-            #~ print "gigaterms computed =", nFourierTermsComputed/1.0e9
-            #~ print "gigaterms/second =", (nFourierTermsComputed/elapsed)/1.0e9
+        if elapsed > 0:        
+            # Overall profiling stats
+            nFourierTermsComputed = results.attrs['nTimestepsTaken']*self['n_crystals']*self['n_terms']*results.attrs['nComponents']
+            print "elapsed = ", elapsed
+            print "gigaterms computed =", nFourierTermsComputed/1.0e9
+            print "gigaterms/second =", (nFourierTermsComputed/elapsed)/1.0e9
             
-            #~ # Implementation makes use of symmetries in real data, so the actual
-            #~ # number of terms computed at the hardware level is a little over half
-            #~ #print "gigaterms computed (hardware)=", nFourierTermsComputedHardware/1e9
-            #~ #print "gigaterms/second (hardware) =", (nFourierTermsComputedHardware/elapsed)/1.0e9
-            #~ print "terms/terms(hardware) =", float(nFourierTermsComputed)/nFourierTermsComputedHardware
+            # Implementation makes use of symmetries in real data, so the actual
+            # number of terms computed at the hardware level is a little over half
+            #print "gigaterms computed (hardware)=", nFourierTermsComputedHardware/1e9
+            #print "gigaterms/second (hardware) =", (nFourierTermsComputedHardware/elapsed)/1.0e9
+            print "terms/terms(hardware) =", float(nFourierTermsComputed)/results.attrs['nFourierTermsComputedHardware']
             
-            #~ print "strain steps/second = ", nTimestepsTaken/elapsed
+            print "strain steps/second = ", results.attrs['nTimestepsTaken']/elapsed
             
-            #~ return (nFourierTermsComputed/elapsed)/1.0e9
-        #~ else:
-            #~ return 0
+            return (nFourierTermsComputed/elapsed)/1.0e9
+        else:
+            return 0
     
     def getMaxMemUsedGB(self):
-        pass
-        # Fetch outputs        
-        #~ exec(open(self['results_filename']))
-        #~ return maxMemUsedGB
+        results = h5py.File(self['results_filename'], "r")
+        return results.attrs['maxMemUsedGB']
         
     def getPoleHistograms(self):
-        pass
-        #~ exec(open(self['results_filename']))
-        #~ return pole_histograms
+        histograms = {}
+        results = h5py.File(self['results_filename'], "r")
+        for key in results.keys():
+            if key.startswith('poleHistogram_'):
+                pole_name = key[key.find('_')+1:]
+                histograms[pole_name] = results[key]
+        return histograms
 
 def expandRunsByListParameter(runs, paramName, paramValList):
     expanded_runs = []

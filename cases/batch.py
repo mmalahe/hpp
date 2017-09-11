@@ -18,8 +18,8 @@ do_spectral_solve = True
 do_iterative_solve_plot = False
 do_spectral_solve_plot = False
 
-error_study_type = None
-#~ error_study_type = 'n_terms'
+#~ error_study_type = None
+error_study_type = 'n_terms'
 #~ error_study_type = 'refinement_multiplier'
 #~ error_study_type = 'db_dim'
 
@@ -41,8 +41,8 @@ general_params['do_profile'] = False
 problem_params = {}
 problem_params['default_seed'] = True
 #~ problem_params['n_crystals'] = 2*22*768*2**5
-#~ problem_params['n_crystals'] = 22*2*768
-problem_params['n_crystals'] = 2*768
+problem_params['n_crystals'] = 22*2*768
+#~ problem_params['n_crystals'] = 2*768
 #~ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 problem_params['experiment_name'].append('mihaila2014_simple_shear')
@@ -76,8 +76,8 @@ spectral_solve_params.update(problem_params)
 spectral_solve_params.update(spectral_db_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
-spectral_solve_params['n_terms'] = 2**14
-#~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
+#~ spectral_solve_params['n_terms'] = 2**14
+spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(7,16)]
 
 # Iterative solves
@@ -109,8 +109,8 @@ if error_study_type != None:
     doErrorStudy(spectral_solve_runs[-1], spectral_solve_runs[:-1], error_study_type)
     
     # Comparison with iterative solver
-    assert(len(iterative_solve_runs) == 1)
-    doErrorStudy(iterative_solve_runs[0], spectral_solve_runs, error_study_type)
+    #~ assert(len(iterative_solve_runs) == 1)
+    #~ doErrorStudy(iterative_solve_runs[0], spectral_solve_runs, error_study_type)
     
 # Performance studies
 if spectral_performance_study_type != None:
