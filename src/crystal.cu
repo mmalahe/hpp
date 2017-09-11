@@ -643,10 +643,10 @@ void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
     H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
     
     // Stress history
-    writeVectorToHDF5Array(outfile, "t_history", this->tHistory);    
+    writeVectorToHDF5Array(outfile, "tHistory", this->tHistory);    
     std::vector<hsize_t> timeDims = {this->TCauchyHistory.size()};
     std::vector<hsize_t> tensorDims = {3,3};
-    H5::DataSet TCauchyDset = createHDF5GridOfArrays<T>(outfile, "T_cauchy_history", timeDims, tensorDims);
+    H5::DataSet TCauchyDset = createHDF5GridOfArrays<T>(outfile, "TCauchyHistory", timeDims, tensorDims);
     for (unsigned int i=0; i<this->TCauchyHistory.size(); i++) {
         std::vector<hsize_t> offset = {i};
         this->TCauchyHistory[i].writeToExistingHDF5Dataset(TCauchyDset, offset);
@@ -659,15 +659,15 @@ void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
     poles.push_back(VecCUDA<T,3>{1,0,0});
     poles.push_back(VecCUDA<T,3>{0,0,1});
     poles.push_back(VecCUDA<T,3>{0,1,1});
-    this->writePoleHistogramsHDF5(outfile, "pole_histograms", poles);
-//    
-//    // Performance
-//    outfile << "spectral_polycrystal_solve_time = " << solveTimer.getDuration() << std::endl;
-//    outfile << "nTimestepsTaken = " << this->getNTimestepsTaken() << std::endl;
-//    outfile << "nComponents = " << this->getNComponents() << std::endl;
-//    outfile << "nFourierTermsComputedHardware = " << this->getNTermsComputedHardware() << std::endl;
-//    outfile << "maxMemUsedGB = " << maxMemUsedGB << std::endl;
-//    
+    this->writePoleHistogramsHDF5(outfile, "poleHistograms", poles);
+    
+    // Scalar attributes
+    addAttribute(outfile, "spectralPolycrystalSolveTime", solveTimer.getDuration());
+    addAttribute(outfile, "nTimestepsTaken", this->getNTimestepsTaken());
+    addAttribute(outfile, "nComponents", this->getNComponents());
+    addAttribute(outfile, "nFourierTermsComputedHardware", this->getNTermsComputedHardware());
+    addAttribute(outfile, "maxMemUsedGB", maxMemUsedGB);
+ 
     // Close
     outfile.close();
 }

@@ -36,6 +36,24 @@ H5::DataType getHDF5Type() {
     else if (std::is_same<T, double>::value) {
         dataType = H5::PredType::NATIVE_DOUBLE;
     }
+    else if (std::is_same<T, int>::value) {
+        dataType = H5::PredType::NATIVE_INT32;
+    }
+    else if (std::is_same<T, long int>::value) {
+        dataType = H5::PredType::NATIVE_LONG;
+    }
+    else if (std::is_same<T, long long int>::value) {
+        dataType = H5::PredType::NATIVE_LLONG;
+    }
+    else if (std::is_same<T, unsigned int>::value) {
+        dataType = H5::PredType::NATIVE_UINT32;
+    }
+    else if (std::is_same<T, unsigned long int>::value) {
+        dataType = H5::PredType::NATIVE_ULONG;
+    }
+    else if (std::is_same<T, unsigned long long int>::value) {
+        dataType = H5::PredType::NATIVE_ULLONG;
+    }
     else {
         throw HDFUtilsError("Datatype lookup not implemented for this type.");
     }
@@ -64,12 +82,6 @@ H5::DataSet createHDF5Dataset(H5::H5File& file, const H5std_string& datasetName,
     
     // Return
     return dataset;
-}
-
-template <typename T>
-H5::DataSet createHDF5DatasetScalar(H5::H5File& file, const H5std_string& datasetName) {
-    std::vector<hsize_t> dataDims;
-    return createHDF5Dataset<T>(file, datasetName, dataDims);
 }
 
 template <typename T>
@@ -156,7 +168,7 @@ void readWriteHDF5SimpleArray(H5::DataSet& dataset, HDFReadWriteParams parms, T*
     // Dataspace
     H5::DataSpace dataspace = dataset.getSpace();
     
-    // Create the memspace for the read
+    // Create the memspace for the read/write
     H5::DataSpace memspace(parms.dataCount.size(), parms.dataCount.data());
     
     // Select the hyperslab
@@ -202,6 +214,13 @@ void writeVectorToHDF5Array(H5::H5File& file, const std::string& dsetName, std::
     std::vector<hsize_t> dataDims = {vec.size()};    
     H5::DataSet dset = createHDF5Dataset<T>(file, dsetName, dataDims);
     writeSingleHDF5Array<T>(dset, dataOffset, dataDims, vec.data());
+}
+
+template <typename T>
+void addAttribute(H5::H5File& file, const std::string& attrName, T attrVal) {
+    H5::DataSpace scalarSpace(H5S_SCALAR);
+    auto attr = file.createAttribute(attrName, getHDF5Type<T>(), scalarSpace);
+    attr.write(getHDF5Type<T>(), &attrVal);
 }
 
 } //END NAMESPACE HPP
