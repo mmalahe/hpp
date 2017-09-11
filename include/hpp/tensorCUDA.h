@@ -14,6 +14,7 @@
 #include <hpp/config.h>
 #include <hpp/tensor.h>
 #include <hpp/cudaUtils.h>
+#include <hpp/hdfUtilsCpp.h>
 
 namespace hpp
 {
@@ -232,6 +233,12 @@ public:
     
     // Print to stream
     void printToStream(std::ostream& out) const;
+    
+    // Write to HDF5
+    void writeToExistingHDF5Dataset(H5::DataSet& dataset, std::vector<hsize_t> arrayOffset) {
+        std::vector<hsize_t> tensorDims = {M, N};
+        writeSingleHDF5Array<T>(dataset, arrayOffset, tensorDims, &(vals[0][0]));
+    }
     
     // Friends
 private:

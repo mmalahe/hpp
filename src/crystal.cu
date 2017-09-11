@@ -653,8 +653,15 @@ void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
 {
     H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
     
-    // Problem output
-    writeVectorToHDF5Array(outfile, "t_history", this->tHistory);
+    // Stress history
+    writeVectorToHDF5Array(outfile, "t_history", this->tHistory);    
+    std::vector<hsize_t> timeDims = {this->TCauchyHistory.size()};
+    std::vector<hsize_t> tensorDims = {3,3};
+    H5::DataSet TCauchyDset = createHDF5GridOfArrays<T>(outfile, "T_cauchy_history", timeDims, tensorDims);
+    for (unsigned int i=0; i<this->TCauchyHistory.size(); i++) {
+        std::vector<hsize_t> offset = {i};
+        this->TCauchyHistory[i].writeToExistingHDF5Dataset(TCauchyDset, offset);
+    }
     
 //    outfile << "t_history = " << this->tHistory << std::endl;
 //    outfile << "T_cauchy_history = " << this->TCauchyHistory << std::endl;
