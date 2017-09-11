@@ -1,0 +1,10 @@
+// GPU APIs
+#cmakedefine HPP_USE_CUDA
+
+// CPU instructions
+#cmakedefine HPP_USE_SSE
+#cmakedefine HPP_USE_SSE2
+#cmakedefine HPP_USE_SSE3
+#cmakedefine HPP_USE_SSE4_1
+#cmakedefine HPP_USE_AVX
+#cmakedefine HPP_USE_AVX2

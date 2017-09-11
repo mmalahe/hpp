@@ -1,0 +1,12 @@
+# IDE and build systems
+.cmake_dirty
+.codelite
+*.mk
+*CMakeFiles
+*CMakeCache.txt
+*cmake_install.cmake
+*Makefile
+
+# Build products
+lib
+bin
