@@ -6,7 +6,11 @@
 *CMakeCache.txt
 *cmake_install.cmake
 *Makefile
+*.project
+*.workspace
 
 # Build products
 lib
 bin
+build-release
+build-debug
