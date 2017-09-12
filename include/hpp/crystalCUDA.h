@@ -131,8 +131,11 @@ __device__ void getSpectralCrystalDatabaseCoordinate(SpectralCrystalCUDA<T>& cry
     T gridPos[4] = {angles.alpha, angles.beta, angles.gamma, theta};    
     T *gridStarts = db->getGridStarts();
     T *gridSteps = db->getGridSteps();
+    unsigned int *gridDims = db->getGridDims();
     for (unsigned int i=0; i<4; i++) {
-        dbCoord[i] = (unsigned int) ((gridPos[i] - gridStarts[i])/gridSteps[i]);
+        dbCoord[i] = nearbyint((gridPos[i] - gridStarts[i])/gridSteps[i]);
+        // Periodicity
+        dbCoord[i] = dbCoord[i]%gridDims[i];
     }
 }
 

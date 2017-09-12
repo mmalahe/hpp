@@ -100,6 +100,7 @@ public:
     // Getters
     __device__ T* getGridStarts() {return gridStarts;}
     __device__ T* getGridSteps() {return gridSteps;}
+    __device__ unsigned int * getGridDims() {return gridDims;}
     unsigned int getNDsets() const {return nDsets;}
     
 protected:
@@ -305,7 +306,8 @@ public:
     __device__ void getIDFTRealDSharedPair(unsigned int *spatialCoord0, T *outputs0, unsigned int *spatialCoord1, T *outputs1, unsigned int nShared, SpectralDataUnifiedCUDA<T,N,P> *sharedData) const;
     // Getters
     __device__ T* getGridStarts() {return gridStarts;}
-    __device__ T* getGridSteps() {return gridSteps;}    
+    __device__ T* getGridSteps() {return gridSteps;}
+    __device__ unsigned int * getGridDims() {return gridDims;}   
     unsigned int getNDsets() const {return nDsets;}
     unsigned int getNTerms() const {return nTerms;}
     
