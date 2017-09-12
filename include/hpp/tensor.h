@@ -1566,6 +1566,17 @@ void randomRotationTensorArvo1992(Tensor2<T>& A, bool defaultSeed=false) {
     T x2 = (T)dist(gen);
     T x3 = (T)dist(gen);
     
+    // Generate 
+    rotationTensorFrom3UniformRandomsArvo1992(A, x1, x2, x3);
+}
+
+template <typename T>
+void rotationTensorFrom3UniformRandomsArvo1992(Tensor2<T>& A, T x1, T x2, T x3) {    
+    // Static to avoid expensive alloc/dealloc for the tens/hundreds of millions regime
+    static std::vector<T> v(3);
+    static Tensor2<T> R(3,3);
+    static Tensor2<T> H(3,3);
+    
     // Random rotation about vertical axis
     R(0,0) = std::cos(2*M_PI*x1);
     R(1,1) = R(0,0);
@@ -1588,6 +1599,11 @@ void randomRotationTensorArvo1992(Tensor2<T>& A, bool defaultSeed=false) {
     // Final matrix
     A = H*R;
 }
+
+template <typename T>
+void rotationTensorFrom3UniformRandoms(Tensor2<T>& A, T x1, T x2, T x3) {
+    rotationTensorFrom3UniformRandomsArvo1992(A, x1, x2, x3);
+} 
 
 /**
  * @brief Generate a random rotation tensor.

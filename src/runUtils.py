@@ -118,10 +118,6 @@ class IterativeSolveRun(GenericRun):
             args += CPU_PROFILE_ARGS
         
         # MPI
-        if self['default_seed'] and self['np'] > 1:
-            print "WARNING: global default seed not implemented for MPI"
-            print "For correctness, setting number of processors to 1"
-            self['np'] = 1
         if not self['do_debug']:
             args += ["mpirun","-np",str(self['np'])]            
         

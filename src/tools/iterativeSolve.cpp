@@ -36,14 +36,33 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     int comm_size, comm_rank;
     MPI_Comm_size(comm, &comm_size);
     MPI_Comm_rank(comm, &comm_rank);
-    int ncrystals = ncrystalsGlobal/comm_size;
+    int ncrystalsLocal = ncrystalsGlobal/comm_size;
     
-    // Run replication
-    std::vector<hpp::Crystal<U>> crystal_list(ncrystals);
+    // Generate random numbers for rotations on root
+    std::vector<U> uniformRandomsRoot;
+    if (comm_rank == 0) {
+        uniformRandomsRoot.resize(ncrystalsGlobal*3);
+        auto gen = hpp::makeMt19937(defaultSeed);
+        std::uniform_real_distribution<double> dist(0.0,1.0);
+        for (unsigned int i=0; i<ncrystalsGlobal*3; i++) {
+            uniformRandomsRoot[i] = (U)dist(gen);
+        }
+    }
     
-    // For a single crystal only, do not randomize the rotation
-    for (auto&& crystal : crystal_list) {
-        hpp::Tensor2<U> rotTensor = hpp::randomRotationTensor<U>(3, defaultSeed);
+    // Distribute random numbers to all processes
+    std::vector<U> uniformRandomsLocal = hpp::MPISplitVectorEvenly(uniformRandomsRoot, comm);
+    
+    // Generate randomly rotated crystals
+    std::vector<hpp::Crystal<U>> crystal_list(ncrystalsLocal);
+    hpp::Tensor2<U> rotTensor(3,3);
+    for (unsigned int i=0; i<crystal_list.size(); i++) {
+        // Generate random rotation
+        U x1 = uniformRandomsLocal[i*3];
+        U x2 = uniformRandomsLocal[i*3+1];
+        U x3 = uniformRandomsLocal[i*3+2];
+        hpp::rotationTensorFrom3UniformRandoms(rotTensor, x1, x2, x3);
+        
+        // Rotate
         hpp::CrystalProperties<U> propsRotated = hpp::rotate(props, rotTensor);
         hpp::CrystalInitialConditions<U> initRotated = init;
         initRotated.crystalRotation = rotTensor;
@@ -51,12 +70,13 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
             // Do not rotate if there's only a single crystal
             // This is a special case for debugging purposes
             std::cout << "Note: single crystal is not being given a random rotation." << std::endl;
-            crystal = hpp::Crystal<U>(props, config, init);
+            crystal_list[i] = hpp::Crystal<U>(props, config, init);
         }
         else {
-            crystal = hpp::Crystal<U>(propsRotated, config, initRotated);
+            crystal_list[i] = hpp::Crystal<U>(propsRotated, config, initRotated);
         }
     }
+    
     hpp::Polycrystal<U> kalidindi_polycrystal(crystal_list, comm);
     kalidindi_polycrystal.evolve(experiment.tStart, experiment.tEnd, dt_initial, experiment.F_of_t);
     
