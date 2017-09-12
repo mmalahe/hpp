@@ -4,6 +4,7 @@
 #include <hpp/tensor.h>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 #include <limits>
 
 namespace hpp {
@@ -28,8 +29,8 @@ void testTensor2Basics() {
     A_almost = A + bump;
     
     // Equality
-    assert(A == A && "equality evaluation failed");
-    assert(A != A_almost && "inequality evaluation failed"); 
+    if (!(A == A)) throw std::runtime_error("equality evaluation failed");
+    if (!(A != A_almost)) throw std::runtime_error("inequality evaluation failed"); 
     
     // Inverse
     Tensor2<T> AInvAnalytic(2,2);
@@ -37,24 +38,23 @@ void testTensor2Basics() {
     AInvAnalytic(0,1) = 1.0;
     AInvAnalytic(1,0) = 1.5;
     AInvAnalytic(1,1) = 0.5;
-    assert(A.inv() == AInvAnalytic && "inverse failed");
+    if (!(A.inv() == AInvAnalytic)) throw std::runtime_error("inverse failed");
     
     // Inverse in place
     Tensor2<T> AInv = A;
     AInv.invInPlace();
-    assert(AInv == AInvAnalytic && "in-place inverse failed");
+    if (!(AInv == AInvAnalytic)) throw std::runtime_error("in-place inverse failed");
 
     // Trace
     T trAnalytic = 9.0;
-    assert(A.tr() == trAnalytic && "trace evaluation failed");
+    if (!(A.tr() == trAnalytic)) throw std::runtime_error("trace evaluation failed");
     
     // Determinant
     T detAnalytic = 2.0;
-    assert(std::abs(A.det()-detAnalytic) < closeEnough && "determinant evaluation failed");
+    if (!(std::abs(A.det()-detAnalytic) < closeEnough)) throw std::runtime_error("determinant evaluation failed");
     
     // Scaling to unit determinant
-    assert(std::abs(A.scaledToUnitDeterminant().det()-1.0) < closeEnough
-    && "scaling to unit determinant failed");
+    if (!(std::abs(A.scaledToUnitDeterminant().det()-1.0) < closeEnough)) throw std::runtime_error("scaling to unit determinant failed");
     
     // Check error for determinant scaling of negative determinant tensor
     Tensor2<T> negativeDeterminantTensor(2,2);
@@ -68,7 +68,7 @@ void testTensor2Basics() {
     } catch (TensorError e) {
         caughtNegativeDeterminantTensor = true;
     }
-    assert(caughtNegativeDeterminantTensor && "negative determinant tensor error was not raised correctly");
+    if (!(caughtNegativeDeterminantTensor)) throw std::runtime_error("negative determinant tensor error was not raised correctly");
     
     // Transpose
     Tensor2<T> ATAnalytic(2,2);
@@ -76,13 +76,13 @@ void testTensor2Basics() {
     ATAnalytic(0,1) = -3.0;
     ATAnalytic(1,0) = -2.0;
     ATAnalytic(1,1) = 8.0;
-    assert(A.trans() == ATAnalytic && "transpose failed");
+    if (!(A.trans() == ATAnalytic)) throw std::runtime_error("transpose failed");
     
     // Min and max
     T minAnalytic = -3.0;
     T maxAnalytic = 8.0;
-    assert(A.min() == minAnalytic && "min failed");
-    assert(A.max() == maxAnalytic && "max failed");
+    if (!(A.min() == minAnalytic)) throw std::runtime_error("min failed");
+    if (!(A.max() == maxAnalytic)) throw std::runtime_error("max failed");
     
     // Abs
     Tensor2<T> AAbsAnalytic(2,2);
@@ -90,7 +90,7 @@ void testTensor2Basics() {
     AAbsAnalytic(0,1) = 2.0;
     AAbsAnalytic(1,0) = 3.0;
     AAbsAnalytic(1,1) = 8.0;
-    assert(A.abs() == AAbsAnalytic && "abs failed");
+    if (!(A.abs() == AAbsAnalytic)) throw std::runtime_error("abs failed");
     
     // Constraining
     T constrainMin = -2.5;
@@ -100,8 +100,7 @@ void testTensor2Basics() {
     AConstrainedAnalytic(0,1) = -2.0;
     AConstrainedAnalytic(1,0) = -2.5;
     AConstrainedAnalytic(1,1) = 7.5;
-    assert(A.constrainedTo(constrainMin, constrainMax) == AConstrainedAnalytic &&
-    "constraining failed");
+    if (!(A.constrainedTo(constrainMin, constrainMax) == AConstrainedAnalytic)) throw std::runtime_error("constraining failed");
     
     // Poorly-formed constraint
     bool caughtBadConstraint = false;
@@ -110,7 +109,7 @@ void testTensor2Basics() {
     } catch (TensorError e) {
         caughtBadConstraint = true;
     }
-    assert(caughtBadConstraint && "bad constraint error was not raised correctly");
+    if (!(caughtBadConstraint)) throw std::runtime_error("bad constraint error was not raised correctly");
     
     // Check errors for non-square tensors
     Tensor2<T> notSquare(1,2);
@@ -122,7 +121,7 @@ void testTensor2Basics() {
     } catch (TensorError e) {
         caughtNotSquare = true;
     }
-    assert(caughtNotSquare && "non-square tensor error was not raised correctly");
+    if (!(caughtNotSquare)) throw std::runtime_error("non-square tensor error was not raised correctly");
     
     // Check error thrown for non-square inverse
     bool caughtNonSquareInverse = false;
@@ -131,7 +130,7 @@ void testTensor2Basics() {
     } catch (TensorError e) {
         caughtNonSquareInverse = true;
     }
-    assert(caughtNonSquareInverse && "Non-square tensor error was not raised correctly.");
+    if (!(caughtNonSquareInverse)) throw std::runtime_error("Non-square tensor error was not raised correctly.");
     
     // Check error thrown for singular matrix
     Tensor2<T> singularTensor(2,2);
@@ -145,7 +144,7 @@ void testTensor2Basics() {
     } catch (TensorError e) {
         caughtSingularTensor = true;
     }
-    assert(caughtSingularTensor && "Singular tensor error was not raised correctly.");
+    if (!(caughtSingularTensor)) throw std::runtime_error("Singular tensor error was not raised correctly.");
 }
 
 template<typename T>
@@ -173,17 +172,17 @@ void testTensor2BinaryOperations() {
     APlusOne(0,1) = 3.0;
     APlusOne(1,0) = 4.0;
     APlusOne(1,1) = 5.0;
-    assert(A+one == APlusOne && "Addition failed.");
-    assert(one+A == APlusOne && "Addition failed.");
+    if (!(A+one == APlusOne)) throw std::runtime_error("Addition failed.");
+    if (!(one+A == APlusOne)) throw std::runtime_error("Addition failed.");
     Tensor2<T> APlusB(2,2);
     APlusB(0,0) = 3.0;
     APlusB(0,1) = 2.0;
     APlusB(1,0) = 3.0;
     APlusB(1,1) = 6.0;
-    assert(A+B == APlusB && "Addition failed.");
+    if (!(A+B == APlusB)) throw std::runtime_error("Addition failed.");
     Tensor2<T> AIncrementB(A);
     AIncrementB += B;
-    assert(AIncrementB == APlusB && "Addition failed.");
+    if (!(AIncrementB == APlusB)) throw std::runtime_error("Addition failed.");
     
     // Addition size mismatch
     bool caughtIncompatibleTensor = false;
@@ -192,7 +191,7 @@ void testTensor2BinaryOperations() {
     } catch (TensorError e) {
         caughtIncompatibleTensor = true;
     }
-    assert(caughtIncompatibleTensor && "Incompatible tensor addition error was not raised correctly.");
+    if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor addition error was not raised correctly.");
     
     // Subtraction
     Tensor2<T> AMinusOne(2,2);
@@ -200,17 +199,17 @@ void testTensor2BinaryOperations() {
     AMinusOne(0,1) = 1.0;
     AMinusOne(1,0) = 2.0;
     AMinusOne(1,1) = 3.0;
-    assert(A-one == AMinusOne && "Subtraction failed.");
-    assert(one-A == AMinusOne && "Subtraction failed.");
+    if (!(A-one == AMinusOne)) throw std::runtime_error("Subtraction failed.");
+    if (!(one-A == AMinusOne)) throw std::runtime_error("Subtraction failed.");
     Tensor2<T> AMinusB(2,2);
     AMinusB(0,0) = -1.0;
     AMinusB(0,1) = 2.0;
     AMinusB(1,0) = 3.0;
     AMinusB(1,1) = 2.0;
-    assert(A-B == AMinusB && "Subtraction failed.");
+    if (!(A-B == AMinusB)) throw std::runtime_error("Subtraction failed.");
     Tensor2<T> ADecrementB(A);
     ADecrementB -= B;
-    assert(ADecrementB == AMinusB && "Subtraction failed.");
+    if (!(ADecrementB == AMinusB)) throw std::runtime_error("Subtraction failed.");
     
     // Addition size mismatch
     caughtIncompatibleTensor = false;
@@ -219,7 +218,7 @@ void testTensor2BinaryOperations() {
     } catch (TensorError e) {
         caughtIncompatibleTensor = true;
     }
-    assert(caughtIncompatibleTensor && "Incompatible tensor subtraction error was not raised correctly.");
+    if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor subtraction error was not raised correctly.");
     
     // Scalar multiplication
     Tensor2<T> ATimesTwo(2,2);
@@ -227,11 +226,11 @@ void testTensor2BinaryOperations() {
     ATimesTwo(0,1) = 4.0;
     ATimesTwo(1,0) = 6.0;
     ATimesTwo(1,1) = 8.0;
-    assert(A*two == ATimesTwo && "Scalar multiplication failed.");
-    assert(two*A == ATimesTwo && "Scalar multiplication failed.");
+    if (!(A*two == ATimesTwo)) throw std::runtime_error("Scalar multiplication failed.");
+    if (!(two*A == ATimesTwo)) throw std::runtime_error("Scalar multiplication failed.");
     Tensor2<T> ATimesEqualsTwo(A);
     ATimesEqualsTwo *= two;
-    assert(A*two == ATimesEqualsTwo && "Scalar multiplication failed.");
+    if (!(A*two == ATimesEqualsTwo)) throw std::runtime_error("Scalar multiplication failed.");
     
     // Scalar Division
     Tensor2<T> ADividedByTwo(2,2);
@@ -239,10 +238,10 @@ void testTensor2BinaryOperations() {
     ADividedByTwo(0,1) = 1.0;
     ADividedByTwo(1,0) = 1.5;
     ADividedByTwo(1,1) = 2.0;
-    assert(A/two == ADividedByTwo && "Scalar division failed.");
+    if (!(A/two == ADividedByTwo)) throw std::runtime_error("Scalar division failed.");
     Tensor2<T> ADividedByEqualsTwo(A);
     ADividedByEqualsTwo /= two;
-    assert(A/two == ADividedByEqualsTwo && "Scalar division failed.");
+    if (!(A/two == ADividedByEqualsTwo)) throw std::runtime_error("Scalar division failed.");
     
     // Tensor multiplication
     Tensor2<T> ATimesB(2,2);
@@ -250,11 +249,11 @@ void testTensor2BinaryOperations() {
     ATimesB(0,1) = 4.0;
     ATimesB(1,0) = 6.0;
     ATimesB(1,1) = 8.0;
-    assert(A*B == ATimesB && "Tensor multiplication failed.");
+    if (!(A*B == ATimesB)) throw std::runtime_error("Tensor multiplication failed.");
     
     // Identity tensor
     Tensor2<T> I2 = identityTensor2<T>(2);
-    assert(I2*A == A && "identity tensor failed");
+    if (!(I2*A == A)) throw std::runtime_error("identity tensor failed");
     
     // Tensor multiplication size mismatch
     Tensor2<T> incompatibleTensor(2,3);
@@ -264,11 +263,11 @@ void testTensor2BinaryOperations() {
     } catch (TensorError e) {
         caughtIncompatibleTensor = true;
     }
-    assert(caughtIncompatibleTensor && "Incompatible tensor multiplication error was not raised correctly.");
+    if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor multiplication error was not raised correctly.");
     
     // Tensor contraction
     T AContractB = 10.0;
-    assert(contract(A,B) == AContractB && "Tensor contraction failed.");
+    if (!(contract(A,B) == AContractB)) throw std::runtime_error("Tensor contraction failed.");
     
     // Tensor contraction size mismatch
     caughtIncompatibleTensor = false;
@@ -277,7 +276,7 @@ void testTensor2BinaryOperations() {
     } catch (TensorError e) {
         caughtIncompatibleTensor = true;
     }
-    assert(caughtIncompatibleTensor && "Incompatible tensor contraction error was not raised correctly.");
+    if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor contraction error was not raised correctly.");
 }
 
 template<typename T>

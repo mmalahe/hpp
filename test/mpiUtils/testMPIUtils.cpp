@@ -20,8 +20,8 @@ namespace hpp
 void testMPIUtilsNonParallel() {    
     
     // Recognition of existing types
-    assert(MPIType<double>() ==  MPI_DOUBLE && "Type recognition failed.");
-    assert(MPIType<float>() ==  MPI_FLOAT && "Type recognition failed.");
+    if (MPIType<double>() !=  MPI_DOUBLE) throw std::runtime_error("Type recognition failed.");
+    if (MPIType<float>() !=  MPI_FLOAT) throw std::runtime_error("Type recognition failed.");
     
     // Failure on incompatible type
     bool caughtTypeIncompatible = false;
@@ -30,7 +30,7 @@ void testMPIUtilsNonParallel() {
     } catch (std::runtime_error e) {
         caughtTypeIncompatible = true;
     }
-    assert(caughtTypeIncompatible && "Non-existent MPI type not raised correctly.");
+    if (!caughtTypeIncompatible)  throw std::runtime_error("Non-existent MPI type not raised correctly.");
 }
 
 void testMPIUtilsParallel(MPI_Comm comm, int comm_size, int comm_rank) {

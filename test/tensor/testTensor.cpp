@@ -7,6 +7,7 @@
 
 #include <hpp/tensor.h>
 #include <cassert>
+#include <stdexcept>
 #include <iostream>
 #include <limits>
 
@@ -39,7 +40,7 @@ void testTensor4Tensor2Interactions() {
     A2(1,1) = 2.0;
     
     // Order conversions
-    assert(Tensor4<T>(Tensor2<T>(A4)) == A4 && "Order conversion failed.");
+    if (!(Tensor4<T>(Tensor2<T>(A4)) == A4)) throw std::runtime_error("Order conversion failed.");
     
     // Contraction
     Tensor2<T> A4ContractA2(2,2);
@@ -47,7 +48,7 @@ void testTensor4Tensor2Interactions() {
     A4ContractA2(0,1) = 32.0;
     A4ContractA2(1,0) = -36.0;
     A4ContractA2(1,1) = 40.0;
-    assert(contract(A4,A2) == A4ContractA2 && "Contraction evaluation failed.");
+    if (!(contract(A4,A2) == A4ContractA2)) throw std::runtime_error("Contraction evaluation failed.");
     
     // Contraction incompatability
     Tensor2<T> A2ContractionIncompatible(3,2);
@@ -57,11 +58,11 @@ void testTensor4Tensor2Interactions() {
     } catch (TensorError e) {
         caughtContractionIncompatible = true;
     }
-    assert(caughtContractionIncompatible && "Incomparible tensor contraction was not raised correctly.");
+    if (!(caughtContractionIncompatible)) throw std::runtime_error("Incomparible tensor contraction was not raised correctly.");
     
     // Fourth order identity
     Tensor4<T> I4 = identityTensor4<T>(2);
-    assert(contract(I4, A2) == A2 && "Fourth order identity failed.");
+    if (!(contract(I4, A2) == A2)) throw std::runtime_error("Fourth order identity failed.");
     
     // Fourth order inverse
     // A4 was just constructed randomly
@@ -85,14 +86,14 @@ void testTensor4Tensor2Interactions() {
     A4Nonsingular(1,0,1,1) = 0.65;
     A4Nonsingular(1,1,1,1) = 0.74;
     Tensor4<T> A4NonsingularInv = A4Nonsingular.inv();
-    assert(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge && "Fourth order inverse failed.");
-    assert(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge && "Fourth order inverse failed.");
+    if (!(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");
+    if (!(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");
     
     // In-place inverse
     A4NonsingularInv = A4Nonsingular;
     A4NonsingularInv.invInPlace();
-    assert(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge && "Fourth order inverse failed.");
-    assert(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge && "Fourth order inverse failed.");    
+    if (!(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");
+    if (!(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");    
     
     // Outer product
     Tensor2<T> C2(2,2);
@@ -122,7 +123,7 @@ void testTensor4Tensor2Interactions() {
     C2OuterB2(0,1,1,1) = 10.0;
     C2OuterB2(1,0,1,1) = 15.0;
     C2OuterB2(1,1,1,1) = 20.0;
-    assert(outer(C2, B2) ==  C2OuterB2 && "Outer product failed.");
+    if (!(outer(C2, B2) ==  C2OuterB2)) throw std::runtime_error("Outer product failed.");
 }
 
 } //end namespace hpp

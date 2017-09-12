@@ -3,6 +3,7 @@
 /// @brief Code for testing members of hpp::Tensor4
 #include <hpp/tensor.h>
 #include <cassert>
+#include <stdexcept>
 #include <iostream>
 #include <limits>
 
@@ -51,7 +52,7 @@ void testTensor4Basics() {
     negA(0,1,1,1) = -14.0;
     negA(1,0,1,1) = 15.0;
     negA(1,1,1,1) = -16.0;
-    assert(-A == negA && "Negation failed.");
+    if (!(-A == negA)) throw std::runtime_error("Negation failed.");
     
     // Check errors for non-square tensors
     Tensor4<T> notSquare(1,2,3,4);
@@ -63,7 +64,7 @@ void testTensor4Basics() {
     } catch (TensorError e) {
         caughtNonSquareInverse = true;
     }
-    assert(caughtNonSquareInverse && "Non-square tensor error was not raised correctly.");
+    if (!(caughtNonSquareInverse)) throw std::runtime_error("Non-square tensor error was not raised correctly.");
     
     // Check error thrown for singular tensor
     // Make a tensor with all zeros
@@ -74,7 +75,7 @@ void testTensor4Basics() {
     } catch (TensorError e) {
         caughtSingularTensor = true;
     }
-    assert(caughtSingularTensor && "Singular tensor error was not raised correctly.");
+    if (!(caughtSingularTensor)) throw std::runtime_error("Singular tensor error was not raised correctly.");
 }
 
 template<typename T>
@@ -126,17 +127,17 @@ void testTensor4BinaryOperations() {
     APlusOne(0,1,1,1) = 15.0;
     APlusOne(1,0,1,1) = -14.0;
     APlusOne(1,1,1,1) = 17.0;
-    assert(A+one == APlusOne && "Addition failed.");
-    assert(one+A == APlusOne && "Addition failed.");
+    if (!(A+one == APlusOne)) throw std::runtime_error("Addition failed.");
+    if (!(one+A == APlusOne)) throw std::runtime_error("Addition failed.");
     Tensor4<T> APlusB = A;
     APlusB(0,0,0,0) = 1.0;
     APlusB(1,1,0,0) = 6.0;
     APlusB(0,0,1,1) = -11.0;
     APlusB(1,1,1,1) = 18.0;
-    assert(A+B == APlusB && "Addition failed.");
+    if (!(A+B == APlusB)) throw std::runtime_error("Addition failed.");
     Tensor4<T> AIncrementB(A);
     AIncrementB += B;
-    assert(AIncrementB == APlusB && "Addition failed.");
+    if (!(AIncrementB == APlusB)) throw std::runtime_error("Addition failed.");
     
     // Addition size mismatch
     bool caughtIncompatibleTensor = false;
@@ -145,7 +146,7 @@ void testTensor4BinaryOperations() {
     } catch (TensorError e) {
         caughtIncompatibleTensor = true;
     }
-    assert(caughtIncompatibleTensor && "Incompatible tensor addition error was not raised correctly.");
+    if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor addition error was not raised correctly.");
     
     // Subtraction
     Tensor4<T> AMinusOne(2,2,2,2);
@@ -165,17 +166,17 @@ void testTensor4BinaryOperations() {
     AMinusOne(0,1,1,1) = 13.0;
     AMinusOne(1,0,1,1) = -16.0;
     AMinusOne(1,1,1,1) = 15.0;
-    assert(A-one == AMinusOne && "Subtraction failed.");
-    assert(one-A == AMinusOne && "Subtraction failed.");
+    if (!(A-one == AMinusOne)) throw std::runtime_error("Subtraction failed.");
+    if (!(one-A == AMinusOne)) throw std::runtime_error("Subtraction failed.");
     Tensor4<T> AMinusB = A;
     AMinusB(0,0,0,0) = -3.0;
     AMinusB(1,1,0,0) = 2.0;
     AMinusB(0,0,1,1) = -15.0;
     AMinusB(1,1,1,1) = 14.0;
-    assert(A-B == AMinusB && "Subtraction failed.");
+    if (!(A-B == AMinusB)) throw std::runtime_error("Subtraction failed.");
     Tensor4<T> ADecrementB = A;
     ADecrementB -= B;
-    assert(ADecrementB == AMinusB && "Subtraction failed.");
+    if (!(ADecrementB == AMinusB)) throw std::runtime_error("Subtraction failed.");
     
     // Addition size mismatch
     caughtIncompatibleTensor = false;
@@ -184,7 +185,7 @@ void testTensor4BinaryOperations() {
     } catch (TensorError e) {
         caughtIncompatibleTensor = true;
     }
-    assert(caughtIncompatibleTensor && "Incompatible tensor subtraction error was not raised correctly.");
+    if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor subtraction error was not raised correctly.");
     
     // Scalar multiplication
     Tensor4<T> ATimesTwo(2,2,2,2);
@@ -204,11 +205,11 @@ void testTensor4BinaryOperations() {
     ATimesTwo(0,1,1,1) = 28.0;
     ATimesTwo(1,0,1,1) = -30.0;
     ATimesTwo(1,1,1,1) = 32.0;
-    assert(A*two == ATimesTwo && "Scalar multiplication failed.");
-    assert(two*A == ATimesTwo && "Scalar multiplication failed.");
+    if (!(A*two == ATimesTwo)) throw std::runtime_error("Scalar multiplication failed.");
+    if (!(two*A == ATimesTwo)) throw std::runtime_error("Scalar multiplication failed.");
     Tensor4<T> ATimesEqualsTwo(A);
     ATimesEqualsTwo *= two;
-    assert(A*two == ATimesEqualsTwo && "Scalar multiplication failed.");
+    if (!(A*two == ATimesEqualsTwo)) throw std::runtime_error("Scalar multiplication failed.");
     
     // Scalar Division
     Tensor4<T> ADividedByTwo(2,2,2,2);
@@ -228,10 +229,10 @@ void testTensor4BinaryOperations() {
     ADividedByTwo(0,1,1,1) = 7.0;
     ADividedByTwo(1,0,1,1) = -7.5;
     ADividedByTwo(1,1,1,1) = 8.0;
-    assert(A/two == ADividedByTwo && "Scalar division failed.");
+    if (!(A/two == ADividedByTwo)) throw std::runtime_error("Scalar division failed.");
     Tensor4<T> ADividedByEqualsTwo(A);
     ADividedByEqualsTwo /= two;
-    assert(A/two == ADividedByEqualsTwo && "Scalar division failed.");
+    if (!(A/two == ADividedByEqualsTwo)) throw std::runtime_error("Scalar division failed.");
 }
 
 } //end namespace hpp
