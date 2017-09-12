@@ -1,8 +1,8 @@
 /// @file tensor.h
 /// @author Michael Malahe
 /// @brief Header file for tensor classes
-#ifndef TENSOR_H
-#define TENSOR_H
+#ifndef HPP_TENSOR_H
+#define HPP_TENSOR_H
 
 #include <cstddef>
 #include <iostream>
@@ -1824,4 +1824,4 @@ Tensor2<T> transformOutOfFrame(const Tensor2<T>& A_star, const Tensor2<T>& Q) {
 
 } //END NAMESPACE HPP
 
-#endif /* TENSOR_H */
+#endif /* HPP_TENSOR_H */

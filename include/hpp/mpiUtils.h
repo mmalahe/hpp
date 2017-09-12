@@ -4,8 +4,8 @@
 * @details
 */
 
-#ifndef MPIUTILS_H
-#define MPIUTILS_H
+#ifndef HPP_MPIUTILS_H
+#define HPP_MPIUTILS_H
 
 #include "mpi.h"
 #include <cstddef>
@@ -227,4 +227,4 @@ bool MPIAllTrue(bool condition, MPI_Comm comm);
 
 }//END NAMESPACE HPP
 
-#endif /* MPIUTILS_H */
+#endif /* HPP_MPIUTILS_H */

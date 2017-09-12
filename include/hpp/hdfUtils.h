@@ -5,8 +5,8 @@
 * @details Uses the C interface and parallel implementation.
 */
 
-#ifndef HDFUTILS_H
-#define HDFUTILS_H
+#ifndef HPP_HDFUTILS_H
+#define HPP_HDFUTILS_H
 
 #include <stdexcept>
 #include <cstddef>
@@ -389,4 +389,4 @@ class HDF5MPIHandler
 
 } //END NAMESPACE HPP
 
-#endif /* HDFUTILS_H */
+#endif /* HPP_HDFUTILS_H */

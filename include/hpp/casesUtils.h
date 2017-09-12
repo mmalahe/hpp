@@ -4,6 +4,9 @@
 * @details
 */
 
+#ifndef HPP_CASESUTILS_H
+#define HPP_CASESUTILS_H
+
 #include <hpp/config.h>
 #include <hpp/tensor.h>
 #include <functional>
@@ -92,3 +95,5 @@ class Experiment {
 };
 
 } // END NAMESPACE hpp
+
+#endif /* HPP_CASESUTILS_H */

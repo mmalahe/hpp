@@ -14,8 +14,8 @@ efficiency with high-performance spectral crystal plasticity on GPU
 platforms., (January):785--798, 2014
 */
 
-#ifndef CRYSTAL_H
-#define CRYSTAL_H
+#ifndef HPP_CRYSTAL_H
+#define HPP_CRYSTAL_H
 
 #include <vector>
 #include <functional>
@@ -520,4 +520,4 @@ private:
 }//END NAMESPACE HPP
 
 
-#endif /* CRYSTAL_H */
+#endif /* HPP_CRYSTAL_H */

@@ -1,5 +1,5 @@
-#ifndef SPECTRAL_UTILS_H
-#define SPECTRAL_UTILS_H
+#ifndef HPP_SPECTRAL_UTILS_H
+#define HPP_SPECTRAL_UTILS_H
 
 #include <mpi.h>
 #include <cmath>
@@ -904,4 +904,4 @@ void evaluateSpectralCompressionErrorAxisSliceUnified(std::string rawDBName, std
 
 } //END NAMESPACE HPP
 
-#endif /* SPECTRAL_UTILS_H */
+#endif /* HPP_SPECTRAL_UTILS_H */

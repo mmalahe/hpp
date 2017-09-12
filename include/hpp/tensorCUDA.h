@@ -7,8 +7,8 @@
 * just indicates that it's in a format that's most suitable for a CUDA implementation.
 */
 
-#ifndef TENSOR_CUDA_H
-#define TENSOR_CUDA_H
+#ifndef HPP_TENSOR_CUDA_H
+#define HPP_TENSOR_CUDA_H
 
 #include <initializer_list>
 #include <hpp/config.h>
@@ -948,4 +948,4 @@ Tensor4CUDA<U,M,N,P,Q>::Tensor4CUDA(const Tensor4<U>& in) {
 #endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
-#endif /* TENSOR_CUDA_H */
+#endif /* HPP_TENSOR_CUDA_H */

@@ -1,8 +1,8 @@
 /// @file continuum.h
 /// @author Michael Malahe
 /// @brief Header file for continuum mechanics classes and functions
-#ifndef CONTINUUM_H
-#define CONTINUUM_H
+#ifndef HPP_CONTINUUM_H
+#define HPP_CONTINUUM_H
 
 #include <hpp/config.h>
 #include <hpp/tensor.h>
@@ -115,4 +115,4 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
 
 }
     
-#endif /* CONTINUUM_H */
+#endif /* HPP_CONTINUUM_H */

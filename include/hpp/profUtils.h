@@ -3,6 +3,9 @@
 * @brief
 */
 
+#ifndef HPP_PROFUTILS_H
+#define HPP_PROFUTILS_H
+
 #include <iostream>
 #include <ctime>
 #include <hpp/config.h>
@@ -23,3 +26,5 @@ private:
 };
 
 } //END NAMESPACE HPP
+
+#endif /* HPP_PROFUTILS_H */

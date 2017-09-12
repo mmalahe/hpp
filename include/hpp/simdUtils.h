@@ -3,6 +3,9 @@
 * @brief
 */
 
+#ifndef HPP_SIMDUTILS_H
+#define HPP_SIMDUTILS_H
+
 #include "immintrin.h"
 #include "emmintrin.h"
 #include "smmintrin.h"
@@ -28,3 +31,5 @@ inline __m256 _mm256_loadu4_m64(float const *p3, float const *p2, float const *p
     return _mm256_set_m128(_mm128_loadu2_m64(p3, p2), _mm128_loadu2_m64(p1, p0));
 };
 #endif
+
+#endif /* HPP_SIMDUTILS_H */

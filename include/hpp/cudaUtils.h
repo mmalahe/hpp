@@ -4,8 +4,8 @@
 * @details
 */
 
-#ifndef CUDA_UTILS_H
-#define CUDA_UTILS_H
+#ifndef HPP_CUDA_UTILS_H
+#define HPP_CUDA_UTILS_H
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -355,4 +355,4 @@ inline double getClockRateGHz(int deviceID) {
 #endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
-#endif /* SPECTRAL_UTILS_H */
+#endif /* HPP_CUDA_UTILS_H */

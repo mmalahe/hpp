@@ -4,8 +4,8 @@
 * @details
 */
 
-#ifndef CRYSTAL_CUDA_H
-#define CRYSTAL_CUDA_H
+#ifndef HPP_CRYSTAL_CUDA_H
+#define HPP_CRYSTAL_CUDA_H
 
 #include <hpp/config.h>
 #include <hpp/crystal.h>
@@ -250,4 +250,4 @@ __device__ Tensor2CUDA<T,3,3> EulerZXZRotationMatrixCUDA(EulerAngles<T> angles) 
 #endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
-#endif /* CRYSTAL_CUDA_H */
+#endif /* HPP_CRYSTAL_CUDA_H */

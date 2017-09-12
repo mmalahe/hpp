@@ -4,8 +4,8 @@
 * @details
 */
 
-#ifndef SPECTRAL_UTILS_CUDA_H
-#define SPECTRAL_UTILS_CUDA_H
+#ifndef HPP_SPECTRAL_UTILS_CUDA_H
+#define HPP_SPECTRAL_UTILS_CUDA_H
 
 #include <hpp/config.h>
 #include <hpp/crystal.h>
@@ -539,4 +539,4 @@ __device__ void SpectralDatabaseUnifiedCUDA<T,N,P>::getIDFTRealDSharedPair(unsig
 #endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
-#endif /* SPECTRAL_UTILS_CUDA_H */
+#endif /* HPP_SPECTRAL_UTILS_CUDA_H */

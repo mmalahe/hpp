@@ -3,8 +3,8 @@
 * @brief Header file for helper functions with HDF, C++ API
 */
 
-#ifndef HDFUTILSCPP_H
-#define HDFUTILSCPP_H
+#ifndef HPP_HDFUTILSCPP_H
+#define HPP_HDFUTILSCPP_H
 
 #include <stdexcept>
 #include <cstddef>
@@ -225,4 +225,4 @@ void addAttribute(H5::H5File& file, const std::string& attrName, T attrVal) {
 
 } //END NAMESPACE HPP
 
-#endif /* HDFUTILS_CPP */
+#endif /* HPP_HDFUTILS_CPP */
