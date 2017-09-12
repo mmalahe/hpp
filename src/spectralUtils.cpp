@@ -111,7 +111,7 @@ bool operator<(const SpectralDatasetID& l, const SpectralDatasetID& r) {
     }
     // Otherwise order by component index
     else {
-        int nComponents = l.component.size();
+        unsigned int nComponents = l.component.size();
         if (nComponents != r.component.size()) {
             throw std::runtime_error("Component dimension mismatch.");
         }
@@ -202,7 +202,7 @@ void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5MPIHandler& dbfile, std
         std::copy(start, end, coordsList[i].data());
         
         // Spectral refinement
-        for (int j=0; j<nDims; j++) {
+        for (unsigned int j=0; j<nDims; j++) {
             // Insert zeros in the middle
             if (coordsList[i][j] >= (gridDims[j]/refineMult)/2) {
                 coordsList[i][j] += gridDims[j]-(gridDims[j]/refineMult);
@@ -541,7 +541,7 @@ void SpectralDatabaseUnified<U>::loadDatasets(HDF5MPIHandler& dbfile, std::vecto
         std::copy(start, end, coordsList[i].data());
         
         // Spectral refinement
-        for (int j=0; j<nDims; j++) {
+        for (unsigned int j=0; j<nDims; j++) {
             // Insert zeros in the middle
             if (coordsList[i][j] >= (gridDims[j]/refineMult)/2) {
                 coordsList[i][j] += gridDims[j]-(gridDims[j]/refineMult);
@@ -846,7 +846,6 @@ void evaluateSpectralCompressionErrorFull(std::string rawDBName, std::string spe
             unsigned int nTermsNumerical = coeffs.size();
             
             // Loop through spatial points to get the error at each point
-            unsigned int nTerms = nTermsMax;///@todo create a loop of these
             double minError = std::numeric_limits<double>::max();
             double maxError = std::numeric_limits<double>::min();
             double errorSum = 0.0;
@@ -1042,7 +1041,6 @@ void evaluateSpectralCompressionErrorFullUnified(std::string rawDBName, std::str
             unsigned int nTermsNumerical = coeffs.size();
             
             // Loop through spatial points to get the error at each point
-            unsigned int nTerms = nTermsMax;///@todo create a loop of these
             double minError = std::numeric_limits<double>::max();
             double maxError = std::numeric_limits<double>::min();
             double errorSum = 0.0;

@@ -310,7 +310,7 @@ void generateDatabase(std::string output_filename, unsigned int gridLength, MPI_
             std::vector<hsize_t> gridWriteOffsetBase = {gridIdx.i, gridIdx.j, 0, 0};
             
             // Calculate negations of theta for easy writing of the theta symmetry later
-            for (unsigned int flatIdxInChunk=0; flatIdxInChunk<chunkSizeSymm; flatIdxInChunk++) {
+            for (int flatIdxInChunk=0; flatIdxInChunk<chunkSizeSymm; flatIdxInChunk++) {
                 for (unsigned int ix=0; ix<3; ix++) {
                     for (unsigned int iy=0; iy<3; iy++) {
                         sigmaPrimeWriteBuffersThetaShift[ix][iy][flatIdxInChunk] = -sigmaPrimeWriteBuffers[ix][iy][flatIdxInChunk];

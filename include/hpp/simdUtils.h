@@ -19,10 +19,13 @@
 // Convenience defines in this library only
 #ifdef HPP_USE_SSE
 inline __m128 _mm128_loadu2_m64(float const *hiaddr, float const *loaddr) {
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wuninitialized"
     __m128 val;
     val = _mm_loadl_pi(val, (__m64*)loaddr);
     val = _mm_loadh_pi(val, (__m64*)hiaddr);
     return val;
+    #pragma GCC diagnostic pop
 }
 #endif
 

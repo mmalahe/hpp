@@ -189,7 +189,7 @@ std::vector<T> MPISplitVectorEvenly(const std::vector<T>& rootVec, MPI_Comm comm
         
         // Create MPI parameters
         displs[0] = 0;
-        for (unsigned int i=0; i<comm_size-1; i++) {
+        for (int i=0; i<comm_size-1; i++) {
             sendcounts[i] = localVecSize;
             displs[i+1] = displs[i] + localVecSize;
         }

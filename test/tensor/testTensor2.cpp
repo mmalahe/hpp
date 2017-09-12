@@ -370,7 +370,7 @@ void testTensor2Random() {
     histTheta = 0.0;
     
     // Samples
-    for (unsigned int iS=0; iS<nSamples; iS++) {
+    for (int iS=0; iS<nSamples; iS++) {
         randomRotationTensorInPlace<T>(3, R, true);
         getAxisAngle(R, u, theta);
         int iTheta = (int)(theta/binWidthTheta);
@@ -380,7 +380,7 @@ void testTensor2Random() {
     
     // Analytic density
     std::valarray<T> histAnalyticTheta(nBins);
-    for (unsigned int iBin=0; iBin<nBins; iBin++) {
+    for (int iBin=0; iBin<nBins; iBin++) {
         theta = (iBin+0.5)*binWidthTheta;
         histAnalyticTheta[iBin] = binWidthTheta*(1.0/M_PI)*(1.0-std::cos(theta));
     }

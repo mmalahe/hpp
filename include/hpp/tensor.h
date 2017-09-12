@@ -641,11 +641,11 @@ Tensor2<T> outer(const std::vector<T>& A, const std::vector<T>& B) {
 
 template <typename T>
 void outerInPlace(const std::vector<T>& A, const std::vector<T>& B, Tensor2<T>& C) {
-    int n1 = A.size();
-    int n2 = B.size();
+    unsigned int n1 = A.size();
+    unsigned int n2 = B.size();
     DEBUG_ONLY(if (n1 != C.getn1() || n2 != C.getn2()) throw TensorError("Size mismatch."););
-    for (int i=0; i<n1; i++) {
-        for (int j=0; j<n2; j++) {
+    for (unsigned int i=0; i<n1; i++) {
+        for (unsigned int j=0; j<n2; j++) {
             C(i,j) = A[i]*B[j];
         }
     }

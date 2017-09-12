@@ -1124,7 +1124,7 @@ template <typename U>
 void SpectralPolycrystal<U>::step(const hpp::Tensor2<U>& F_next, const hpp::Tensor2<U>& L_next, const hpp::SpectralDatabase<U>& db, U dt) {
     solveTimer.start();
     #pragma omp parallel for num_threads(nOmpThreads)
-    for (int i=0; i<crystal_list.size(); i++) {
+    for (unsigned int i=0; i<crystal_list.size(); i++) {
         crystal_list[i].step(F_next, L_next, db, dt);
     }
     solveTimer.stop();
@@ -1140,7 +1140,7 @@ Tensor2<U> SpectralPolycrystal<U>::getGlobalTCauchy()
     // Local Cauchy stress and volume
     hpp::Tensor2<U> TCauchyGlobal(3,3);
     U volumeGlobal = 0.0;
-    for (int i=0; i<crystal_list.size(); i++) {
+    for (unsigned int i=0; i<crystal_list.size(); i++) {
         TCauchyGlobal += crystal_list[i].getTCauchy();
         volumeGlobal += crystal_list[i].getVolume();
     }
