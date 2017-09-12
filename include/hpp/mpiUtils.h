@@ -176,9 +176,9 @@ std::vector<T> MPISplitVectorEvenly(const std::vector<T>& rootVec, MPI_Comm comm
     MPI_Comm_rank(comm, &comm_rank);
     
     // Sizing of local vectors and MPI parameters
-    int rootVecSize;
-    int localVecSize;
-    int localVecSizeFinalProc;
+    int rootVecSize = -1;
+    int localVecSize = -1;
+    int localVecSizeFinalProc = -1;
     std::vector<int> sendcounts(comm_size);
     std::vector<int> displs(comm_size);
     if (comm_rank == 0) {
