@@ -78,12 +78,6 @@ Tensor2<T>::Tensor2(const unsigned int n1, const unsigned int n2, const T* inVal
     std::copy(inVals, inVals+nVals, std::begin(vals));
 }
 
-template <typename T>
-void Tensor2<T>::copyValuesOut(T* outVals) const
-{
-    std::copy(std::begin(vals), std::end(vals), outVals);
-}
-
 /**
  * @brief Constructor for a populated tensor
  * @details Populates the values of the tensor from an STL vector of values
@@ -738,26 +732,6 @@ void Tensor2<T>::evecDecomposition(std::valarray<T>& evals, Tensor2<T>& evecs) {
             throw TensorError("LAPACKE syevr call failed.");
         }
     }
-}
-
-template <typename T>
-T Tensor2<T>::spectralNorm() const{
-    // Must be square
-    this->assertSquare();
-    
-    // A^T A
-    Tensor2<T> ATransA = this->trans()*(*this);
-    
-    // Eigenvalues and eigenvectors
-    std::valarray<T> evals;
-    Tensor2<T> evecs; 
-    
-    // Get decomposition and norm
-    ATransA.evecDecomposition(evals, evecs);
-    T norm = std::sqrt(((std::abs(evals)).max()));
-    
-    // Return
-    return norm;
 }
 
 template <typename T>

@@ -106,7 +106,8 @@ class SpectralDataset
 public:
     // Constructors
     SpectralDataset() : alignment(HPP_DEFAULT_ALIGNMENT) {
-        ;
+        nDims = 0;
+        nTerms = 0;
     }
     SpectralDataset(const std::vector<std::vector<unsigned int>>& coordsList, const std::vector<std::complex<U>>& coeffList);
 
@@ -160,10 +161,10 @@ struct SpectralDatasetID {
     SpectralDatasetID(){;}
     
     // Constructors
-    SpectralDatasetID(const std::string baseName, const std::vector<unsigned int> component) : baseName(baseName), component(component) {
+    SpectralDatasetID(const std::string& baseName, const std::vector<unsigned int>& component) : baseName(baseName), component(component) {
         ;
     }
-    explicit SpectralDatasetID(const std::string baseName) : baseName(baseName) {
+    explicit SpectralDatasetID(const std::string& baseName) : baseName(baseName) {
         ;
     }
     

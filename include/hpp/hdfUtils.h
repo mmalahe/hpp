@@ -380,7 +380,6 @@ class HDF5MPIHandler
         
         // Datasets
         void openDataset(std::string datasetName);
-        void closeDataset(std::string datasetName);
         
         // Property lists
         hid_t plist_id_file_access;

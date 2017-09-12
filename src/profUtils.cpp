@@ -5,11 +5,8 @@ namespace hpp {
 // TIMER //
 
 Timer::Timer() {
-}
-
-void Timer::reset() { 
-    duration = 0.0;
-    running = false;
+    beg_ = timespec();
+    end_ = timespec();
 }
 
 void Timer::start() {

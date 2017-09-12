@@ -43,7 +43,8 @@ namespace hpp
 {
 
 enum CrystalType {
-    FCC
+    CRYSTAL_TYPE_FCC,
+    CRYSTAL_TYPE_NONE
 };    
 
 enum CrystalDatasetIdx {   
@@ -127,7 +128,7 @@ CrystalProperties<U> defaultCrystalProperties()
     CrystalProperties<U> props;
 
     // Crystal type
-    props.crystal_type = FCC;
+    props.crystal_type = CRYSTAL_TYPE_FCC;
 
     // Scalar parameters
     props.n_alpha = 12;
@@ -361,8 +362,8 @@ private:
     hpp::Tensor2<U> T;
     std::vector<U> s_alphas;
     hpp::Tensor2<U> F_p;
-    bool step_accepted;
-    bool step_rejected;
+    bool step_accepted = false;
+    bool step_rejected = false;
 
     // Derived quantities
     hpp::Tensor2<U> F_e;

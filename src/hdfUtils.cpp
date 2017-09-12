@@ -91,13 +91,6 @@ HDF5MPIHandler::HDF5MPIHandler(std::string filename, MPI_Comm comm, bool doCreat
     MPI_Barrier(comm);
 }
 
-void HDF5MPIHandler::closeDataset(std::string datasetName) {
-    if (currentlyOpenDatasets.count(datasetName) == 1) {
-        HDFCHECK(H5Dclose(currentlyOpenDatasets[datasetName]));
-        currentlyOpenDatasets.erase(datasetName);
-    }
-}
-
 hid_t HDF5MPIHandler::getDataset(std::string datasetName) {    
     if (currentlyOpenDatasets.count(datasetName) == 0) {
         this->openDataset(datasetName);

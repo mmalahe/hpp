@@ -15,7 +15,6 @@ namespace hpp {
 class Timer {
 public:
     Timer();
-    void reset();
     void start();
     void stop();
     double getDuration(){return duration;}

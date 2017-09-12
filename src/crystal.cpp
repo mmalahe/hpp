@@ -366,6 +366,7 @@ void Crystal<U>::applyInitialConditions()
 // Default constructor
 template <typename U>
 Crystal<U>::Crystal() {
+    ;
 }
 
 template <typename U>
@@ -779,8 +780,11 @@ template <typename U>
 Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm) {
     this->crystal_list = crystal_list;
     this->comm = comm;
-    MPI_Comm_size(comm, &comm_size);
-    MPI_Comm_rank(comm, &comm_rank);
+    int csize, crank;
+    MPI_Comm_size(comm, &csize);
+    MPI_Comm_rank(comm, &crank);
+    this->comm_size = csize;
+    this->comm_rank = crank;
 }
 
 template <typename U>
