@@ -98,7 +98,6 @@ void testSpectralDatabase() {
     
     // Test the quality of dataset agreement
     U closeEnough = 10*std::numeric_limits<U>::epsilon();
-    std::vector<U> errors(nGridPoints);
     for (unsigned int flatIdx=0; flatIdx<nGridPoints; flatIdx++) {
         std::vector<unsigned int> idx = unflatC(flatIdx, gridDims);
         U rawData = dataPair.raw[flatIdx];

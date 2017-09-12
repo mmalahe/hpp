@@ -20,11 +20,10 @@ void testCrystal()
     hpp::Tensor2<U> F_next = hpp::identityTensor2<U>(3);
     U dt = 1e-3;
     U dt_new;
-    bool step_good = false;
     
     // Single crystal
     Crystal<U> crystal(props, config, init);
-    step_good = crystal.tryStep(F_next, dt);
+    bool step_good = crystal.tryStep(F_next, dt);
     std::cout << "step_good: " << step_good << std::endl;
 //    crystal.acceptStep();
 //    crystal.rejectStep();

@@ -61,7 +61,7 @@ void testTensor4Basics() {
     bool caughtNonSquareInverse = false;
     try {        
         notSquare.inv();
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtNonSquareInverse = true;
     }
     if (!(caughtNonSquareInverse)) throw std::runtime_error("Non-square tensor error was not raised correctly.");
@@ -72,7 +72,7 @@ void testTensor4Basics() {
     bool caughtSingularTensor = false;
     try {        
         singularTensor.inv();
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtSingularTensor = true;
     }
     if (!(caughtSingularTensor)) throw std::runtime_error("Singular tensor error was not raised correctly.");
@@ -143,7 +143,7 @@ void testTensor4BinaryOperations() {
     bool caughtIncompatibleTensor = false;
     try {        
         A + ADifferentShape;
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtIncompatibleTensor = true;
     }
     if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor addition error was not raised correctly.");
@@ -182,7 +182,7 @@ void testTensor4BinaryOperations() {
     caughtIncompatibleTensor = false;
     try {        
         A - ADifferentShape;
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtIncompatibleTensor = true;
     }
     if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor subtraction error was not raised correctly.");

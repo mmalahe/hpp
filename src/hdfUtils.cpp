@@ -10,17 +10,6 @@
 namespace hpp
 {
 
-// Suppressing errors
-H5E_auto2_t dummyHDFErrorHandler;
-void *dummyHDFClientData;
-void hdfSuppressErrors() {
-     H5Eget_auto(H5E_DEFAULT, &dummyHDFErrorHandler, &dummyHDFClientData);
-     H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-}
-void hdfRestoreErrors() {
-    H5Eset_auto(H5E_DEFAULT, dummyHDFErrorHandler, dummyHDFClientData);
-}
-
 // Complex type
 hid_t getComplexHDFType() {
     hid_t complex_type = H5Tcreate(H5T_COMPOUND, sizeof(hdf_complex_t));

@@ -27,7 +27,7 @@ void testMPIUtilsNonParallel() {
     bool caughtTypeIncompatible = false;
     try {        
         MPIType<void>();
-    } catch (std::runtime_error e) {
+    } catch (std::runtime_error& e) {
         caughtTypeIncompatible = true;
     }
     if (!caughtTypeIncompatible)  throw std::runtime_error("Non-existent MPI type not raised correctly.");

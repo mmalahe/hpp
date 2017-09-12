@@ -166,7 +166,6 @@ void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5MPIHandler& dbfile, std
     // Read in raw data
     std::vector<unsigned short int> coordsBuffer(nTermsToInclude*nDims);
     std::vector<hdf_complex_t> coeffsBuffer(nTermsToInclude);
-    std::vector<hsize_t> gridOffset;//no grid
     
     HDFReadWriteParamsC coordsReadParams;
     coordsReadParams.dataOffset = componentIdx;
@@ -485,8 +484,7 @@ void SpectralDatabaseUnified<U>::loadDatasets(HDF5MPIHandler& dbfile, std::vecto
     std::vector<hsize_t> componentIdx;
     
     // Read in coordinates dataset
-    std::vector<unsigned short int> coordsBuffer(nTermsToInclude*nDims);
-    std::vector<hsize_t> gridOffset;//no grid    
+    std::vector<unsigned short int> coordsBuffer(nTermsToInclude*nDims);  
     HDFReadWriteParamsC coordsReadParams;
     coordsReadParams.dataOffset = componentIdx;
     coordsReadParams.dataOffset.push_back(0);

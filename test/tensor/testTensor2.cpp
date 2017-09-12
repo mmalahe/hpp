@@ -65,7 +65,7 @@ void testTensor2Basics() {
     bool caughtNegativeDeterminantTensor = false;
     try {        
         negativeDeterminantTensor.scaledToUnitDeterminant();
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtNegativeDeterminantTensor = true;
     }
     if (!(caughtNegativeDeterminantTensor)) throw std::runtime_error("negative determinant tensor error was not raised correctly");
@@ -106,7 +106,7 @@ void testTensor2Basics() {
     bool caughtBadConstraint = false;
     try {        
         A.constrainedTo(1.0,-1.0);
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtBadConstraint = true;
     }
     if (!(caughtBadConstraint)) throw std::runtime_error("bad constraint error was not raised correctly");
@@ -118,7 +118,7 @@ void testTensor2Basics() {
     bool caughtNotSquare = false;
     try {        
         notSquare.assertSquare();
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtNotSquare = true;
     }
     if (!(caughtNotSquare)) throw std::runtime_error("non-square tensor error was not raised correctly");
@@ -127,7 +127,7 @@ void testTensor2Basics() {
     bool caughtNonSquareInverse = false;
     try {        
         notSquare.inv();
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtNonSquareInverse = true;
     }
     if (!(caughtNonSquareInverse)) throw std::runtime_error("Non-square tensor error was not raised correctly.");
@@ -141,7 +141,7 @@ void testTensor2Basics() {
     bool caughtSingularTensor = false;
     try {        
         singularTensor.inv();
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtSingularTensor = true;
     }
     if (!(caughtSingularTensor)) throw std::runtime_error("Singular tensor error was not raised correctly.");
@@ -188,7 +188,7 @@ void testTensor2BinaryOperations() {
     bool caughtIncompatibleTensor = false;
     try {        
         A + ADifferentShape;
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtIncompatibleTensor = true;
     }
     if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor addition error was not raised correctly.");
@@ -215,7 +215,7 @@ void testTensor2BinaryOperations() {
     caughtIncompatibleTensor = false;
     try {        
         A - ADifferentShape;
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtIncompatibleTensor = true;
     }
     if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor subtraction error was not raised correctly.");
@@ -260,7 +260,7 @@ void testTensor2BinaryOperations() {
     caughtIncompatibleTensor = false;
     try {        
         incompatibleTensor*A;
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtIncompatibleTensor = true;
     }
     if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor multiplication error was not raised correctly.");
@@ -273,7 +273,7 @@ void testTensor2BinaryOperations() {
     caughtIncompatibleTensor = false;
     try {        
         contract(incompatibleTensor,A);
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtIncompatibleTensor = true;
     }
     if (!(caughtIncompatibleTensor)) throw std::runtime_error("Incompatible tensor contraction error was not raised correctly.");

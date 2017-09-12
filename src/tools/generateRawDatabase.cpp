@@ -163,7 +163,6 @@ void generateDatabase(std::string output_filename, unsigned int gridLength, MPI_
     unsigned int nBeta = gridLength;
     unsigned int nGamma = gridLength;
     unsigned int nTheta = gridLength;
-    unsigned int nGridpoints = nAlpha*nBeta*nGamma*nTheta;
     std::vector<hsize_t> gridDims = {nAlpha, nBeta, nGamma, nTheta};
     
     // Grid lengths accounting for symmetries
@@ -211,7 +210,7 @@ void generateDatabase(std::string output_filename, unsigned int gridLength, MPI_
     // Make sure final slab fits into end of range
     if (gridEndSymm > nGridpointsSymm-1) gridEndSymm = nGridpointsSymm-1;   
     nGridpointsLocalSymm = gridEndSymm - gridStartSymm + 1;
-    printf("Proc %d taking care of %d-%d.\n", comm_rank, gridStartSymm, gridEndSymm);
+    printf("Proc %d taking care of %ud-%ud.\n", comm_rank, gridStartSymm, gridEndSymm);
     
     // Get final chunk count
     if (nGridpointsLocalSymm % chunkSizeSymm != 0) {
@@ -281,7 +280,7 @@ void generateDatabase(std::string output_filename, unsigned int gridLength, MPI_
         // Status
         if (i % chunkSizeSymm == 0) {
             float completionPercentage = (100.0*i)/nGridpointsLocalSymm;
-            printf("Proc %d, point %d/%d (%1.1f%%)\n", comm_rank, i, nGridpointsLocalSymm, completionPercentage);
+            printf("Proc %d, point %ud/%ud (%1.1f%%)\n", comm_rank, i, nGridpointsLocalSymm, completionPercentage);
         }
         
         // Parameters

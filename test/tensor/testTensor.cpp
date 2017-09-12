@@ -55,7 +55,7 @@ void testTensor4Tensor2Interactions() {
     bool caughtContractionIncompatible = false;
     try {        
         contract(A4, A2ContractionIncompatible);
-    } catch (TensorError e) {
+    } catch (TensorError& e) {
         caughtContractionIncompatible = true;
     }
     if (!(caughtContractionIncompatible)) throw std::runtime_error("Incomparible tensor contraction was not raised correctly.");

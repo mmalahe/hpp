@@ -23,64 +23,6 @@ inline double complexMag(double im, double re) {
     return std::sqrt(std::pow(im,2) + std::pow(re,2));
 }
     
-void readPerformDFTThenWriteScalar(hpp::HDF5MPIHandler& infile, std::string dsetInName, hpp::FFTWConfigRealND& cfg, std::vector<hsize_t> componentIdx, hpp::HDF5MPIHandler& outfile, std::string dsetOutName, MPI_Comm comm) 
-{
-    // File transfer property lists
-    hid_t plist_in = infile.getPropertyListTransferIndependent();
-    hid_t plist_out = outfile.getPropertyListTransferIndependent();
-    
-    // Input dataset
-    hid_t dsetIn = infile.getDataset(dsetInName);
-    
-    // Create the output dataset
-    std::vector<hsize_t> dimsOut(cfg.complexDims.begin(), cfg.complexDims.end());
-    outfile.createDataset<hpp::hdf_complex_t>(dsetOutName, dimsOut);
-    hid_t dsetOut = outfile.getDataset(dsetOutName);    
-    
-    // Length of the final grid dimension for a buffered read in
-    std::vector<hsize_t> lArrayDimsReal = {(hsize_t)cfg.realDimsLocal[3]};
-    
-    // Input values
-    hpp::HDFReadWriteParamsC parms;
-    parms.dataOffset = {(hsize_t)cfg.local0Start,0,0,0};
-    parms.dataOffset.insert(std::end(parms.dataOffset), std::begin(componentIdx), std::end(componentIdx));
-    parms.dataCount = std::vector<hsize_t>(cfg.realDimsLocal.begin(), cfg.realDimsLocal.end());
-    parms.datatype = H5Dget_type(dsetIn);
-    for (unsigned int i=0; i<componentIdx.size(); i++) {
-        parms.dataCount.push_back(1);
-    }                  
-    hpp::readHDF5SimpleArray(dsetIn, plist_in, parms, cfg.in);
-    
-    // Execute
-    fftw_execute(cfg.forwardPlan);
-    
-    // Scale correctly
-    for (int i=0; i<cfg.nLocalComplex; i++) {
-        cfg.out[i][0] /= cfg.NReal;
-        cfg.out[i][1] /= cfg.NReal;
-    }
-    
-    // Write to datasets
-    std::vector<hsize_t> lArrayDimsComplex = {(hsize_t)cfg.complexDimsLocal[3]};
-    std::vector<hpp::hdf_complex_t> lArrayBufferComplex(cfg.complexDimsLocal[3]);
-    for (unsigned int iLocal=0; iLocal<cfg.complexDimsLocal[0]; iLocal++) {
-        unsigned int i = cfg.local0Start + iLocal;
-        for (unsigned int j=0; j<cfg.complexDimsLocal[1]; j++) {
-            for (unsigned int k=0; k<cfg.complexDimsLocal[2]; k++) {
-                unsigned int array_idx_base = hpp::fftwFlat4(iLocal,j,k,0,cfg.complexDimsLocal);
-                std::vector<hsize_t> gridOffset = {i,j,k};
-                for (unsigned int l=0; l<cfg.complexDimsLocal[3]; l++) {
-                    unsigned int array_idx = array_idx_base + l;                    
-                    fftw_complex value = {cfg.out[array_idx][0], cfg.out[array_idx][1]};
-                    lArrayBufferComplex[l].r = value[0];
-                    lArrayBufferComplex[l].i = value[1];
-                }
-                hpp::writeSingleHDF5Array(dsetOut, plist_out, gridOffset, lArrayDimsComplex, lArrayBufferComplex.data());
-            }
-        }
-    }
-}
-
 void readPerformDFTThenWriteOrderedCoeffs(hpp::HDF5MPIHandler& infile, std::string dsetInName, hpp::FFTWConfigRealND& cfg, std::vector<hsize_t> componentIdx, hpp::HDF5MPIHandler& outfile, hid_t dsetOutCoords, hid_t dsetOutVals, unsigned int nCoeffs, MPI_Comm comm) 
 {   
     // Comm
@@ -94,9 +36,6 @@ void readPerformDFTThenWriteOrderedCoeffs(hpp::HDF5MPIHandler& infile, std::stri
     
     // Input dataset
     hid_t dsetIn = infile.getDataset(dsetInName);
-    
-    // Length of the final grid dimension for a buffered read in
-    std::vector<hsize_t> lArrayDimsReal = {(hsize_t)cfg.realDimsLocal[3]};
     
     // Input values
     hpp::HDFReadWriteParamsC parms;
@@ -392,7 +331,6 @@ void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5MPIHandler& infile, hi
     nCoeffs = std::min(cfg.NComplex, nCoeffs);
     
     // Create the output datasets and store handles to the datasets
-    unsigned int nDatasets = spectralDatasetIDs.size();
     std::vector<hsize_t> scalarValDims = {nCoeffs};
     std::map<hpp::SpectralDatasetID, hid_t> HDFOutputDsetIDs;
     for (auto dsetID : spectralDatasetIDs) {

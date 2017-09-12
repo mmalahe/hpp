@@ -640,7 +640,7 @@ bool Crystal<U>::tryStep(const hpp::Tensor2<U>& F_next, U dt)
     bool step_good = false;
     try {
         step_good = updateTandS(tensor_A, dt);
-    } catch (hpp::TensorError error) {
+    } catch (hpp::TensorError& error) {
         DEBUG_ONLY(std::cout << "Caught during step: " << error.what() << std::endl;)
         DEBUG_ONLY(std::cout << "Rejecting step." << std::endl;)
         step_good = false;
