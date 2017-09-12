@@ -166,7 +166,7 @@ std::ostream& operator<<(std::ostream& out, const std::valarray<T>& vec)
 class TensorError: public std::runtime_error
 {
     public:
-        TensorError (const std::string &val) : std::runtime_error::runtime_error(val) {}
+        explicit TensorError (const std::string &val) : std::runtime_error::runtime_error(val) {}
 };
 
 /**
@@ -352,7 +352,7 @@ class Tensor2
         void copyValuesOut(T* outVals) const;
         
         // Construct from Tensor4
-        Tensor2(const Tensor4<T>& A);
+        explicit Tensor2(const Tensor4<T>& A);
 
         // Assignment operator
         Tensor2<T>& operator=(const Tensor2<T>& input);
@@ -980,7 +980,7 @@ class Tensor4
     ~Tensor4();
 
     // Construct from 2nd order
-    Tensor4(const Tensor2<T>& A);
+    explicit Tensor4(const Tensor2<T>& A);
     
     // Assignment operator
     Tensor4<T>& operator=(const Tensor4<T>& input);

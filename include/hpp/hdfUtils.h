@@ -26,7 +26,7 @@ namespace hpp
 class HDFUtilsError: public std::runtime_error
 {
     public:
-        HDFUtilsError (const std::string &val) : std::runtime_error::runtime_error(val) {}
+        explicit HDFUtilsError (const std::string &val) : std::runtime_error::runtime_error(val) {}
 };    
 
 // Check an HDF C API call

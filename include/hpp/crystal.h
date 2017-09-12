@@ -68,7 +68,7 @@ std::vector<SpectralDatasetID> defaultCrystalSpectralDatasetIDs();
 class CrystalError: public std::runtime_error
 {
 public:
-    CrystalError (const std::string &val) : std::runtime_error::runtime_error(val) {}
+    explicit CrystalError (const std::string &val) : std::runtime_error::runtime_error(val) {}
 };
 
 

@@ -163,7 +163,7 @@ struct SpectralDatasetID {
     SpectralDatasetID(const std::string baseName, const std::vector<unsigned int> component) : baseName(baseName), component(component) {
         ;
     }
-    SpectralDatasetID(const std::string baseName) : baseName(baseName) {
+    explicit SpectralDatasetID(const std::string baseName) : baseName(baseName) {
         ;
     }
     
@@ -424,7 +424,6 @@ void loadSpectralDatabase(hpp::HDF5MPIHandler& infile, std::string dsetNameCoord
     // Read in raw data
     std::vector<unsigned short int> coordsBuffer(nTerms*nDims);
     std::vector<hpp::hdf_complex_t> coeffsBuffer(nTerms);
-    std::vector<hsize_t> gridOffset;//no grid
 
     hpp::HDFReadWriteParamsC coordsReadParams;
     coordsReadParams.dataOffset = componentIdx;
@@ -532,7 +531,6 @@ std::complex<U> TruncatedIFFTNDSingleSquare(const unsigned int spatialDim, const
     std::complex<U> val = 0.0;
     std::complex<U> iUnit(0, 1);
     std::complex<U> seriesTerm;
-    std::complex<U> seriesTermConjugate;
     for (unsigned int iCoeff=0; iCoeff<nTerms; iCoeff++) {
         // Add terms
         unsigned int expFactorInt = 0;

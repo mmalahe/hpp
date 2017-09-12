@@ -84,7 +84,7 @@ template <typename U>
 class Experiment {
     
     public:
-        Experiment(std::string experimentName);
+        explicit Experiment(std::string experimentName);
         
         // Members
         U tStart;
