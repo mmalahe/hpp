@@ -125,9 +125,9 @@ MainQuantities<U> solveForMainQuantities(hpp::CrystalProperties<U> props, hpp::T
     
     // Determine main quantities to store
     MainQuantities<U> mainQuantities;
-    mainQuantities.sigmaPrime = TCauchy.deviatoricComponent()/(s*std::pow(std::abs(strainIncrement), propsRotated.m));
-    mainQuantities.W_p = W_p/strainIncrement;
-    std::vector<U> gammadot_alphas = hpp::operator/(crystal.getShearStrainRates(), strainIncrement);
+    mainQuantities.sigmaPrime = TCauchy.deviatoricComponent()/(s*std::pow(std::abs(strainRate), propsRotated.m));
+    mainQuantities.W_p = W_p/strainRate;
+    std::vector<U> gammadot_alphas = hpp::operator/(crystal.getShearStrainRates(), strainRate);
     mainQuantities.gammadotAbsSum = 0.0;
     for (auto&& gammadot_alpha : gammadot_alphas) {
         mainQuantities.gammadotAbsSum += std::abs(gammadot_alpha);

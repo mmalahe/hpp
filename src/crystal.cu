@@ -222,7 +222,7 @@ __device__ Tensor2AsymmCUDA<T,3> getWp(T WpScaling, T*dbVars) {
 // Step kernel
 template<typename T, unsigned int N>
 __global__ void SPECTRAL_POLYCRYSTAL_STEP(unsigned int nCrystals, SpectralCrystalCUDA<T>* crystals, CrystalPropertiesCUDA<T,N>* props, 
-Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T strainIncrement, T dt, SpectralDatabaseCUDA<T,4>* db, Tensor2CUDA<T,3,3> *TCauchyPerBlockSums) 
+Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T strainRate, T dt, SpectralDatabaseCUDA<T,4>* db, Tensor2CUDA<T,3,3> *TCauchyPerBlockSums) 
 {
     // Get crystal index
     unsigned int idx = blockDim.x*blockIdx.x + threadIdx.x;
@@ -273,14 +273,14 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     T gammaNext;
     
     // Gamma
-    T gammaScaling = strainIncrement;
+    T gammaScaling = strainRate;
     gammaNext = gammaScaling*db->getIDFTRealDShared(GAMMA, spatialCoord, nSharedSpectral, sharedCoords, sharedCoeffs);
     
     // Update slip deformation resistance
     crystal.s = slipDeformationResistanceStepSpectralSolver(props, crystal.s, gammaNext, dt);
     
     // Sigma
-    T sigmaScaling = (crystal.s*powIntrinsic(fabs(strainIncrement), props->m));
+    T sigmaScaling = (crystal.s*powIntrinsic(fabs(strainRate), props->m));
     
     // Only the upper triangular terms of sigmaPrime
     sigmaPrimeNext(0,0) = sigmaScaling*db->getIDFTRealDShared(SIGMA00, spatialCoord, nSharedSpectral, sharedCoords, sharedCoeffs);
@@ -296,7 +296,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     sigmaPrimeNext(1,0) = sigmaScaling*sigmaPrimeNext(0,1);    
  
     // Wp
-    T WpScaling = strainIncrement;
+    T WpScaling = strainRate;
     
     // Only the terms (0,1), (1,2) and (0,2)
     WpNext.setVal(0,1,WpScaling*db->getIDFTRealDShared(WP01, spatialCoord, nSharedSpectral, sharedCoords, sharedCoeffs));
@@ -336,7 +336,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
 // Step kernel
 template<typename T, unsigned int N, unsigned int P>
 __global__ void SPECTRAL_POLYCRYSTAL_STEP_UNIFIED(unsigned int nCrystalPairs, SpectralCrystalCUDA<T>* crystals, CrystalPropertiesCUDA<T,N>* props, 
-Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T strainIncrement, T dt, SpectralDatabaseUnifiedCUDA<T,4,P>* db, Tensor2CUDA<T,3,3> *TCauchyPerBlockSums) 
+Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T strainRate, T dt, SpectralDatabaseUnifiedCUDA<T,4,P>* db, Tensor2CUDA<T,3,3> *TCauchyPerBlockSums) 
 {
     // Get crystal index
     unsigned int pairIdx = blockDim.x*blockIdx.x + threadIdx.x;
@@ -377,7 +377,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     db->getIDFTRealDSharedPair(dbCoord0, dbVars0, dbCoord1, dbVars1, nSharedSpectral, sharedData);
     
     // Gamma
-    T gammaScaling = strainIncrement;
+    T gammaScaling = strainRate;
     T gammaNext0 = gammaScaling*dbVars0[GAMMA];
     T gammaNext1 = gammaScaling*dbVars1[GAMMA];
     
@@ -386,13 +386,13 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     crystal1.s = slipDeformationResistanceStepSpectralSolver(props, crystal1.s, gammaNext1, dt);
     
     // Sigma
-    T sigmaScaling0 = (crystal0.s*powIntrinsic(fabs(strainIncrement), props->m));
-    T sigmaScaling1 = (crystal1.s*powIntrinsic(fabs(strainIncrement), props->m));
+    T sigmaScaling0 = (crystal0.s*powIntrinsic(fabs(strainRate), props->m));
+    T sigmaScaling1 = (crystal1.s*powIntrinsic(fabs(strainRate), props->m));
     Tensor2CUDA<T,3,3> sigmaPrimeNext0 = transformOutOfFrame(getSigmaPrime(sigmaScaling0, dbVars0), RStretchingTensor);
     Tensor2CUDA<T,3,3> sigmaPrimeNext1 = transformOutOfFrame(getSigmaPrime(sigmaScaling1, dbVars1), RStretchingTensor);
  
     // Wp
-    T WpScaling = strainIncrement;
+    T WpScaling = strainRate;
     Tensor2CUDA<T,3,3> WpNext0 = transformOutOfFrame(getWp(WpScaling, dbVars0), RStretchingTensor);
     Tensor2CUDA<T,3,3> WpNext1 = transformOutOfFrame(getWp(WpScaling, dbVars1), RStretchingTensor);
     
@@ -537,10 +537,10 @@ void SpectralPolycrystalCUDA<T,N>::step(const hpp::Tensor2<T>& F_next, const hpp
     solveTimer.start();
     
     if (useUnifiedDB) {
-        SPECTRAL_POLYCRYSTAL_STEP_UNIFIED<<<dG,dB>>>(nCrystalPairs, crystalsD.get(), crystalPropsD.get(), RStretchingTensor, WNext, theta, strainIncrement, dt, dbUnifiedD.get(), TCauchyPerBlockSums.get());
+        SPECTRAL_POLYCRYSTAL_STEP_UNIFIED<<<dG,dB>>>(nCrystalPairs, crystalsD.get(), crystalPropsD.get(), RStretchingTensor, WNext, theta, strainRate, dt, dbUnifiedD.get(), TCauchyPerBlockSums.get());
     }
     else {
-        SPECTRAL_POLYCRYSTAL_STEP<<<dG,dB>>>(nCrystals, crystalsD.get(), crystalPropsD.get(), RStretchingTensor, WNext, theta, strainIncrement, dt, dbD.get(), TCauchyPerBlockSums.get());    
+        SPECTRAL_POLYCRYSTAL_STEP<<<dG,dB>>>(nCrystals, crystalsD.get(), crystalPropsD.get(), RStretchingTensor, WNext, theta, strainRate, dt, dbD.get(), TCauchyPerBlockSums.get());    
     }
     
     // Stop solve timer
