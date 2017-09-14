@@ -4,6 +4,11 @@
 * @details
 */
 
+#ifndef HPP_STDLIBREPLACEMENTS_H
+#define HPP_STDLIBREPLACEMENTS_H
+
+#include <hpp/config.h>
+
 /**
  * @brief The stdlib function aligned_alloc
  * @param size
@@ -42,3 +47,5 @@ aligned_alloc (size_t size, size_t align)
   return aligned_ptr;
 }
 #endif
+
+#endif /* HPP_STDLIBREPLACEMENTS_H */
