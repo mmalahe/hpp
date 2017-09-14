@@ -50,7 +50,7 @@ void testHDFReadWriteParallel(MPI_Comm comm) {
     unsigned int gridStart = comm_rank*nGridpointsLocal;
     unsigned int gridEnd = gridStart+nGridpointsLocal-1;
     if (gridEnd > nGridpoints-1) gridEnd = nGridpoints-1;
-    printf("Proc %d taking care of %ud-%ud.\n", comm_rank, gridStart, gridEnd);
+    printf("Proc %d taking care of %u-%u.\n", comm_rank, gridStart, gridEnd);
     
     // Write data
     for (unsigned int flatIdx=gridStart; flatIdx<gridEnd+1; flatIdx++) {

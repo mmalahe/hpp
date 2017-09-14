@@ -55,7 +55,7 @@ void testTensor2ParallelIO(MPI_Comm comm, int comm_size, int comm_rank) {
     unsigned int gridStart = comm_rank*nGridpointsLocal;
     unsigned int gridEnd = gridStart+nGridpointsLocal-1;
     if (gridEnd > nGridpoints-1) gridEnd = nGridpoints-1;
-    printf("Proc %d taking care of %ud-%ud.\n", comm_rank, gridStart, gridEnd);
+    printf("Proc %d taking care of %u-%u.\n", comm_rank, gridStart, gridEnd);
     
     // Create file and dataset //
     /////////////////////////////
