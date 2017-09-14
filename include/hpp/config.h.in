@@ -8,3 +8,6 @@
 #cmakedefine HPP_USE_SSE4_1
 #cmakedefine HPP_USE_AVX
 #cmakedefine HPP_USE_AVX2
+
+// Available standard library functions
+#cmakedefine HPP_HAVE_ALIGNED_ALLOC

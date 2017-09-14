@@ -55,6 +55,14 @@ if (${CUDA_FOUND})
     find_package(GPUS)
 endif()
 
+# FIND STANDARD LIBRARY FUNCTIONS #
+###################################
+# Some of these aren't available with certain combinations of compiler and
+# standard library implementation, so we provide our own implementation
+# in that case.
+
+CHECK_SYMBOL_EXISTS(aligned_alloc stdlib.h HPP_HAVE_ALIGNED_ALLOC)
+
 # OPTIONS #
 ###########
 

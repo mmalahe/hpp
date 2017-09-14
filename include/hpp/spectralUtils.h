@@ -17,6 +17,7 @@
 #include <hpp/tensor.h>
 #include <hpp/mpiUtils.h>
 #include <hpp/simdUtils.h>
+#include <hpp/stdlibReplacements.h>
 
 namespace hpp
 {
