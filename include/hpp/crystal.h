@@ -202,9 +202,7 @@ CrystalProperties<U> defaultCrystalProperties()
     props.S_0 = S_0;
 
     // Elasticity tensor
-    props.L = hpp::Tensor4<U>(3,3,3,3);
-    props.L = 2*props.mu*hpp::identityTensor4<U>(3) ;
-    props.L += ((U)(props.kappa-(2.0/3)*props.mu))*hpp::outer<U>(hpp::identityTensor2<U>(3), hpp::identityTensor2<U>(3));
+    props.L = cubeSymmetricElasticityTensor(props.mu, props.kappa);
 
     // Return
     return props;

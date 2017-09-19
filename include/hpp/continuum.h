@@ -113,6 +113,49 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
     return decomp;
 }
 
+/**
+ * @brief Construct a fourth order isotropic elasticity tensor
+ * @param mu the elastic shear modulus \f$\mu\f$
+ * @param kappa the elastic bulk modulus \f$\kappa\f$
+ * @return The elasticity tensor
+ */
+template <typename U>
+hpp::Tensor4<U> isotropicElasticityTensor(U mu, U kappa) {
+    hpp::Tensor4<U> L(3,3,3,3);
+    L = 2*mu*hpp::identityTensor4<U>(3) ;
+    L += ((U)(kappa-(2.0/3)*mu))*outer<U>(identityTensor2<U>(3), identityTensor2<U>(3));
+    return L;
 }
+
+/**
+ * @brief Construct a fourth order elasticity tensor accounting for cubic symmetry
+ * @param mu the elastic shear modulus \f$\mu\f$
+ * @param kappa the elastic bulk modulus \f$\kappa\f$
+ * @return The elasticity tensor
+ */
+template <typename U>
+hpp::Tensor4<U> cubeSymmetricElasticityTensor(U mu, U kappa) {
+    hpp::Tensor4<U> L(3,3,3,3);
+    U c11 = kappa + (4.0/3.0)*mu;
+    U c12 = kappa - (2.0/3.0)*mu;
+    U c44 = mu;
+    U cbar = c11-c12-2*c44;
+    for (int i=0; i<3; i++) {
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                for (int l=0; l<3; l++) {
+                    L(i,j,k,l) = c12*(i==j)*(k==l);
+                    L(i,j,k,l) += c44*((i==k)*(j==l)+(i==l)*(j==k));
+                    for (int r=0; r<3; r++) {
+                        L(i,j,k,l) += cbar*(i==r)*(j==r)*(k==r)*(l==r);
+                    }
+                }
+            }
+        }
+    }
+    return L;
+}
+
+} //END NAMESPACE HPP
     
 #endif /* HPP_CONTINUUM_H */
