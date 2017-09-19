@@ -32,13 +32,6 @@ platforms., (January):785--798, 2014
 #include <hpp/spectralUtils.h>
 #include <hpp/profUtils.h>
 
-// Units
-// Quantities are in GPA
-#define GPA (1.0)
-#define MPA (1e-3)
-#define KPA (1e-6)
-#define PA (1e-9)
-
 namespace hpp
 {
 
@@ -109,6 +102,7 @@ struct CrystalProperties {
     unsigned int n_alpha;
     U mu;
     U kappa;
+    U c11, c12, c44;
     U m;
     U gammadot_0;
     U h_0;
@@ -132,8 +126,17 @@ CrystalProperties<U> defaultCrystalProperties()
 
     // Scalar parameters
     props.n_alpha = 12;
+    
+    // Elastic constants from Kalidindi1992
     props.mu = 46.5*GPA;
     props.kappa = 124.0*GPA;
+    
+    // Elastic constants from Anders and Thompson 1961
+    props.c11 = 168.7*GPA;
+    props.c12 = 121.7*GPA;
+    props.c44 = 75.0*GPA;
+    
+    // From Kalidindi1992
     props.m = 0.012;
     props.gammadot_0 = 0.001;
     props.h_0 = 180.0*MPA;
@@ -202,7 +205,7 @@ CrystalProperties<U> defaultCrystalProperties()
     props.S_0 = S_0;
 
     // Elasticity tensor
-    props.L = cubeSymmetricElasticityTensor(props.mu, props.kappa);
+    props.L = cubeSymmetricElasticityTensor(props.c11, props.c12, props.c44);
 
     // Return
     return props;

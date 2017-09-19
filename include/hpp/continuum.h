@@ -7,6 +7,13 @@
 #include <hpp/config.h>
 #include <hpp/tensor.h>
 
+// Units
+// Quantities are in GPA
+#define GPA (1.0)
+#define MPA (1e-3)
+#define KPA (1e-6)
+#define PA (1e-9)
+
 namespace hpp
 {
 
@@ -129,16 +136,14 @@ hpp::Tensor4<U> isotropicElasticityTensor(U mu, U kappa) {
 
 /**
  * @brief Construct a fourth order elasticity tensor accounting for cubic symmetry
- * @param mu the elastic shear modulus \f$\mu\f$
- * @param kappa the elastic bulk modulus \f$\kappa\f$
+ * @param c11 elastic constant \f${C}_11\f$
+ * @param c12 elastic constant \f${C}_12\f$
+ * @param c44 elastic constant \f${C}_44\f$
  * @return The elasticity tensor
  */
 template <typename U>
-hpp::Tensor4<U> cubeSymmetricElasticityTensor(U mu, U kappa) {
-    hpp::Tensor4<U> L(3,3,3,3);
-    U c11 = kappa + (4.0/3.0)*mu;
-    U c12 = kappa - (2.0/3.0)*mu;
-    U c44 = mu;
+hpp::Tensor4<U> cubeSymmetricElasticityTensor(U c11, U c12, U c44) {
+    hpp::Tensor4<U> L(3,3,3,3);  
     U cbar = c11-c12-2*c44;
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
