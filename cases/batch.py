@@ -15,11 +15,11 @@ setPlotDefaults('journal')
 do_iterative_solve = False
 do_spectral_solve = True
 
-do_iterative_solve_plot = False
-do_spectral_solve_plot = False
+do_iterative_solve_plot = True
+do_spectral_solve_plot = True
 
-#~ error_study_type = None
-error_study_type = 'n_terms'
+error_study_type = None
+#~ error_study_type = 'n_terms'
 #~ error_study_type = 'refinement_multiplier'
 #~ error_study_type = 'db_dim'
 
@@ -54,7 +54,7 @@ problem_params['experiment_name'].append('mihaila2014_simple_shear')
 # Spectral database parameters
 spectral_db_params = {}
 spectral_db_params['db_dir'] = "databases"
-spectral_db_params['db_dim'] = 128
+spectral_db_params['db_dim'] = 64
 #~ spectral_db_params['db_dim'] = [8,16,32,64,128]
 spectral_db_params['refinement_multiplier'] = 128
 #~ spectral_db_params['refinement_multiplier'] = [1,2,4,8,16,32,64,128]
@@ -76,8 +76,8 @@ spectral_solve_params.update(problem_params)
 spectral_solve_params.update(spectral_db_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
-#~ spectral_solve_params['n_terms'] = 2**14
-spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
+spectral_solve_params['n_terms'] = 2**14
+#~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(7,16)]
 
 # Iterative solves
