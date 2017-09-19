@@ -132,6 +132,7 @@ CrystalProperties<U> defaultCrystalProperties()
     props.kappa = 124.0*GPA;
     
     // Elastic constants from Anders and Thompson 1961
+    // See Ledbetter and Naimon 1974, page 908 for the values actually tabulated
     props.c11 = 168.7*GPA;
     props.c12 = 121.7*GPA;
     props.c44 = 75.0*GPA;
