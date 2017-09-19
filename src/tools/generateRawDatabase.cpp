@@ -115,7 +115,7 @@ MainQuantities<U> solveForMainQuantities(hpp::CrystalProperties<U> props, hpp::T
     hpp::Tensor2<U> W_p = crystal.getPlasticSpinTensor();
     
     // Determine the average slip system resistance for scaling
-    ///@fixme: This should be the s from the voce-type law
+    // If the Voce law is used in the underlying solver, each s will be identical anyway.
     U s = 0;
     std::vector<U> s_alphas = crystal.getSAlphas();
     for (auto s_alpha : s_alphas) {
