@@ -575,7 +575,12 @@ void SpectralPolycrystalCUDA<T,N>::evolve(T tStart, T tEnd, T dt, std::function<
     TCauchyHistory.push_back(TCauchyGlobalH);
     
     // Stepping
-    unsigned int nsteps = (tEnd-tStart)/dt;    
+    unsigned int nsteps = (tEnd-tStart)/dt;
+    poleHistogramHistory111.resize(nsteps);
+    poleHistogramHistory110.resize(nsteps);
+    poleHistogramHistory100.resize(nsteps);
+    poleHistogramHistory001.resize(nsteps);
+    poleHistogramHistory011.resize(nsteps);
     for (unsigned int i=0; i<nsteps; i++) {
         // Inputs for the next step
         T t = tStart + (i+1)*dt;
@@ -589,17 +594,16 @@ void SpectralPolycrystalCUDA<T,N>::evolve(T tStart, T tEnd, T dt, std::function<
         // Store quantities
         tHistory.push_back(t);
         TCauchyHistory.push_back(TCauchyGlobalH);
-        appendPoleHistograms(this->poleHistogramHistory111, VecCUDA<T,3>{1,1,1});
-        appendPoleHistograms(this->poleHistogramHistory110, VecCUDA<T,3>{1,1,0});
-        appendPoleHistograms(this->poleHistogramHistory100, VecCUDA<T,3>{1,0,0});
-        appendPoleHistograms(this->poleHistogramHistory001, VecCUDA<T,3>{0,0,1});
-        appendPoleHistograms(this->poleHistogramHistory011, VecCUDA<T,3>{0,1,1});
+        getPoleHistogram(this->poleHistogramHistory111[i], VecCUDA<T,3>{1,1,1});
+        getPoleHistogram(this->poleHistogramHistory110[i], VecCUDA<T,3>{1,1,0});
+        getPoleHistogram(this->poleHistogramHistory100[i], VecCUDA<T,3>{1,0,0});
+        getPoleHistogram(this->poleHistogramHistory001[i], VecCUDA<T,3>{0,0,1});
+        getPoleHistogram(this->poleHistogramHistory011[i], VecCUDA<T,3>{0,1,1});
     }
-    
 }
 
 template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::appendPoleHistograms(std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>>& histList, const VecCUDA<T,3>& pole) {
+std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> SpectralPolycrystalCUDA<T,N>::getPoleHistogram(const VecCUDA<T,3>& pole) {
     // Histogram configuration
     const unsigned int histDim = HPP_POLE_FIG_HIST_DIM;
     CudaKernelConfig histKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)HISTOGRAM_POLES_EQUAL_AREA<T, histDim>, nCrystals);
@@ -615,8 +619,14 @@ void SpectralPolycrystalCUDA<T,N>::appendPoleHistograms(std::vector<Tensor2CUDA<
     CUDA_CHK(cudaDeviceSynchronize());
     copyToHost(histD, histHSharedPtr.get());
     
-    // Store histogram
-    histList.push_back(*(histHSharedPtr.get()));
+    // Return
+    return histHSharedPtr;
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole) {
+    auto histHSharedPtr = this->getPoleHistogram(pole);
+    hist = *(histHSharedPtr.get());
 }
 
 /**
