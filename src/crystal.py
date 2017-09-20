@@ -5,6 +5,7 @@ from numpy import array, histogram2d, linspace, meshgrid, nan, ma
 from numpy.linalg import norm
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib.patches import Circle
+import matplotlib.animation as manimation
 
 def cartesianToSpherical(vec):
     """Uses "mathematics" convention.
@@ -188,4 +189,103 @@ def plotPoleHistograms(pole_data, filename, projection='equal-area'):
     cbar.set_clim(1.0, max_density)
     
     # Save    
-    savefig(filename, bbox_inches='tight')       
+    savefig(filename, bbox_inches='tight')
+    
+def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equal-area'):    
+    n_poles = len(pole_history_data)
+    
+    # Colorbar spacing
+    cbar_main_frac = 0.13
+    cbar_pad_frac = 0.07
+    cbar_total_frac = cbar_main_frac+cbar_pad_frac
+    
+    # Set up subplots
+    fig_size = (4*n_poles, 4/(1-cbar_total_frac))
+    fig, axes = subplots(nrows=1, ncols=n_poles, figsize=fig_size)    
+    subplots_adjust(wspace=0,hspace=0)
+    
+    # Set up video
+    dpi = 72
+    
+    # Get number of timesteps
+    ntimesteps = pole_history_data.values()[0].shape[0]
+    
+    # Initialisations
+    pcolormeshes = {}
+    i_subplot = 0
+    for pole_name, pole_history in pole_history_data.iteritems():
+        ax = axes.flat[i_subplot]
+        sca(ax)
+        pole_hist = pole_history[0,:,:]
+        pcolormeshes[pole_name] = pcolormesh(pole_hist.T)
+    cbar = fig.colorbar(pcolormeshes.values()[-1], ax=axes.ravel().tolist(), fraction=cbar_main_frac, 
+        pad=cbar_pad_frac, orientation='horizontal', format='%1.1f', label='MRD')
+    
+    # Update function
+    def animFunc(it):
+        print "Plotting frame", it
+        i_subplot = 0
+        for pole_name, pole_history in pole_history_data.iteritems():
+            # Set current axes
+            ax = axes.flat[i_subplot]
+            sca(ax)
+            gca().clear()
+            
+            # Smooth data
+            pole_hist = pole_history[it,:,:]
+            hist = gaussian_filter(pole_hist, sigma=12.0)
+            
+            # Histogram dimensions
+            nBins = hist.shape[0]
+            maxR = nBins/2.0
+            histCentre = [nBins/2.0, nBins/2.0]
+            xRange = [0.0,nBins]
+            yRange = [0.0,nBins]
+            
+            # Sum
+            hist_sum = sum(sum(hist))
+            max_density = hist.max()
+            
+            # Mark invalid bins with nan
+            for ix in range(nBins):
+                for iy in range(nBins):
+                    x = ix - histCentre[0]
+                    y = iy - histCentre[1]
+                    if sqrt(x**2+y**2) > maxR:
+                        hist[ix,iy] = nan        
+            n_valid_bins = numpy.count_nonzero(hist!=nan)
+            
+            # Normalise to uniform density
+            uniform_density = hist_sum/n_valid_bins
+            hist /= uniform_density
+            max_density /= uniform_density
+            
+            # Plot
+            hist_masked = ma.masked_invalid(hist)
+            plot_ax = pcolormesh(hist_masked.T)     
+            plot_ax.set_clim(1.0, max_density)
+            circ = Circle(histCentre, radius=maxR, fill=False)
+            gca().add_patch(circ)
+            removeBorder(gca())
+            xlim(1.01*array(xRange))
+            ylim(1.01*array(yRange))
+            title(pole_name)
+            if i_subplot == 0:
+                xlabel("$\mathbf{e}_1$")
+                ylabel("$\mathbf{e}_2$")
+                
+            # Projection reference points
+            #~ x_ref, y_ref = projectionReferencePoints(projection, scale=maxR, centre=histCentre)
+            #~ plot(x_ref, y_ref, '.', markersize=1, markerfacecolor=(0.5, 0.5, 0.5, 0.5), markeredgewidth=0.0)
+            
+            # Next subplot
+            i_subplot += 1
+    
+        # Set colorbar
+        cbar_ticks = linspace(1.0, max_density, 7)    
+        cbar.set_clim(1.0, max_density)
+        cbar.set_ticks(cbar_ticks)
+    
+    for i in range(ntimesteps):
+        animFunc(i)    
+        savefig(base_filename+"%d.png"%(i), bbox_inches='tight')

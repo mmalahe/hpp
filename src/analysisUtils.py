@@ -122,7 +122,8 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
     if do_spectral_solve_plot:
         pole_histograms = spectral_run.getPoleHistograms()        
         pole_data = {name:array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
-        plotPoleHistograms(pole_data, experiment_name+"_poles_spectral.png")        
+        #~ plotPoleHistograms(pole_data, experiment_name+"_poles_spectral.png")    
+        plotPoleHistogramsHistory(pole_data, experiment_name+"_poles_spectral")        
     if do_iterative_solve_plot:
         pole_histograms = iterative_run.getPoleHistograms()
         pole_data = {name:array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
