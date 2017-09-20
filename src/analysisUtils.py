@@ -4,6 +4,7 @@ from crystal import *
 from plotting import *
 from runUtils import *
 from numpy import polyfit, log, exp
+import numpy as np
 
 def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs):
     # Number of plots
@@ -58,6 +59,7 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
             y_label = "Stress (MPa)"
         
         # Stress strain plots
+        stress_max = 0.0
         if do_spectral_solve_plot:    
             # Load data
             true_strain_history, T_cauchy_history = spectral_run.getStrainAndStress()
@@ -67,17 +69,19 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
             T_33 = array([T_cauchy[2,2] for T_cauchy in T_cauchy_history])
             
             # Plotting
-            if experiment_name == 'kalidindi1992_simple_shear' or experiment_name == 'mihaila2014_simple_shear': 
-                plot(abs(true_strain_history), abs(T_12), 'k+')  
+            if experiment_name == 'kalidindi1992_simple_shear' or experiment_name == 'mihaila2014_simple_shear':
+                spectral_stress = abs(T_12)
                 leg.append("$\sigma_{12}$ (spectral)")
             elif experiment_name == 'kalidindi1992_simple_compression':
                 sigma = T_33 - 0.5*(T_11+T_22)
-                plot(abs(true_strain_history), abs(sigma), 'k+')
+                spectral_stress = abs(sigma)
                 leg.append("spectral")
             elif experiment_name == 'savage2015_plane_strain_compression':
-                plot(abs(true_strain_history), abs(T_33), 'k+')
+                spectral_stress = abs(T_33)
                 leg.append("$\sigma_{33}$ (spectral)")
             
+            stress_max = max(stress_max, np.max(spectral_stress))    
+            plot(np.abs(true_strain_history), spectral_stress, 'k+')            
             figname += "_spectral"
         
         if do_iterative_solve_plot:
@@ -90,22 +94,25 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
             
             # Plotting
             if experiment_name == 'kalidindi1992_simple_shear' or experiment_name == 'mihaila2014_simple_shear': 
-                plot(abs(true_strain_history), abs(T_12), 'k-')  
+                iterative_stress = abs(T_12)
                 leg.append("$\sigma_{12}$ (iterative)")
             elif experiment_name == 'kalidindi1992_simple_compression': 
                 sigma = T_33 - 0.5*(T_11+T_22)
-                plot(abs(true_strain_history), abs(sigma), 'k-')
+                iterative_stress = abs(sigma)
                 leg.append("iterative")
             elif experiment_name == 'savage2015_plane_strain_compression':
-                plot(abs(true_strain_history), abs(T_33), 'k-')
+                iterative_stress = abs(T_33)
                 leg.append("$\sigma_{33}$ (iterative)")
             
+            stress_max = max(stress_max, np.max(iterative_stress)) 
+            plot(np.abs(true_strain_history), iterative_stress, 'k-')
             figname += "_iterative"
         
         # Common plotting
+        ylim((0.0, stress_max*1.05)) 
         legend(leg, loc='best')
         xlabel(x_label)
-        ylabel(y_label)
+        ylabel(y_label)        
     
         # Save
         figname += ".png"

@@ -1,5 +1,6 @@
 from linearAlgebra import *
-from numpy import dot, max, abs, cos, sin
+from numpy import dot, cos, sin
+import numpy as np
 from scipy.linalg import sqrtm
 
 def deviatoricStressTensor(T):
