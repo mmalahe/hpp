@@ -17,6 +17,8 @@ namespace hpp
 {
 #ifdef HPP_USE_CUDA
 
+#define HPP_POLE_FIG_HIST_DIM 1024
+
 // Forward declarations
 template <typename T, unsigned int N> class SpectralPolycrystalCUDA;
 template <typename T> struct SpectralCrystalCUDA;
@@ -233,9 +235,17 @@ private:
     std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyPerBlockSums;
     std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyLevel0Sums;
     
-    // History
+    // Stress-strain history
     std::vector<T> tHistory;
-    std::vector<hpp::Tensor2CUDA<T,3,3>> TCauchyHistory;
+    std::vector<Tensor2CUDA<T,3,3>> TCauchyHistory;
+    
+    // Texture history
+    void appendPoleHistograms(std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>>& histList, const VecCUDA<T,3>& pole);
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory111;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory110;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory100;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory001;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory011;
 
     // Profiling
     hpp::Timer solveTimer;

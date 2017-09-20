@@ -99,9 +99,9 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
     // Write the result
     polycrystal.writeResultHDF5(outputFilename);
     
-    // Write out strain history
+    // Write out true strain history
     if (comm_rank == 0) {
-        // Strain history
+        // True strain history
         std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, polycrystal.getTHistory());        
         H5::H5File outfile(outputFilename, H5F_ACC_RDWR);
         hpp::writeVectorToHDF5Array(outfile, "trueStrainHistory", trueStrainHistory);  

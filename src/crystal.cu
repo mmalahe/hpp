@@ -588,17 +588,40 @@ void SpectralPolycrystalCUDA<T,N>::evolve(T tStart, T tEnd, T dt, std::function<
         
         // Store quantities
         tHistory.push_back(t);
-        TCauchyHistory.push_back(TCauchyGlobalH);        
+        TCauchyHistory.push_back(TCauchyGlobalH);
+        appendPoleHistograms(this->poleHistogramHistory111, VecCUDA<T,3>{1,1,1});
+        appendPoleHistograms(this->poleHistogramHistory110, VecCUDA<T,3>{1,1,0});
+        appendPoleHistograms(this->poleHistogramHistory100, VecCUDA<T,3>{1,0,0});
+        appendPoleHistograms(this->poleHistogramHistory001, VecCUDA<T,3>{0,0,1});
+        appendPoleHistograms(this->poleHistogramHistory011, VecCUDA<T,3>{0,1,1});
     }
     
-    // Report clock rate
-    std::cout << "Clock rate (GHz) = " << getClockRateGHz(deviceID) << std::endl;
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::appendPoleHistograms(std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>>& histList, const VecCUDA<T,3>& pole) {
+    // Histogram configuration
+    const unsigned int histDim = HPP_POLE_FIG_HIST_DIM;
+    CudaKernelConfig histKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)HISTOGRAM_POLES_EQUAL_AREA<T, histDim>, nCrystals);
+    dim3 dG = histKernelCfg.dG;
+    dim3 dB = histKernelCfg.dB;
+      
+    // Generate histogram
+    std::shared_ptr<VecCUDA<T,3>> poleD = makeDeviceCopySharedPtr(pole);    
+    std::shared_ptr<Tensor2CUDA<T,histDim,histDim>> histHSharedPtr(new Tensor2CUDA<T,histDim,histDim>);
+    std::shared_ptr<Tensor2CUDA<T,histDim,histDim>> histD = makeDeviceCopySharedPtrFromPtr(histHSharedPtr.get());        
+    CUDA_CHK(cudaDeviceSynchronize());
+    HISTOGRAM_POLES_EQUAL_AREA<T, histDim><<<dG,dB>>>(nCrystals, crystalsD.get(), poleD.get(), histD.get());
+    CUDA_CHK(cudaDeviceSynchronize());
+    copyToHost(histD, histHSharedPtr.get());
+    
+    // Store histogram
+    histList.push_back(*(histHSharedPtr.get()));
 }
 
 /**
- * @brief Writes out pole histograms as a Python dictionary
- * @detail Keys are pole specifiers of the form '110' for the pole 110. Values
- * are the pole histograms.
+ * @brief Writes out pole histograms to HDF5.
+ * @detail
  * @param outfile the output file
  * @param poles the poles to plot
  */
