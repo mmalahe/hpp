@@ -576,11 +576,16 @@ void SpectralPolycrystalCUDA<T,N>::evolve(T tStart, T tEnd, T dt, std::function<
     
     // Stepping
     unsigned int nsteps = (tEnd-tStart)/dt;
-    poleHistogramHistory111.resize(nsteps);
-    poleHistogramHistory110.resize(nsteps);
-    poleHistogramHistory100.resize(nsteps);
-    poleHistogramHistory001.resize(nsteps);
-    poleHistogramHistory011.resize(nsteps);
+    poleHistogramHistory111.resize(nsteps+1);
+    poleHistogramHistory110.resize(nsteps+1);
+    poleHistogramHistory100.resize(nsteps+1);
+    poleHistogramHistory001.resize(nsteps+1);
+    poleHistogramHistory011.resize(nsteps+1);
+    getPoleHistogram(this->poleHistogramHistory111[0], VecCUDA<T,3>{1,1,1});
+    getPoleHistogram(this->poleHistogramHistory110[0], VecCUDA<T,3>{1,1,0});
+    getPoleHistogram(this->poleHistogramHistory100[0], VecCUDA<T,3>{1,0,0});
+    getPoleHistogram(this->poleHistogramHistory001[0], VecCUDA<T,3>{0,0,1});
+    getPoleHistogram(this->poleHistogramHistory011[0], VecCUDA<T,3>{0,1,1});
     for (unsigned int i=0; i<nsteps; i++) {
         // Inputs for the next step
         T t = tStart + (i+1)*dt;
@@ -594,11 +599,11 @@ void SpectralPolycrystalCUDA<T,N>::evolve(T tStart, T tEnd, T dt, std::function<
         // Store quantities
         tHistory.push_back(t);
         TCauchyHistory.push_back(TCauchyGlobalH);
-        getPoleHistogram(this->poleHistogramHistory111[i], VecCUDA<T,3>{1,1,1});
-        getPoleHistogram(this->poleHistogramHistory110[i], VecCUDA<T,3>{1,1,0});
-        getPoleHistogram(this->poleHistogramHistory100[i], VecCUDA<T,3>{1,0,0});
-        getPoleHistogram(this->poleHistogramHistory001[i], VecCUDA<T,3>{0,0,1});
-        getPoleHistogram(this->poleHistogramHistory011[i], VecCUDA<T,3>{0,1,1});
+        getPoleHistogram(this->poleHistogramHistory111[i+1], VecCUDA<T,3>{1,1,1});
+        getPoleHistogram(this->poleHistogramHistory110[i+1], VecCUDA<T,3>{1,1,0});
+        getPoleHistogram(this->poleHistogramHistory100[i+1], VecCUDA<T,3>{1,0,0});
+        getPoleHistogram(this->poleHistogramHistory001[i+1], VecCUDA<T,3>{0,0,1});
+        getPoleHistogram(this->poleHistogramHistory011[i+1], VecCUDA<T,3>{0,1,1});
     }
 }
 
