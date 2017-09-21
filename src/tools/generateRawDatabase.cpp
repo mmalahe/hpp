@@ -79,7 +79,6 @@ MainQuantities<U> solveForMainQuantities(hpp::CrystalProperties<U> props, hpp::T
 {    
     // Solver configuration
     hpp::CrystalSolverConfig<U> config = hpp::defaultConservativeCrystalSolverConfig<U>();
-    config.verbose = false;
     
     // Initial conditions
     hpp::CrystalInitialConditions<U> init;

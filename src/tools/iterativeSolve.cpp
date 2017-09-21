@@ -28,6 +28,12 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     hpp::CrystalInitialConditions<U> init = hpp::defaultCrystalInitialConditions<U>();
     U dt_initial = 1e-3;
     
+    // Output
+    hpp::PolycrystalOutputConfig outputConfig;
+    outputConfig.verbose = true;
+    outputConfig.writeTextureHistory = true;
+    outputConfig.textureHistoryTimeInterval = 20.0;
+    
     // Experiment parameters
     hpp::Experiment<U> experiment(experimentName);
     
@@ -77,7 +83,7 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
         }
     }
     
-    hpp::Polycrystal<U> kalidindi_polycrystal(crystal_list, comm);
+    hpp::Polycrystal<U> kalidindi_polycrystal(crystal_list, comm, outputConfig);
     kalidindi_polycrystal.evolve(experiment.tStart, experiment.tEnd, dt_initial, experiment.F_of_t);
     
     // Write out results

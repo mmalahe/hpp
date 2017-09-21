@@ -249,7 +249,7 @@ struct CrystalSolverConfig {
     U DT_max_factor = (2.0/3.0);
 
     // Verbosity
-    bool verbose = true;
+    bool verbose = false;
 };
 template <typename U>
 CrystalSolverConfig<U> defaultCrystalSolverConfig()
@@ -260,20 +260,25 @@ CrystalSolverConfig<U> defaultCrystalSolverConfig()
     config.r_max = 1.25;
     config.algebraic_max_iter = 50;
     config.r_t = 0.75;
-    config.verbose = true;
     return config;
 };
 template <typename U>
 CrystalSolverConfig<U> defaultConservativeCrystalSolverConfig()
 {
-    CrystalSolverConfig<U> config;
+    CrystalSolverConfig<U> config = defaultCrystalSolverConfig<U>();
     config.Dgamma_max = 2e-3;
-    config.r_min = 0.8;
-    config.r_max = 1.25;
-    config.algebraic_max_iter = 50;
-    config.r_t = 0.75;
-    config.verbose = true;
     return config;
+};
+
+/**
+ * @class CrystalOutputConfig
+ * @author Michael Malahe
+ * @date 21/09/17
+ * @file crystal.h
+ * @brief Configuration for output
+ */
+struct CrystalOutputConfig {
+    bool verbose = false;
 };
 
 template <typename U>
@@ -317,6 +322,8 @@ public:
     Crystal();
     Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config,
             const CrystalInitialConditions<U>& init);
+    Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config,
+            const CrystalInitialConditions<U>& init, const CrystalOutputConfig& outputConfig);
 
     // Stepping
     bool tryStep(const hpp::Tensor2<U>& F_next, U dt);
@@ -351,6 +358,9 @@ private:
     CrystalProperties<U> props;
     CrystalSolverConfig<U> config;
     CrystalInitialConditions<U> init;
+    
+    // Output settings
+    CrystalOutputConfig outputConfig;
 
     // Solver tolerances and constraintsbased on initial conditions
     /** @brief Defined on journal page 545 of Kalidindi1992 */
@@ -395,11 +405,25 @@ private:
     std::vector<hpp::Tensor2<U>> dumC_alphas;
 };
 
+/**
+ * @class PolycrystalOutputConfig
+ * @author Michael Malahe
+ * @date 21/09/17
+ * @file crystal.h
+ * @brief Configuration for output
+ */
+struct PolycrystalOutputConfig {
+    bool verbose = false;
+    bool writeTextureHistory = false;
+    double textureHistoryTimeInterval = 1e-15;
+};
+
 template <typename U>
 class Polycrystal
 {
 public:
     Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm);
+    Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm, const PolycrystalOutputConfig& outputConfig);
     bool step(hpp::Tensor2<U> F_next, U dt);
     U recommendNextTimestepSize(U dt);
     void evolve(U t_start, U t_end, U dt_initial, std::function<hpp::Tensor2<U>(U t)> F_of_t);
@@ -419,6 +443,7 @@ protected:
 
 private:
     std::vector<Crystal<U>> crystal_list;
+    PolycrystalOutputConfig outputConfig;
 
     // Derived quantities
     void updateDerivedQuantities();

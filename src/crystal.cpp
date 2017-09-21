@@ -371,7 +371,7 @@ Crystal<U>::Crystal() {
 
 template <typename U>
 Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config, 
-                    const CrystalInitialConditions<U>& init)
+                    const CrystalInitialConditions<U>& init, const CrystalOutputConfig& outputConfig)
 {
     // Material properties
     this->props = props;
@@ -381,6 +381,9 @@ Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig
     
     // Initial conditions
     this->init = init;
+    
+    // Output configuration
+    this->outputConfig = outputConfig;
     
     // Convergence tolerances that depend on initial conditions
     DT_max = config.DT_max_factor*init.s_0;
@@ -404,6 +407,14 @@ Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig
     for (auto&& dum4thOrder : dum4thOrders) {
         dum4thOrder = Tensor4<U>(3,3,3,3);
     }
+}
+
+template <typename U>
+Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config, 
+                    const CrystalInitialConditions<U>& init)
+{
+    CrystalOutputConfig outputConfig;
+    *this = Crystal<U>(props, config, init, outputConfig);
 }
 
 template <typename U>
@@ -777,7 +788,7 @@ EulerAngles<U> Crystal<U>::getEulerAngles() const {
 /////////////////
 
 template <typename U>
-Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm) {
+Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm, const PolycrystalOutputConfig& outputConfig) {
     this->crystal_list = crystal_list;
     this->comm = comm;
     int csize, crank;
@@ -785,6 +796,13 @@ Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Com
     MPI_Comm_rank(comm, &crank);
     this->comm_size = csize;
     this->comm_rank = crank;
+    this->outputConfig = outputConfig;
+}
+
+template <typename U>
+Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm) {
+    PolycrystalOutputConfig outputConfig;
+    *this = Polycrystal(crystal_list, comm, outputConfig);
 }
 
 template <typename U>
@@ -874,8 +892,8 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
     int prevent_next_x_timestep_increases = 0;
     U t_end_tol = 1e-10;
     while (t<t_end && std::abs(t-t_end)/t_end > t_end_tol) {
-        if (crystal_list[0].config.verbose) {
-            if (comm_rank==0) std::cout<<"##########t="<<t<<" start##########"<<std::endl;
+        if (outputConfig.verbose) {
+            if (comm_rank == 0) std::cout << "t = " << t << std::endl;
         }
         
         // If timestep was decreased earlier, prevent subsequent increases
@@ -886,20 +904,13 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
         // Do the main solve
         bool step_good = false;
         U new_dt;
-        while (!step_good) {
-            if (crystal_list[0].config.verbose) {
-                if (comm_rank==0) std::cout << "Current dt = " << dt << std::endl;
-            }
-            
+        while (!step_good) {            
             // Next deformation gradient
             hpp::Tensor2<U> F_next = F_of_t(t + dt);
             
             // Try step
             step_good = this->step(F_next, dt);
             new_dt = this->recommendNextTimestepSize(dt);
-            if (crystal_list[0].config.verbose) {
-                if (comm_rank==0) std::cout << "new_dt/dt = " << new_dt/dt << std::endl;
-            }
             
             // If the step is not accepted, reduce the timestep
             if (!step_good) {
