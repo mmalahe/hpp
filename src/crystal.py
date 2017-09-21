@@ -192,14 +192,21 @@ def plotPoleHistograms(pole_data, filename, projection='equal-area'):
     savefig(filename, bbox_inches='tight')
 
 def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equal-area'):    
-    n_poles = len(pole_history_data)
-    
+    # This factor scales down the measured maximum density for the purposes of setting
+    # the ranges of colour bars.
+    # The intent is to allow lower density regions to be visible on the same plot.
+    # One downside is that densities above this will all be represented by the same
+    # colour, so there is an artificial grouping at the high end.
+    # Set to 1.0, the plot is scaled normally.
+    density_max_downscale = 0.5
+
     # Colorbar spacing
     cbar_main_frac = 0.13
     cbar_pad_frac = 0.07
     cbar_total_frac = cbar_main_frac+cbar_pad_frac
     
     # Set up subplots
+    n_poles = len(pole_history_data)
     fig_size = (8*n_poles, 8/(1-cbar_total_frac))
     fig, axes = subplots(nrows=1, ncols=n_poles, figsize=fig_size)    
     subplots_adjust(wspace=0,hspace=0)
@@ -209,7 +216,6 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
     
     # Get number of timesteps
     ntimesteps = pole_history_data.values()[0].shape[0]
-    #~ ntimesteps = 2
     
     # Get ranges
     max_density = 0.0
@@ -243,6 +249,7 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
                 max_density = local_max_density
                 max_hist_name = pole_name
                 max_hist_it = it
+    max_density *= density_max_downscale
     
     # Initialisations
     pcolormeshes = {}
@@ -268,6 +275,7 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
         # Normalise to uniform density
         uniform_density = hist_sum/n_valid_bins
         hist = pole_history[max_hist_it,:,:]/uniform_density
+        hist *= density_max_downscale
         
         pcolormeshes[pole_name] = pcolormesh(hist.T)
         i_subplot += 1
@@ -319,7 +327,7 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
             # Plot
             hist_masked = ma.masked_invalid(hist)
             plot_ax = pcolormesh(hist_masked.T)     
-            plot_ax.set_clim(1.0, max_density)
+            #~ plot_ax.set_clim(1.0, max_density)
             circ = Circle(histCentre, radius=maxR, fill=False)
             gca().add_patch(circ)
             removeBorder(gca())
@@ -329,16 +337,9 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
             if i_subplot == 0:
                 xlabel("$\mathbf{e}_1$")
                 ylabel("$\mathbf{e}_2$")
-                
-            # Projection reference points
-            #~ x_ref, y_ref = projectionReferencePoints(projection, scale=maxR, centre=histCentre)
-            #~ plot(x_ref, y_ref, '.', markersize=1, markerfacecolor=(0.5, 0.5, 0.5, 0.5), markeredgewidth=0.0)
             
             # Next subplot
             i_subplot += 1
-        
-        cbar.set_ticks(cbar_ticks)
-        cbar.set_clim(1.0, max_density)
         
         # Save
         savefig(base_filename+"%d.png"%(i), bbox_inches='tight')
