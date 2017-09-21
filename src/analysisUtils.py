@@ -118,15 +118,23 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         figname += ".png"
         savefig(figname, bbox_inches='tight')
     
-    # Plot pole figures
+    # Fetch pole data  
     if do_spectral_solve_plot:
-        pole_histograms = spectral_run.getPoleHistograms()        
-        pole_data = {name:array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}   
-        plotPoleHistogramsHistory(pole_data, experiment_name+"_poles_spectral")        
+        pole_histograms_spectral = spectral_run.getPoleHistograms()        
+        pole_data_spectral = {name:array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}      
     if do_iterative_solve_plot:
-        pole_histograms = iterative_run.getPoleHistograms()
-        pole_data = {name:array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
-        plotPoleHistogramsHistory(pole_data, experiment_name+"_poles_iterative")
+        pole_histograms_iterative = iterative_run.getPoleHistograms()
+        pole_data_iterative = {name:array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
+        
+    # Plot pole figures
+    if do_spectral_solve_plot and do_iterative_solve_plot:
+        pole_data_diffs = {name: abs(pole_data_iterative[name]-pole_data_spectral[name]) for name in pole_names}
+        plotPoleHistogramsHistory(pole_data_diffs, experiment_name+"_poles_spectral_iterative_diff")
+    if do_spectral_solve_plot:
+        plotPoleHistogramsHistory(pole_data_spectral, experiment_name+"_poles_spectral")
+    if do_iterative_solve_plot:
+        plotPoleHistogramsHistory(pole_data_iterative, experiment_name+"_poles_iterative")
+    
 
 def getLog2Ticks(x_variable_list):
     log2Ticks = [int(log(x)/log(2)) for x in x_variable_list]
