@@ -888,10 +888,22 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
     t_history.push_back(t);
     T_cauchy_history.push_back(T_cauchy);
     
+    // Manage texture writing interval
+    U tNextTextureSave;
+    if (outputConfig.writeTextureHistory) {
+        tNextTextureSave = t+outputConfig.textureHistoryTimeInterval;
+    }
+    else {
+        tNextTextureSave = t_end;
+    }
+    
+    // Add initial texture
+    
+    
     // Evolve
     int prevent_next_x_timestep_increases = 0;
-    U t_end_tol = 1e-10;
-    while (t<t_end && std::abs(t-t_end)/t_end > t_end_tol) {
+    U t_end_tol = 100.0*std::numeric_limits<U>::epsilon()*t_end;
+    while (t<t_end && std::abs(t-t_end) > t_end_tol) {
         if (outputConfig.verbose) {
             if (comm_rank == 0) std::cout << "t = " << t << std::endl;
         }
@@ -933,14 +945,19 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
             dt = new_dt;
         }
 
-        // Store important quantities
+        // Store stress strain history
         t_history.push_back(t);
         T_cauchy_history.push_back(T_cauchy);
+        
+        // Store texture history
+        if (outputConfig.writeTextureHistory) {
+            //
+        }
 
         // If we're near the end, adjust the timestep to exactly hit the end time 
-/*        if (t+dt > t_end) {
+        if (t+dt > t_end) {
             dt = t_end - t;
-        }*/
+        }
     }
 }
 

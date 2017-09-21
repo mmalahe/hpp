@@ -475,8 +475,6 @@ struct SpectralCrystalSolverConfig {
 template <typename U>
 class SpectralCrystal
 {
-    //friend class SpectralPolycrystal<U>;
-
 public:
     // Constructor
     SpectralCrystal();
