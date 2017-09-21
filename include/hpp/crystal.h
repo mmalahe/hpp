@@ -455,6 +455,8 @@ private:
     // History
     std::vector<U> t_history;
     std::vector<hpp::Tensor2<U>> T_cauchy_history;
+    std::vector<std::vector<EulerAngles<U>>> eulerAnglesHistory;
+    void addTextureToHistory();
 
     // MPI
     MPI_Comm comm;

@@ -147,10 +147,19 @@ class IterativeSolveRun(GenericRun):
     def getPoleHistograms(self):        
         # Extract
         results = h5py.File(self['results_filename'], "r")
-        euler_angles = []
-        for i in range(results['eulerAngles'].shape[0]):
-            euler_angles.append(results['eulerAngles'][i,:])
-        return getPoleHistograms(euler_angles)
+        histogram_histories = {}
+        ntimesteps = results['eulerAngles'].shape[0]
+        for iTime in range(ntimesteps):
+            euler_angles = []
+            for i in range(results['eulerAngles'].shape[1]):
+                euler_angles.append(results['eulerAngles'][iTime,i,:])
+            histograms = getPoleHistograms(euler_angles)
+            for pole_name in histograms.keys():
+                histogram = histograms[pole_name]
+                if not pole_name in histogram_histories:
+                    histogram_histories[pole_name] = zeros((ntimesteps,histogram.shape[0],histogram.shape[1]))
+                histogram_histories[pole_name][iTime,:,:] = histogram
+        return histogram_histories
 
 class SpectralSolveRun(GenericRun):
     """This class handles running and handling output from the spectral solver.

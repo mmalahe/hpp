@@ -898,12 +898,13 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
     }
     
     // Add initial texture
-    
+    if (outputConfig.writeTextureHistory) {
+        this->addTextureToHistory();
+    }
     
     // Evolve
     int prevent_next_x_timestep_increases = 0;
-    U t_end_tol = 100.0*std::numeric_limits<U>::epsilon()*t_end;
-    while (t<t_end && std::abs(t-t_end) > t_end_tol) {
+    while (t<t_end) {
         if (outputConfig.verbose) {
             if (comm_rank == 0) std::cout << "t = " << t << std::endl;
         }
@@ -950,14 +951,15 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
         T_cauchy_history.push_back(T_cauchy);
         
         // Store texture history
-        if (outputConfig.writeTextureHistory) {
-            //
+        if (t >= tNextTextureSave) {
+            this->addTextureToHistory();
+            tNextTextureSave += outputConfig.textureHistoryTimeInterval;
         }
     }
 }
 
 template <typename U>
-void Polycrystal<U>::writeResultHDF5(std::string filename) {
+void Polycrystal<U>::addTextureToHistory() {
     // Calculate local orientations
     std::vector<U> alphasLocal(crystal_list.size());
     std::vector<U> betasLocal(crystal_list.size());
@@ -980,19 +982,29 @@ void Polycrystal<U>::writeResultHDF5(std::string filename) {
         anglesGlobalRoot[i].gamma = gammasGlobalRoot[i];
     }
     
+    // Store on root
+    if (comm_rank == 0) {
+        eulerAnglesHistory.push_back(anglesGlobalRoot);
+    }
+}
+
+template <typename U>
+void Polycrystal<U>::writeResultHDF5(std::string filename) {    
     if (comm_rank == 0) {
         // Open output file
         H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
         
         // Write out orientations
-        std::vector<hsize_t> crystalDims = {anglesGlobalRoot.size()};
+        std::vector<hsize_t> gridDims = {eulerAnglesHistory.size(), eulerAnglesHistory[0].size()};
         std::vector<hsize_t> angleDims = {3};
-        H5::DataSet anglesDset = createHDF5GridOfArrays<U>(outfile, "eulerAngles", crystalDims, angleDims);
-        for (unsigned int i=0; i<anglesGlobalRoot.size(); i++) {
-            std::vector<hsize_t> offset = {i};
-            auto angle = anglesGlobalRoot[i];
-            std::vector<U> angleData = {angle.alpha, angle.beta, angle.gamma};
-            writeSingleHDF5Array<U>(anglesDset, offset, angleDims, angleData.data());
+        H5::DataSet anglesDset = createHDF5GridOfArrays<U>(outfile, "eulerAngles", gridDims, angleDims);
+        for (unsigned int iTime=0; iTime<eulerAnglesHistory.size(); iTime++) {
+            for (unsigned int iCrystal=0; iCrystal<eulerAnglesHistory[0].size(); iCrystal++) {
+                std::vector<hsize_t> offset = {iTime, iCrystal};
+                auto angle = eulerAnglesHistory[iTime][iCrystal];
+                std::vector<U> angleData = {angle.alpha, angle.beta, angle.gamma};
+                writeSingleHDF5Array<U>(anglesDset, offset, angleDims, angleData.data());
+            }
         }
         
         // Stress history
