@@ -953,11 +953,6 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
         if (outputConfig.writeTextureHistory) {
             //
         }
-
-        // If we're near the end, adjust the timestep to exactly hit the end time 
-        if (t+dt > t_end) {
-            dt = t_end - t;
-        }
     }
 }
 
