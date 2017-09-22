@@ -174,12 +174,12 @@ public:
     
     // Constructors
     SpectralPolycrystalCUDA(){;}
-    SpectralPolycrystalCUDA(const std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabase<T>& dbIn);
-    SpectralPolycrystalCUDA(const std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
+    SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabase<T>& dbIn);
+    SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
     
     // Construction helpers
     void doGPUSetup();
-    void doCrystalSetup(const std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps);
+    void doSetup(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T,N>& crystalProps);
     
     // Simulation
     void step(const hpp::Tensor2<T>& F_next, const hpp::Tensor2<T>& L_next, T dt);

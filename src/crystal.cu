@@ -72,28 +72,7 @@ SpectralCrystalListCUDA<T>::SpectralCrystalListCUDA(const std::vector<SpectralCr
 }
 
 template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::doCrystalSetup(const std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps) {
-    // Establish the CUDA context
-    CUDA_CHK(cudaFree(0));
-    
-    // Direct device copies
-    nCrystals = crystals.size();
-    if (nCrystals % 2 != 0) {
-        std::cerr << "Warning: paired crystal implementation does not account for odd total number of crystals" << std::endl;
-        ///@todo account for this
-    }
-    nCrystalPairs = nCrystals/2;
-    crystalsD = makeDeviceCopyVecSharedPtr(crystals);
-    
-    // Crystal properties    
-    crystalPropsD = makeDeviceCopySharedPtr(crystalProps);
-    
-    // Initialise global cauchy stress
-    TCauchyGlobalD = makeDeviceCopySharedPtr(this->TCauchyGlobalH);
-}
-
-template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::doGPUSetup() {
+void SpectralPolycrystalCUDA<T,N>::doGPUSetup() {    
     // Find how many GPUs are avaiable
     int nDevices;
     CUDA_CHK(cudaGetDeviceCount(&nDevices));
@@ -106,13 +85,13 @@ void SpectralPolycrystalCUDA<T,N>::doGPUSetup() {
     CUDA_CHK(cudaGetDeviceProperties(&devProp, deviceID));
     std::cout << "Using " << devProp.name << std::endl;
     
-    // Get parallel layout for step kernel
+    // Get ideal parallel layout for step kernel
     if (useUnifiedDB) {
         stepKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)SPECTRAL_POLYCRYSTAL_STEP_UNIFIED<T,N,9>, nCrystalPairs);
     }
     else {
         stepKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)SPECTRAL_POLYCRYSTAL_STEP<T,N>, nCrystals);
-    }
+    }    
     unsigned int nBlocks = stepKernelCfg.dG.x;
     std::cout << "Step kernel:" << std::endl;
     std::cout << stepKernelCfg;
@@ -140,40 +119,64 @@ void SpectralPolycrystalCUDA<T,N>::doGPUSetup() {
 
     // Working memory
     TCauchyPerBlockSums = allocDeviceMemorySharedPtr<Tensor2CUDA<T,3,3>>(nBlocks);
-    
-    // Memory report
-    double usedGiB = getUsedMemoryGiB();
-    std::cout << "Used Memory (GiB) = " << usedGiB << std::endl;    
 }
 
-// Main constructors
+// WARNING: will modify the list of crystals to add padding crystals
 template <typename T, unsigned int N>
-SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(const std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabase<T>& dbIn){    
+void SpectralPolycrystalCUDA<T,N>::doSetup(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps) {
+    // Establish the CUDA context
+    CUDA_CHK(cudaFree(0));
+    
+    // Direct device copies
+    nCrystals = crystals.size();
+    nCrystalPairs = nCrystals/2;
+    if (nCrystals % 2 != 0) {
+        nCrystalPairs++;
+    }
+    
+    // Set up GPU configuration and working memory
+    doGPUSetup();
+    
+    // Pad out the number of crystals to match the GPU configuration
+    // This is for cases where the number of crystals doesn't fit neatly into the 
+    // block size. The solver will operate on the additional crystals, but
+    // not use them in subsequent calculations.
+    int nPaddingCrystals = nCrystals%(2*stepKernelCfg.dB.x);
+    for (int i=0; i<nPaddingCrystals; i++) {
+        crystals.push_back(crystals[0]);
+    }
+    
+    // Device copies of problem variables
+    crystalsD = makeDeviceCopyVecSharedPtr(crystals);  
+    crystalPropsD = makeDeviceCopySharedPtr(crystalProps);
+    TCauchyGlobalD = makeDeviceCopySharedPtr(this->TCauchyGlobalH);   
+}
+
+// WARNING: will modify the list of crystals to add padding crystals
+template <typename T, unsigned int N>
+SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabase<T>& dbIn){    
     // Not using unified database
     useUnifiedDB = false;
     
-    // Set up crystals
-    this->doCrystalSetup(crystals, crystalProps);
-    
-    // Set up GPU parameters based on crystals and available hardware
-    this->doGPUSetup();
+    // Do general setup
+    this->doSetup(crystals, crystalProps);
     
     // Set up database
     std::vector<SpectralDatasetID> dsetIDs = defaultCrystalSpectralDatasetIDs();
     dbH = SpectralDatabaseCUDA<T,4>(dbIn, dsetIDs);    
     dbD = makeDeviceCopySharedPtr(this->dbH);
+    
+    // Get memory usage
+    maxMemUsedGB = getUsedMemoryGB();
 }
 
 template <typename T, unsigned int N>
-SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(const std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn){
+SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn){
     // Using unified database
     useUnifiedDB = true;
     
-    // Set up crystals
-    this->doCrystalSetup(crystals, crystalProps);
-    
-    // Set up GPU parameters
-    this->doGPUSetup();
+    // Do general setup
+    this->doSetup(crystals, crystalProps);
     
     // Set up database
     std::vector<SpectralDatasetID> dsetIDs = defaultCrystalSpectralDatasetIDs();    
@@ -414,8 +417,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     // to head off divergence.
     __syncthreads();
     
-    // Calculate Cauchy stress. 
-    // Transform out of the stretching tensor frame
+    // Add up Cauchy stress for this thread
     Tensor2CUDA<T,3,3> pairTCauchySum;
     pairTCauchySum += sigmaPrimeNext0;
     pairTCauchySum += sigmaPrimeNext1;
@@ -438,7 +440,6 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
 // Average kernel
 /**
  * @brief Get the average Cauchy stress.
- * @detail @todo Write a good parallel reduction.
  * @param F_next
  * @param L_next
  * @param dt
