@@ -295,9 +295,8 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
             sca(ax)
             gca().clear()
             
-            # Smooth data
-            pole_hist = pole_history[it,:,:]
-            hist = gaussian_filter(pole_hist, sigma=12.0)
+            # Get histogram
+            hist = pole_history[it,:,:]
             
             # Histogram dimensions
             nBins = hist.shape[0]
