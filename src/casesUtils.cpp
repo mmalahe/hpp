@@ -4,48 +4,13 @@
 namespace hpp 
 {
 
-// Orientation generators
-template <typename U>
-virtual void OrientationGenerator<U>::generateNext(EulerAngles<U>& angles) {
-    Tensor2<U> rotMatrix(3,3);
-    this->generateNext(rotMatrix);
-    angles = getEulerZXZAngles(rotMatrix);
-}
-    
-template <typename U>
-virtual void RandomOrientationGenerator<U>::generateNext(Tensor2<U>& rotMatrix) {
-    randomRotationTensorInPlace(3, rotMatrix);
-}
-
+   
 template <typename U>
 GridOrientationGenerator<U>::GridOrientationGenerator(int nTheta, int nPhi) : nTheta(nTheta), nPhi(nPhi) {
     dTheta = 2*M_PI/nTheta;
     dPhi = (M_PI/2)/nPhi;
 }
-
-template <typename U>
-virtual void GridOrientationGenerator<U>::generateNext(EulerAngles<U>& angles) {
-    // Get angles
-    U theta = iTheta*dTheta;
-    U phi = iPhi*dPhi;
-    angles = polarToEuler(theta, phi);
-    
-    // Prepare next angle
-    iPhi++;
-    if (iPhi == nPhi) {
-        iPhi = 0;
-        iTheta++;
-        iTheta = iTheta % nTheta;
-    }
-}
-
-template <typename U>
-virtual void GridOrientationGenerator<U>::generateNext(Tensor2<U>& rotMatrix) {
-    EulerAngles<U> angles;
-    this->generateNext(angles);
-    rotMatrix = EulerZXZRotationMatrix(angles);
-}
-    
+ 
 template <typename U>
 Experiment<U>::Experiment(std::string experimentName) {
     // Common to most experiments

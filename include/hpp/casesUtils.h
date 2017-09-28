@@ -92,7 +92,11 @@ template <typename U>
 class OrientationGenerator {
     public:
         virtual void generateNext(Tensor2<U>& rotMatrix) = 0;
-        virtual void generateNext(EulerAngles<U>& angles);
+        virtual void generateNext(EulerAngles<U>& angles) {
+            Tensor2<U> rotMatrix(3,3);
+            this->generateNext(rotMatrix);
+            angles = getEulerZXZAngles(rotMatrix);
+        }
         virtual ~OrientationGenerator() {};
 };
 
@@ -100,7 +104,9 @@ template <typename U>
 class RandomOrientationGenerator : public OrientationGenerator<U> {
     public:
         RandomOrientationGenerator() {;}
-        virtual void generateNext(Tensor2<U>& rotMatrix);
+        virtual void generateNext(Tensor2<U>& rotMatrix) {
+            randomRotationTensorInPlace(3, rotMatrix);
+        };
         
     private:
         
@@ -119,8 +125,25 @@ template <typename U>
 class GridOrientationGenerator : public OrientationGenerator<U> {
     public:
         GridOrientationGenerator(int nTheta=8, int nPhi=4);
-        virtual void generateNext(Tensor2<U>& rotMatrix);
-        virtual void generateNext(EulerAngles<U>& angles);
+        virtual void generateNext(EulerAngles<U>& angles) {
+            // Get angles
+            U theta = iTheta*dTheta;
+            U phi = iPhi*dPhi;
+            angles = polarToEuler(theta, phi);
+            
+            // Prepare next angle
+            iPhi++;
+            if (iPhi == nPhi) {
+                iPhi = 0;
+                iTheta++;
+                iTheta = iTheta % nTheta;
+            }
+        };
+        virtual void generateNext(Tensor2<U>& rotMatrix) {
+            EulerAngles<U> angles;
+            this->generateNext(angles);
+            rotMatrix = EulerZXZRotationMatrix(angles);
+        };
         
     private:
         /// The number of grid points for the azimuthal angle
