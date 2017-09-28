@@ -139,7 +139,7 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         
     # Plot pole figures
     if do_spectral_solve_plot and do_iterative_solve_plot:
-        pole_data_diffs = {name: abs(pole_data_iterative[name]-pole_data_spectral[name]) for name in pole_names}
+        pole_data_diffs = {name: pole_data_iterative[name]-pole_data_spectral[name] for name in pole_names}
         plotPoleHistogramsHistory(pole_data_diffs, experiment_name+"_poles_spectral_iterative_diff")
     if do_spectral_solve_plot:
         plotPoleHistogramsHistory(pole_data_spectral, experiment_name+"_poles_spectral")

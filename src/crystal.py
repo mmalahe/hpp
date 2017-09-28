@@ -218,14 +218,16 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
     ntimesteps = pole_history_data.values()[0].shape[0]
     
     # Get ranges
+    min_density = 1e10
     max_density = 0.0
     max_hist_name = None
     max_hist_it = None
     for pole_name, pole_history in pole_history_data.iteritems():
         for it in range(ntimesteps):
             hist = pole_history[it,:,:].copy()
-            local_max_density = hist.max()
-            hist_sum = sum(sum(hist))
+            local_min_density = hist.min()
+            local_max_density = hist.max()         
+            hist_sum = sum(sum(abs(hist)))
                
             # Mark invalid bins with nan
             nBins = hist.shape[0]
@@ -243,13 +245,19 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
             uniform_density = hist_sum/n_valid_bins
             hist /= uniform_density
             local_max_density /= uniform_density
+            local_min_density /= uniform_density
             
             # Keep track of the histogram with the highest density
             if local_max_density > max_density:
                 max_density = local_max_density
                 max_hist_name = pole_name
                 max_hist_it = it
+            if local_min_density < min_density:
+                min_density = local_min_density
     max_density *= density_max_downscale
+    min_density *= density_max_downscale
+    print "min_density=", min_density
+    print "max_density=", max_density
     
     # Initialisations
     pcolormeshes = {}
@@ -280,10 +288,10 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
         pcolormeshes[pole_name] = pcolormesh(hist.T)
         i_subplot += 1
     
-    cbar_ticks = linspace(0.0, max_density, 7)
+    cbar_ticks = linspace(min_density, max_density, 7)
     cbar = fig.colorbar(pcolormeshes[max_hist_name], ax=axes.ravel().tolist(), fraction=cbar_main_frac, 
         ticks=cbar_ticks, pad=cbar_pad_frac, orientation='horizontal', format='%1.1f', label='MRD')      
-    cbar.set_clim(0.0, max_density)
+    cbar.set_clim(min_density, max_density)
     
     # Update function
     def animFunc(it):
@@ -306,7 +314,7 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
             yRange = [0.0,nBins]
             
             # Sum
-            hist_sum = sum(sum(hist))
+            hist_sum = sum(sum(abs(hist)))
             local_max_density = hist.max()
             
             # Mark invalid bins with nan
@@ -326,7 +334,6 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
             # Plot
             hist_masked = ma.masked_invalid(hist)
             plot_ax = pcolormesh(hist_masked.T)     
-            #~ plot_ax.set_clim(1.0, max_density)
             circ = Circle(histCentre, radius=maxR, fill=False)
             gca().add_patch(circ)
             removeBorder(gca())
