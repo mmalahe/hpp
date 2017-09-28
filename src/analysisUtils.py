@@ -82,7 +82,7 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
                 sigma = T_33 - 0.5*(T_11+T_22)
                 spectral_stress = abs(sigma)
                 leg.append("spectral")
-            elif experiment_name == 'savage2015_plane_strain_compression':
+            elif 'plane_strain_compression' in experiment_name:
                 spectral_stress = abs(T_33)
                 leg.append("$\sigma_{33}$ (spectral)")
             
@@ -106,7 +106,7 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
                 sigma = T_33 - 0.5*(T_11+T_22)
                 iterative_stress = abs(sigma)
                 leg.append("iterative")
-            elif experiment_name == 'savage2015_plane_strain_compression':
+            elif 'plane_strain_compression' in experiment_name:
                 iterative_stress = abs(T_33)
                 leg.append("$\sigma_{33}$ (iterative)")
             
