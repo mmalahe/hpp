@@ -1748,6 +1748,14 @@ struct EulerAngles {
     T gamma = 0;
 };
 
+template <typename T>
+MPI_Datatype getEulerAnglesTypeMPI() {
+    MPI_Datatype dtype;
+    MPI_Type_contiguous(3, MPIType<T>(), &dtype);
+    MPI_Type_commit(&dtype);
+    return dtype;
+}
+
 /**
  * @brief Convert polar angles to Euler angles
  * @param theta the azimuthal angle

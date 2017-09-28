@@ -217,6 +217,55 @@ std::vector<T> MPISplitVectorEvenly(const std::vector<T>& rootVec, MPI_Comm comm
     return localVec;
 }
 
+template <typename T> 
+std::vector<T> MPISplitVectorEvenly(const std::vector<T>& rootVec, MPI_Comm comm, MPI_Datatype dtype) {
+    // Comm
+    int comm_size, comm_rank;
+    MPI_Comm_size(comm, &comm_size);
+    MPI_Comm_rank(comm, &comm_rank);
+    
+    // Sizing of local vectors and MPI parameters
+    int rootVecSize = -1;
+    int localVecSize = -1;
+    int localVecSizeFinalProc = -1;
+    std::vector<int> sendcounts(comm_size);
+    std::vector<int> displs(comm_size);
+    if (comm_rank == 0) {
+        // Divide up vector
+        rootVecSize = rootVec.size();
+        localVecSize = rootVecSize/comm_size;
+        localVecSizeFinalProc = rootVecSize-localVecSize*(comm_size-1);        
+        
+        // Create MPI parameters
+        displs[0] = 0;
+        for (int i=0; i<comm_size-1; i++) {
+            sendcounts[i] = localVecSize;
+            displs[i+1] = displs[i] + localVecSize;
+        }
+        sendcounts.back() = localVecSizeFinalProc;
+    }
+    
+    // Broadcast parameters from root
+    rootVecSize = MPIBroadcastFromRoot(rootVecSize, comm);
+    localVecSize = MPIBroadcastFromRoot(localVecSize, comm);
+    localVecSizeFinalProc = MPIBroadcastFromRoot(localVecSizeFinalProc, comm);
+    sendcounts = MPIBroadcastFromRoot(sendcounts, comm);
+    displs = MPIBroadcastFromRoot(displs, comm);
+    
+    // Final processor may have a different size
+    if (comm_rank == comm_size-1) {
+        localVecSize = localVecSizeFinalProc;
+    }
+    
+    // Scatter to local vectors
+    std::vector<T> localVec(localVecSize);
+    MPI_Scatterv(rootVec.data(), sendcounts.data(), displs.data(), dtype,
+                 localVec.data(), localVecSize, dtype, 0, comm);
+                 
+    // Return
+    return localVec;
+}
+
 /**
  * @brief Determine if condition is true for all processes
  * @param condition

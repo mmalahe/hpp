@@ -44,45 +44,37 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     MPI_Comm_rank(comm, &comm_rank);
     int ncrystalsLocal = ncrystalsGlobal/comm_size;
     
-    // Generate random numbers for rotations on root
-    std::vector<U> uniformRandomsRoot;
+    // Generate all Euler angles on root
+    std::vector<hpp::EulerAngles<U>> anglesRoot;
     if (comm_rank == 0) {
-        uniformRandomsRoot.resize(ncrystalsGlobal*3);
-        auto gen = hpp::makeMt19937(defaultSeed);
-        std::uniform_real_distribution<double> dist(0.0,1.0);
-        for (unsigned int i=0; i<ncrystalsGlobal*3; i++) {
-            uniformRandomsRoot[i] = (U)dist(gen);
+        anglesRoot.resize(ncrystalsGlobal);
+        for (unsigned int i=0; i<ncrystalsGlobal; i++) {
+            experiment.orientationGenerator->generateNext(anglesRoot[i]);
         }
     }
     
-    // Distribute random numbers to all processes
-    std::vector<U> uniformRandomsLocal = hpp::MPISplitVectorEvenly(uniformRandomsRoot, comm);
+    // Distribute Euler Angles to processes
+    auto EulerAnglesTypeMPI = hpp::getEulerAnglesTypeMPI<U>();
+    std::vector<hpp::EulerAngles<U>> anglesLocal = hpp::MPISplitVectorEvenly(anglesRoot, comm, EulerAnglesTypeMPI);
+    if (anglesLocal.size() != ncrystalsLocal) {
+        throw std::runtime_error("Mismatch between distributed angles and number of crystals.");
+    }
     
-    // Generate randomly rotated crystals
+    // Generate crystals locally
     std::vector<hpp::Crystal<U>> crystal_list(ncrystalsLocal);
     hpp::Tensor2<U> rotTensor(3,3);
     for (unsigned int i=0; i<crystal_list.size(); i++) {
-        // Generate random rotation
-        U x1 = uniformRandomsLocal[i*3];
-        U x2 = uniformRandomsLocal[i*3+1];
-        U x3 = uniformRandomsLocal[i*3+2];
-        hpp::rotationTensorFrom3UniformRandoms(rotTensor, x1, x2, x3);
+        // Generate rotation
+        rotTensor = hpp::EulerZXZRotationMatrix(anglesLocal[i]);
         
         // Rotate
         hpp::CrystalProperties<U> propsRotated = hpp::rotate(props, rotTensor);
         hpp::CrystalInitialConditions<U> initRotated = init;
         initRotated.crystalRotation = rotTensor;
-        if (ncrystalsGlobal == 1) {
-            // Do not rotate if there's only a single crystal
-            // This is a special case for debugging purposes
-            std::cout << "Note: single crystal is not being given a random rotation." << std::endl;
-            crystal_list[i] = hpp::Crystal<U>(props, config, init);
-        }
-        else {
-            crystal_list[i] = hpp::Crystal<U>(propsRotated, config, initRotated);
-        }
+        crystal_list[i] = hpp::Crystal<U>(propsRotated, config, initRotated);
     }
     
+    // Generate polycrystal and solve
     hpp::Polycrystal<U> kalidindi_polycrystal(crystal_list, comm, outputConfig);
     kalidindi_polycrystal.evolve(experiment.tStart, experiment.tEnd, dt_initial, experiment.F_of_t);
     
