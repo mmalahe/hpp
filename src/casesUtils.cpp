@@ -49,6 +49,13 @@ Experiment<U>::Experiment(std::string experimentName) {
         F_of_t = std::bind(simpleShearDeformationGradient<U>, std::placeholders::_1, strainRate);
         L_of_t = std::bind(simpleShearVelocityGradient<U>, std::placeholders::_1, strainRate);
     }
+    else if (experimentName == "plane_strain_compression_grid_texture") {
+        orientationGenerator = std::make_shared<GridOrientationGenerator<U>>();
+        tEnd = 1000.0;
+        strainRate = 1.0e-3;
+        F_of_t = std::bind(planeStrainCompressionDeformationGradient<U>, std::placeholders::_1, strainRate);
+        L_of_t = std::bind(planeStrainCompressionVelocityGradient<U>, std::placeholders::_1, strainRate);
+    }
     else if (experimentName == "static") {
         tEnd = 1.0e-2;
         strainRate = 0.0;
