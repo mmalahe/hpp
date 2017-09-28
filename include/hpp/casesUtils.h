@@ -92,7 +92,7 @@ template <typename U>
 class OrientationGenerator {
     public:
         virtual void generateNext(Tensor2<U>& rotMatrix) = 0;
-        void generateNext(EulerAngles<U>& angles) {};
+        virtual void generateNext(EulerAngles<U>& angles);
         virtual ~OrientationGenerator() {};
 };
 
@@ -100,10 +100,37 @@ template <typename U>
 class RandomOrientationGenerator : public OrientationGenerator<U> {
     public:
         RandomOrientationGenerator() {;}
-        virtual void generateNext(Tensor2<U>& rotMatrix) {rotMatrix(0,0) = 9;}
+        virtual void generateNext(Tensor2<U>& rotMatrix);
         
     private:
         
+};
+
+/**
+ * @class GridTextureOrientationGenerator
+ * @author Michael Malahe
+ * @date 28/09/17
+ * @file casesUtils.h
+ * @brief Generates a texture on a fixed grid over an azimuthal angle of
+ * \f$ [0, 2\pi) \f$ and a zenithal angle of \f$ [0, \pi/2) \f$. Does not cover
+ * the area of a sphere equally.
+ */
+template <typename U>
+class GridOrientationGenerator : public OrientationGenerator<U> {
+    public:
+        GridOrientationGenerator(int nTheta=8, int nPhi=4);
+        virtual void generateNext(Tensor2<U>& rotMatrix);
+        virtual void generateNext(EulerAngles<U>& angles);
+        
+    private:
+        /// The number of grid points for the azimuthal angle
+        int nTheta;
+        /// The number of grid points for the zenithal angle
+        int nPhi;
+        int iTheta = 0;
+        int iPhi = 0;
+        U dTheta;
+        U dPhi;
 };
 
 template <typename U>

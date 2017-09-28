@@ -1748,6 +1748,28 @@ struct EulerAngles {
     T gamma = 0;
 };
 
+/**
+ * @brief Convert polar angles to Euler angles
+ * @param theta the azimuthal angle
+ * @param phi the zenithal angle
+ * @return The Euler angles
+ */
+template <typename T>
+EulerAngles<T> polarToEuler(T theta, T phi) {
+    EulerAngles<T> angles;
+    // Rotate about z axis until x axis is aligned with y axis
+    angles.gamma = M_PI/2;
+    
+    // Rotate about x axis to get the zenithal angle correct
+    angles.beta = M_PI/2-phi;
+    
+    // Rotate about z axis to get the azimuthal angle correct
+    angles.alpha = theta;
+    
+    // Return
+    return angles;
+}
+
 template <typename T>
 std::ostream& operator<<(std::ostream& out, const EulerAngles<T>& angles)
 {
