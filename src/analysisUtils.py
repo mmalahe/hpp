@@ -124,18 +124,19 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         figname += ".png"
         savefig(figname, bbox_inches='tight')
     
-    # Fetch and smooth pole data  
+    # Fetch and smooth pole data
+    smoothing_sigma = 2.0
     if do_spectral_solve_plot:
         pole_histograms_spectral = spectral_run.getPoleHistograms()        
         pole_data_spectral = {name:array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
         # Filter
-        pole_data_spectral = {name: gaussianFilterHistogramHistory(pole_data_spectral[name], sigma=4.0) for name in pole_names} 
+        pole_data_spectral = {name: gaussianFilterHistogramHistory(pole_data_spectral[name], sigma=smoothing_sigma) for name in pole_names} 
             
     if do_iterative_solve_plot:
         pole_histograms_iterative = iterative_run.getPoleHistograms()
         pole_data_iterative = {name:array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
         # Filter
-        pole_data_iterative = {name: gaussianFilterHistogramHistory(pole_data_iterative[name], sigma=4.0) for name in pole_names} 
+        pole_data_iterative = {name: gaussianFilterHistogramHistory(pole_data_iterative[name], sigma=smoothing_sigma) for name in pole_names} 
         
     # Plot pole figures
     if do_spectral_solve_plot and do_iterative_solve_plot:

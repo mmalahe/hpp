@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.4)
 # Project name and version.
 project (hpp)
 set (hpp_VERSION_MAJOR 0)
-set (hpp_VERSION_MINOR 4)
+set (hpp_VERSION_MINOR 5)
 
 # COMPILERS #
 #############
