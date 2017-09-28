@@ -74,7 +74,7 @@ def projectionReferencePoints(projection_name, scale=None, centre=None):
             y_points.append(y)
     return x_points, y_points
 
-def getPoleHistograms(euler_angles, plane_normals=[array([1,1,1]),array([1,1,0]),array([1,0,0]),array([0,0,1]),array([0,1,1])], projection='equal-area', nBins=1024):
+def getPoleHistograms(euler_angles, plane_normals=[array([1,1,1]),array([1,1,0]),array([1,0,0]),array([0,0,1]),array([0,1,1])], projection='equal-area', nBins=256):
     """Does a stereographic projection of the poles on the upper half sphere.
     """    
     pole_data = {}    
@@ -198,7 +198,7 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
     # One downside is that densities above this will all be represented by the same
     # colour, so there is an artificial grouping at the high end.
     # Set to 1.0, the plot is scaled normally.
-    density_max_downscale = 0.5
+    density_max_downscale = 1.0
 
     # Colorbar spacing
     cbar_main_frac = 0.13

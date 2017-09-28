@@ -65,16 +65,8 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
         // Initial slip-system deformation resistance
         crystalList[i].s = init.s_0;
         
-        // Initial rotation        
-        if (ncrystalsGlobal == 1) {
-            rotation = hpp::identityTensor2<U>(3);
-        }
-        else {
-            hpp::randomRotationTensorInPlace<U>(3, rotation, defaultSeed);
-        }
-        
         // Get angles
-        crystalList[i].angles = hpp::getEulerZXZAngles<U>(rotation);
+        experiment.orientationGenerator->generateNext(crystalList[i].angles);
     }
     
     // Convert properties and database
