@@ -67,6 +67,16 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
     // Evec decomposition of D
     std::valarray<T> Devals;
     D.evecDecomposition(Devals, decomp.evecs);
+    
+    // Ensure that the determinant of the eigenvector matrix is positive
+    // for the purposes of treating it like a rotation
+    hpp::Tensor2<T> RTest(decomp.evecs);
+    if (RTest.det() < 0) {
+        std::swap(Devals[0], Devals[1]);
+        for (int i=0; i<3; i++) {
+            std::swap(decomp.evecs(i,0), decomp.evecs(i,1));
+        }
+    }
 
     // D in its principal frame
     hpp::Tensor2<T> DPrincipal(3,3);
