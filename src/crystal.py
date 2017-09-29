@@ -191,7 +191,7 @@ def plotPoleHistograms(pole_data, filename, projection='equal-area'):
     # Save    
     savefig(filename, bbox_inches='tight')
 
-def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equal-area'):    
+def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filename, projection='equal-area'):    
     # This factor scales down the measured maximum density for the purposes of setting
     # the ranges of colour bars.
     # The intent is to allow lower density regions to be visible on the same plot.
@@ -350,5 +350,5 @@ def plotPoleHistogramsHistory(pole_history_data, base_filename, projection='equa
         # Save
         savefig(base_filename+"%d.png"%(i), bbox_inches='tight')
     
-    for i in range(ntimesteps):
+    for i in timestep_selection:
         animFunc(i)

@@ -153,7 +153,7 @@ class IterativeSolveRun(GenericRun):
             euler_angles = []
             for i in range(results['eulerAngles'].shape[1]):
                 euler_angles.append(results['eulerAngles'][iTime,i,:])
-            histograms = getPoleHistograms(euler_angles)
+            histograms = getPoleHistograms(euler_angles, nBins=1024)
             for pole_name in histograms.keys():
                 histogram = histograms[pole_name]
                 if not pole_name in histogram_histories:
