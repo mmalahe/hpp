@@ -77,6 +77,9 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
             std::swap(decomp.evecs(i,0), decomp.evecs(i,1));
         }
     }
+    if (!RTest.isRotationMatrix()) {
+        throw std::runtime_error("The transformation to the stretching tensor frame is not a rotation.");
+    }
 
     // D in its principal frame
     hpp::Tensor2<T> DPrincipal(3,3);
