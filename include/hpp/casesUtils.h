@@ -105,8 +105,8 @@ class RandomOrientationGenerator : public OrientationGenerator<U> {
     public:
         RandomOrientationGenerator() {;}
         virtual void generateNext(Tensor2<U>& rotMatrix) {
-            randomRotationTensorInPlace(3, rotMatrix);
-        };
+            randomRotationTensorInPlace(3, rotMatrix, true);
+        }
         
     private:
         
