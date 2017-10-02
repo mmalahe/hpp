@@ -199,17 +199,30 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     # colour, so there is an artificial grouping at the high end.
     # Set to 1.0, the plot is scaled normally.
     density_max_downscale = 1.0
-
+    
+    # Set up subplot dimensions
+    n_poles = len(pole_history_data)
+    poles_per_row = 3
+    n_rows = int(ceil(float(n_poles)/poles_per_row))
+    n_cols = n_poles/n_rows
+    
     # Colorbar spacing
-    cbar_main_frac = 0.13
-    cbar_pad_frac = 0.07
+    cbar_main_frac = 0.13/n_rows
+    cbar_pad_frac = 0.07/n_rows
     cbar_total_frac = cbar_main_frac+cbar_pad_frac
     
     # Set up subplots
-    n_poles = len(pole_history_data)
-    fig_size = (8*n_poles, 8/(1-cbar_total_frac))
-    fig, axes = subplots(nrows=1, ncols=n_poles, figsize=fig_size)    
-    subplots_adjust(wspace=0,hspace=0)
+    print "n_rows", n_rows
+    fig_size = (8*n_cols, 8.0*(n_rows)/(1-cbar_total_frac))
+    print fig_size
+    fig, axes = subplots(nrows=n_rows, ncols=n_cols, figsize=fig_size)    
+    subplots_adjust(wspace=0)
+    
+    # Arrange poles
+    pole_names_unordered = pole_history_data.keys()
+    pole_names_unordered_strings_reversed = [name[::-1] for name in pole_names_unordered]
+    pole_names_ordered_strings_reveresed = sorted(pole_names_unordered_strings_reversed)
+    pole_names_ordered = [name[::-1] for name in pole_names_ordered_strings_reveresed]    
     
     # Get number of timesteps
     ntimesteps = pole_history_data.values()[0].shape[0]
@@ -219,9 +232,9 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     max_density = 0.0
     max_hist_name = None
     max_hist_it = None
-    for pole_name, pole_history in pole_history_data.iteritems():
+    for pole_name in pole_names_ordered:
         for it in timestep_selection:
-            hist = pole_history[it,:,:].copy()
+            hist = pole_history_data[pole_name][it,:,:].copy()
             local_min_density = hist.min()
             local_max_density = hist.max()         
             hist_sum = sum(sum(abs(hist)))
@@ -257,10 +270,10 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     # Initialisations
     pcolormeshes = {}
     i_subplot = 0
-    for pole_name, pole_history in pole_history_data.iteritems():
+    for pole_name in pole_names_ordered:
         ax = axes.flat[i_subplot]
         sca(ax)
-        hist = pole_history[max_hist_it,:,:].copy()
+        hist = pole_history_data[pole_name][max_hist_it,:,:].copy()
         
         # Mark invalid bins with nan
         hist_sum = sum(sum(hist))
@@ -277,7 +290,7 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
         
         # Normalise to uniform density
         uniform_density = hist_sum/n_valid_bins
-        hist = pole_history[max_hist_it,:,:]/uniform_density
+        hist = pole_history_data[pole_name][max_hist_it,:,:]/uniform_density
         hist *= density_max_downscale
         
         pcolormeshes[pole_name] = pcolormesh(hist.T)
@@ -292,14 +305,14 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     def animFunc(it):
         print "Plotting frame", it
         i_subplot = 0
-        for pole_name, pole_history in pole_history_data.iteritems():
+        for pole_name in pole_names_ordered:
             # Set current axes
             ax = axes.flat[i_subplot]
             sca(ax)
             gca().clear()
             
             # Get histogram
-            hist = pole_history[it,:,:]
+            hist = pole_history_data[pole_name][it,:,:]
             
             # Histogram dimensions
             nBins = hist.shape[0]

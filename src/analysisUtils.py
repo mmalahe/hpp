@@ -152,11 +152,14 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
             
         # Plot pole figures        
         if do_spectral_pole_plots and do_iterative_pole_plots:
-            pole_data_diffs = {name: pole_data_iterative[name]-pole_data_spectral[name] for name in pole_names}
-            plotPoleHistogramsHistory(pole_data_diffs, pole_figure_plot_timestep_list, experiment_name+"_poles_spectral_iterative_diff")
-        if do_spectral_pole_plots:
+            pole_data_combo = {}
+            for pole_name in pole_data_iterative.keys():      
+                pole_data_combo[pole_name+" Iterative"] = pole_data_iterative[pole_name] 
+                pole_data_combo[pole_name+" Spectral"] = pole_data_spectral[pole_name]                
+            plotPoleHistogramsHistory(pole_data_combo, pole_figure_plot_timestep_list, experiment_name+"_poles_combined")
+        elif do_spectral_pole_plots:
             plotPoleHistogramsHistory(pole_data_spectral, pole_figure_plot_timestep_list, experiment_name+"_poles_spectral")
-        if do_iterative_pole_plots:
+        elif do_iterative_pole_plots:
             plotPoleHistogramsHistory(pole_data_iterative, pole_figure_plot_timestep_list, experiment_name+"_poles_iterative")
 
 def getLog2Ticks(x_variable_list):
