@@ -294,6 +294,9 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
         pcolormeshes[pole_name] = pcolormesh(hist.T)
         i_subplot += 1
     
+    # Set lowest density to MRD=1.0
+    min_density = 1.0
+    
     cbar_ticks = linspace(min_density, max_density, 7)
     cbar = fig.colorbar(pcolormeshes[max_hist_name], ax=axes.ravel().tolist(), fraction=cbar_main_frac, 
         ticks=cbar_ticks, pad=cbar_pad_frac, orientation='horizontal', format='%1.1f', label='MRD')      

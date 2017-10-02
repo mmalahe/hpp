@@ -133,12 +133,12 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         # Fetch pole data and set smoothing parameters
         if do_spectral_pole_plots:
             pole_histograms_spectral = spectral_run.getPoleHistograms()
-            pole_data_spectral = {name:array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
+            pole_data_spectral = {"{"+name+"}":array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
             n_pixels_side = pole_histograms_spectral.values()[0].shape[1] 
             smoothing_per_pixel = spectral_run['histogram_smoothing_per_pixel']
         if do_iterative_pole_plots:
             pole_histograms_iterative = iterative_run.getPoleHistograms()
-            pole_data_iterative = {name:array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
+            pole_data_iterative = {"{"+name+"}":array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
             n_pixels_side = pole_histograms_iterative.values()[0].shape[1]
             smoothing_per_pixel = iterative_run['histogram_smoothing_per_pixel']
         if do_pole_plots:
@@ -146,9 +146,9 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         
         # Smooth data
         if do_spectral_pole_plots:   
-            pole_data_spectral = {name: gaussianFilterHistogramHistory(pole_data_spectral[name], sigma=smoothing_sigma) for name in pole_names} 
+            pole_data_spectral = {name: gaussianFilterHistogramHistory(pole_data_spectral[name], sigma=smoothing_sigma) for name in pole_data_spectral.keys()} 
         if do_iterative_pole_plots:
-            pole_data_iterative = {name: gaussianFilterHistogramHistory(pole_data_iterative[name], sigma=smoothing_sigma) for name in pole_names} 
+            pole_data_iterative = {name: gaussianFilterHistogramHistory(pole_data_iterative[name], sigma=smoothing_sigma) for name in pole_data_iterative.keys()} 
             
         # Plot pole figures        
         if do_spectral_pole_plots and do_iterative_pole_plots:
