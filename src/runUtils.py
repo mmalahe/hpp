@@ -144,22 +144,14 @@ class IterativeSolveRun(GenericRun):
     def getStrainAndStress(self):
         return getStrainStressFromResultsFile(self['results_filename'])
         
-    def getPoleHistograms(self):        
-        # Extract
+    def getPoleHistograms(self):
+        histograms = {}
         results = h5py.File(self['results_filename'], "r")
-        histogram_histories = {}
-        ntimesteps = results['eulerAngles'].shape[0]
-        for iTime in range(ntimesteps):
-            euler_angles = []
-            for i in range(results['eulerAngles'].shape[1]):
-                euler_angles.append(results['eulerAngles'][iTime,i,:])
-            histograms = getPoleHistograms(euler_angles, nBins=1024)
-            for pole_name in histograms.keys():
-                histogram = histograms[pole_name]
-                if not pole_name in histogram_histories:
-                    histogram_histories[pole_name] = zeros((ntimesteps,histogram.shape[0],histogram.shape[1]))
-                histogram_histories[pole_name][iTime,:,:] = histogram
-        return histogram_histories
+        for key in results.keys():
+            if key.startswith('poleHistogram_'):
+                pole_name = key[key.find('_')+1:]
+                histograms[pole_name] = results[key]
+        return histograms
 
 class SpectralSolveRun(GenericRun):
     """This class handles running and handling output from the spectral solver.

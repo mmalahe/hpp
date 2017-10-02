@@ -212,9 +212,7 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     cbar_total_frac = cbar_main_frac+cbar_pad_frac
     
     # Set up subplots
-    print "n_rows", n_rows
     fig_size = (8*n_cols, 8.0*(n_rows)/(1-cbar_total_frac))
-    print fig_size
     fig, axes = subplots(nrows=n_rows, ncols=n_cols, figsize=fig_size)    
     subplots_adjust(wspace=0)
     

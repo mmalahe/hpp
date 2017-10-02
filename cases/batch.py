@@ -13,7 +13,7 @@ setPlotDefaults('journal')
 
 # Top level control
 do_iterative_solve = False
-do_spectral_solve = False
+do_spectral_solve = True
 
 do_iterative_solve_plot = True
 do_spectral_solve_plot = True

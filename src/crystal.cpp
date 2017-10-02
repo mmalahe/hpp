@@ -958,6 +958,73 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
     }
 }
 
+template <typename T>
+std::vector<T> cartesianToSpherical(const std::vector<T>& cartVec) {
+    // Magnitude
+    T r = 0.0;
+    for (const auto& comp : cartVec) {
+        r += std::pow(comp, (T)2.0);
+    }
+    r = std::sqrt(r);
+    std::vector<T> unitVec = cartVec/r;
+    
+    // Azimuthal component
+    T theta = std::atan2(unitVec[1], unitVec[0]);
+    
+    // Polar
+    T phi = std::acos(unitVec[2]);    
+    
+    // Return
+    std::vector<T> sphereVec(3);
+    sphereVec[0] = r;
+    sphereVec[1] = theta;
+    sphereVec[2] = phi;
+    return sphereVec;
+}
+
+template<typename T>
+Tensor2<T> histogramPoleEqualArea(const std::vector<EulerAngles<T>>& angles, const std::vector<T>& planeNormal) {
+    // Maximum R value from northern hemisphere projection
+    T maxR = (1.00001)*2*std::sin(M_PI/4);
+    
+    // Loop over crystals
+    Tensor2<T> hist(HPP_POLE_FIG_HIST_DIM, HPP_POLE_FIG_HIST_DIM);
+    for (const auto& angle : angles) {
+        // Get orientation of the crystal
+        Tensor2<T> ROrientation = EulerZXZRotationMatrix(angle);
+        
+        // Active rotation
+        std::vector<T> pole = ROrientation*planeNormal;
+        std::vector<T> poleSpherical = cartesianToSpherical(pole);
+        T theta = poleSpherical[1];
+        T phi = poleSpherical[2];
+        
+        // Equal-area projection
+        T R = 2*std::sin(phi/2);
+        T x, y;
+        x = R*std::cos(theta);
+        y = R*std::sin(theta);
+        
+        // Histogram index
+        T xMin = -maxR;
+        T xMax = maxR;
+        T yMin = xMin;
+        T yMax = xMax;
+        T binwidthX = (xMax-xMin)/HPP_POLE_FIG_HIST_DIM;
+        T binwidthY = (yMax-yMin)/HPP_POLE_FIG_HIST_DIM;
+        int ix = (int) ((x-xMin)/binwidthX);
+        int iy = (int) ((y-yMin)/binwidthY);
+        
+        // Add points to histogram
+        if (ix >=0 && ix < HPP_POLE_FIG_HIST_DIM && iy>=0 && iy < HPP_POLE_FIG_HIST_DIM) {
+            hist(ix, iy) += 1.0;
+        }
+    }
+    
+    // Return
+    return hist;
+}
+
 template <typename U>
 void Polycrystal<U>::addTextureToHistory() {
     // Calculate local orientations
@@ -982,9 +1049,41 @@ void Polycrystal<U>::addTextureToHistory() {
         anglesGlobalRoot[i].gamma = gammasGlobalRoot[i];
     }
     
-    // Store on root
+    // Calculate pole figures and store on root
     if (comm_rank == 0) {
-        eulerAnglesHistory.push_back(anglesGlobalRoot);
+        this->poleHistogramHistory111.push_back(histogramPoleEqualArea(anglesGlobalRoot, std::vector<U>{1,1,1}));
+        this->poleHistogramHistory110.push_back(histogramPoleEqualArea(anglesGlobalRoot, std::vector<U>{1,1,0}));
+        this->poleHistogramHistory100.push_back(histogramPoleEqualArea(anglesGlobalRoot, std::vector<U>{1,0,0}));
+        this->poleHistogramHistory001.push_back(histogramPoleEqualArea(anglesGlobalRoot, std::vector<U>{0,0,1}));
+        this->poleHistogramHistory011.push_back(histogramPoleEqualArea(anglesGlobalRoot, std::vector<U>{0,1,1}));
+    }
+}
+
+/**
+ * @brief Writes out pole histograms to HDF5.
+ * @detail
+ * @param outfile the output file
+ * @param poles the poles to plot
+ */
+template <typename T>
+void writePoleHistogramHistoryHDF5(H5::H5File& outfile, const std::string& dsetBaseName, std::vector<Tensor2<T>>& history, const std::vector<T>& pole) {
+    // Data dimensions
+    const unsigned int nTimesteps = history.size();
+    const unsigned int histDimX = history[0].getn1();
+    const unsigned int histDimY = history[0].getn2();
+
+    // Create dataset
+    std::string dsetName = dsetBaseName + "_";        
+    for (auto val : pole) {
+        dsetName += std::to_string((int)val);
+    }
+    std::vector<hsize_t> dataDims = {nTimesteps, histDimX, histDimY};
+    auto dset = createHDF5Dataset<T>(outfile, dsetName, dataDims);
+    
+    // Write to dataset
+    for (unsigned int i=0; i<nTimesteps; i++) {
+        std::vector<hsize_t> offset = {i};
+        history[i].writeToExistingHDF5Dataset(dset, offset);
     }
 }
 
@@ -994,18 +1093,13 @@ void Polycrystal<U>::writeResultHDF5(std::string filename) {
         // Open output file
         H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
         
-        // Write out orientations
-        std::vector<hsize_t> gridDims = {eulerAnglesHistory.size(), eulerAnglesHistory[0].size()};
-        std::vector<hsize_t> angleDims = {3};
-        H5::DataSet anglesDset = createHDF5GridOfArrays<U>(outfile, "eulerAngles", gridDims, angleDims);
-        for (unsigned int iTime=0; iTime<eulerAnglesHistory.size(); iTime++) {
-            for (unsigned int iCrystal=0; iCrystal<eulerAnglesHistory[0].size(); iCrystal++) {
-                std::vector<hsize_t> offset = {iTime, iCrystal};
-                auto angle = eulerAnglesHistory[iTime][iCrystal];
-                std::vector<U> angleData = {angle.alpha, angle.beta, angle.gamma};
-                writeSingleHDF5Array<U>(anglesDset, offset, angleDims, angleData.data());
-            }
-        }
+        // Pole figure histograms
+        std::string poleHistBasename = "poleHistogram";
+        writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory111, std::vector<U>{1,1,1});
+        writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory110, std::vector<U>{1,1,0});
+        writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory100, std::vector<U>{1,0,0});
+        writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory001, std::vector<U>{0,0,1});
+        writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory011, std::vector<U>{0,1,1});
         
         // Stress history
         writeVectorToHDF5Array(outfile, "tHistory", this->t_history);    

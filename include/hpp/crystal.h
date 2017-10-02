@@ -35,6 +35,8 @@ platforms., (January):785--798, 2014
 namespace hpp
 {
 
+#define HPP_POLE_FIG_HIST_DIM 512
+
 enum CrystalType {
     CRYSTAL_TYPE_FCC,
     CRYSTAL_TYPE_NONE
@@ -454,8 +456,12 @@ private:
 
     // History
     std::vector<U> t_history;
-    std::vector<hpp::Tensor2<U>> T_cauchy_history;
-    std::vector<std::vector<EulerAngles<U>>> eulerAnglesHistory;
+    std::vector<Tensor2<U>> T_cauchy_history;
+    std::vector<Tensor2<U>> poleHistogramHistory111;
+    std::vector<Tensor2<U>> poleHistogramHistory110;
+    std::vector<Tensor2<U>> poleHistogramHistory100;
+    std::vector<Tensor2<U>> poleHistogramHistory001;
+    std::vector<Tensor2<U>> poleHistogramHistory011;
     void addTextureToHistory();
 
     // MPI

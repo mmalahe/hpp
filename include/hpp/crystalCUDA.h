@@ -17,8 +17,6 @@ namespace hpp
 {
 #ifdef HPP_USE_CUDA
 
-#define HPP_POLE_FIG_HIST_DIM 1024
-
 // Forward declarations
 template <typename T, unsigned int N> class SpectralPolycrystalCUDA;
 template <typename T> struct SpectralCrystalCUDA;
