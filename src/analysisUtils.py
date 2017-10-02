@@ -124,29 +124,40 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         figname += ".png"
         savefig(figname, bbox_inches='tight')
     
-    # Fetch and smooth pole data
-    smoothing_sigma = 24.0
-    if do_spectral_solve_plot:
-        pole_histograms_spectral = spectral_run.getPoleHistograms()        
-        pole_data_spectral = {name:array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
-        # Filter
-        pole_data_spectral = {name: gaussianFilterHistogramHistory(pole_data_spectral[name], sigma=smoothing_sigma) for name in pole_names} 
-            
-    if do_iterative_solve_plot:
-        pole_histograms_iterative = iterative_run.getPoleHistograms()
-        pole_data_iterative = {name:array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
-        # Filter
-        pole_data_iterative = {name: gaussianFilterHistogramHistory(pole_data_iterative[name], sigma=smoothing_sigma) for name in pole_names} 
+        # Which pole figures to plot
+        do_spectral_pole_plots = do_spectral_solve_plot and spectral_run['do_plot_pole_figures']
+        do_iterative_pole_plots = do_iterative_solve_plot and iterative_run['do_plot_pole_figures']
+        do_pole_plots = do_spectral_pole_plots or do_iterative_pole_plots
+        pole_figure_plot_timestep_list = spectral_run['pole_figure_timestep_selection']
         
-    # Plot pole figures
-    pole_figure_plot_timestep_list = [50]
-    if do_spectral_solve_plot and do_iterative_solve_plot:
-        pole_data_diffs = {name: pole_data_iterative[name]-pole_data_spectral[name] for name in pole_names}
-        plotPoleHistogramsHistory(pole_data_diffs, pole_figure_plot_timestep_list, experiment_name+"_poles_spectral_iterative_diff")
-    if do_spectral_solve_plot:
-        plotPoleHistogramsHistory(pole_data_spectral, pole_figure_plot_timestep_list, experiment_name+"_poles_spectral")
-    if do_iterative_solve_plot:
-        plotPoleHistogramsHistory(pole_data_iterative, pole_figure_plot_timestep_list, experiment_name+"_poles_iterative")
+        # Fetch pole data and set smoothing parameters
+        if do_spectral_pole_plots:
+            pole_histograms_spectral = spectral_run.getPoleHistograms()
+            pole_data_spectral = {name:array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
+            n_pixels_side = pole_histograms_spectral.values()[0].shape[1] 
+            smoothing_per_pixel = spectral_run['histogram_smoothing_per_pixel']
+        if do_iterative_pole_plots:
+            pole_histograms_iterative = iterative_run.getPoleHistograms()
+            pole_data_iterative = {name:array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
+            n_pixels_side = pole_histograms_iterative.values()[0].shape[1]
+            smoothing_per_pixel = iterative_run['histogram_smoothing_per_pixel']
+        if do_pole_plots:
+            smoothing_sigma = n_pixels_side*smoothing_per_pixel
+        
+        # Smooth data
+        if do_spectral_pole_plots:   
+            pole_data_spectral = {name: gaussianFilterHistogramHistory(pole_data_spectral[name], sigma=smoothing_sigma) for name in pole_names} 
+        if do_iterative_pole_plots:
+            pole_data_iterative = {name: gaussianFilterHistogramHistory(pole_data_iterative[name], sigma=smoothing_sigma) for name in pole_names} 
+            
+        # Plot pole figures        
+        if do_spectral_pole_plots and do_iterative_pole_plots:
+            pole_data_diffs = {name: pole_data_iterative[name]-pole_data_spectral[name] for name in pole_names}
+            plotPoleHistogramsHistory(pole_data_diffs, pole_figure_plot_timestep_list, experiment_name+"_poles_spectral_iterative_diff")
+        if do_spectral_pole_plots:
+            plotPoleHistogramsHistory(pole_data_spectral, pole_figure_plot_timestep_list, experiment_name+"_poles_spectral")
+        if do_iterative_pole_plots:
+            plotPoleHistogramsHistory(pole_data_iterative, pole_figure_plot_timestep_list, experiment_name+"_poles_iterative")
 
 def getLog2Ticks(x_variable_list):
     log2Ticks = [int(log(x)/log(2)) for x in x_variable_list]

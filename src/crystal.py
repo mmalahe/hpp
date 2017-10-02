@@ -115,7 +115,7 @@ def getPoleHistograms(euler_angles, plane_normals=[array([1,1,1]),array([1,1,0])
     # Return
     return pole_data
 
-def plotPoleHistograms(pole_data, filename, projection='equal-area'):    
+def plotPoleHistograms(pole_data, filename):    
     n_poles = len(pole_data)
     
     # Colorbar spacing
@@ -191,7 +191,7 @@ def plotPoleHistograms(pole_data, filename, projection='equal-area'):
     # Save    
     savefig(filename, bbox_inches='tight')
 
-def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filename, projection='equal-area'):    
+def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filename):    
     # This factor scales down the measured maximum density for the purposes of setting
     # the ranges of colour bars.
     # The intent is to allow lower density regions to be visible on the same plot.
@@ -211,9 +211,6 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     fig, axes = subplots(nrows=1, ncols=n_poles, figsize=fig_size)    
     subplots_adjust(wspace=0,hspace=0)
     
-    # Set up video
-    dpi = 72
-    
     # Get number of timesteps
     ntimesteps = pole_history_data.values()[0].shape[0]
     
@@ -223,7 +220,7 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     max_hist_name = None
     max_hist_it = None
     for pole_name, pole_history in pole_history_data.iteritems():
-        for it in range(ntimesteps):
+        for it in timestep_selection:
             hist = pole_history[it,:,:].copy()
             local_min_density = hist.min()
             local_max_density = hist.max()         
@@ -256,8 +253,6 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
                 min_density = local_min_density
     max_density *= density_max_downscale
     min_density *= density_max_downscale
-    print "min_density=", min_density
-    print "max_density=", max_density
     
     # Initialisations
     pcolormeshes = {}

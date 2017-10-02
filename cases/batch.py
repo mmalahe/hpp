@@ -19,9 +19,9 @@ do_iterative_solve_plot = True
 do_spectral_solve_plot = True
 
 error_study_type = None
-#~ error_study_type = 'n_terms'
-#~ error_study_type = 'refinement_multiplier'
 #~ error_study_type = 'db_dim'
+#~ error_study_type = 'refinement_multiplier'
+#~ error_study_type = 'n_terms'
 
 spectral_performance_study_type = None
 #~ spectral_performance_study_type = 'n_terms'
@@ -40,13 +40,15 @@ general_params['do_profile'] = False
 # Problem parameters
 problem_params = {}
 problem_params['default_seed'] = True
-#~ problem_params['n_crystals'] = 2*22*768*2**8
+#~ problem_params['n_crystals'] = 390000000
+#~ problem_params['n_crystals'] = 2*22*768*2**5
+#~ problem_params['n_crystals'] = 2*16
 problem_params['n_crystals'] = 2*768
-#~ problem_params['n_crystals'] = 256*2*768
 #~ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
-problem_params['experiment_name'].append('simple_shear_grid_texture')
-#~ problem_params['experiment_name'].append('mihaila2014_simple_shear')
+#~ problem_params['experiment_name'].append('plane_strain_compression_grid_texture')
+#~ problem_params['experiment_name'].append('simple_shear_grid_texture')
+problem_params['experiment_name'].append('mihaila2014_simple_shear')
 #~ problem_params['experiment_name'].append('savage2015_plane_strain_compression')
 #~ problem_params['experiment_name'].append('kalidindi1992_simple_shear')
 #~ problem_params['experiment_name'].append('kalidindi1992_simple_compression')
@@ -55,18 +57,25 @@ problem_params['experiment_name'].append('simple_shear_grid_texture')
 # Spectral database parameters
 spectral_db_params = {}
 spectral_db_params['db_dir'] = "databases"
-spectral_db_params['db_dim'] = 32
+spectral_db_params['db_dim'] = 128
 #~ spectral_db_params['db_dim'] = [8,16,32,64,128]
 spectral_db_params['refinement_multiplier'] = 128
 #~ spectral_db_params['refinement_multiplier'] = [1,2,4,8,16,32,64,128]
 #~ spectral_db_params['refinement_multiplier'] = [1,4,16,64,128]
 spectral_db_params['use_unified_coeff_order'] = True  
 
+# Plotting parameters
+plotting_params = {}
+plotting_params['do_plot_pole_figures'] = True
+plotting_params['histogram_smoothing_per_pixel'] = 0.01
+plotting_params['pole_figure_timestep_selection'] = [50]
+
 # Iterative solve parameters
 iterative_solve_verbose = True
 iterative_solve_params = {}
 iterative_solve_params.update(general_params)
 iterative_solve_params.update(problem_params)
+iterative_solve_params.update(plotting_params)
 iterative_solve_params['np'] = multiprocessing.cpu_count()
 
 # Spectral solver parameters
@@ -75,15 +84,16 @@ spectral_solve_params = {}
 spectral_solve_params.update(general_params)
 spectral_solve_params.update(problem_params)
 spectral_solve_params.update(spectral_db_params)
+spectral_solve_params.update(plotting_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
-spectral_solve_params['n_terms'] = 2**16
+spectral_solve_params['n_terms'] = 2**13
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
-#~ spectral_solve_params['n_terms'] = [2**i for i in range(7,16)]
+#~ spectral_solve_params['n_terms'] = [2**i for i in range(9,16)]
 
 # Iterative solves
 iterative_solve_base_runs = [IterativeSolveRun(iterative_solve_params, iterative_solve_verbose)]
-iterative_solve_runs = expandRunsByAllListParameters(iterative_solve_base_runs)
+iterative_solve_runs = expandRunsByAllListParameters(iterative_solve_base_runs, exclude=['pole_figure_timestep_selection'])
 for run in iterative_solve_runs:
     if do_iterative_solve:  
         run.run()
@@ -92,7 +102,7 @@ for run in iterative_solve_runs:
 
 # Spectral solves
 spectral_solve_base_runs = [SpectralSolveRun(spectral_solve_params, spectral_solve_verbose)]
-spectral_solve_runs = expandRunsByAllListParameters(spectral_solve_base_runs)
+spectral_solve_runs = expandRunsByAllListParameters(spectral_solve_base_runs, exclude=['pole_figure_timestep_selection'])
 for run in spectral_solve_runs:
     if do_spectral_solve:    
         run.run()
