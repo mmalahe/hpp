@@ -67,7 +67,7 @@ void testTensor4Tensor2Interactions() {
     // Fourth order inverse
     // A4 was just constructed randomly
     //
-    T closeEnoughConditionNumberFudge = 1000*std::numeric_limits<T>::epsilon(); ///@todo yeah...
+    T closeEnoughConditionNumber = 1000*std::numeric_limits<T>::epsilon();
     Tensor4<T> A4Nonsingular(2,2,2,2);
     A4Nonsingular(0,0,0,0) = 0.05;
     A4Nonsingular(0,1,0,0) = 0.95;
@@ -86,14 +86,14 @@ void testTensor4Tensor2Interactions() {
     A4Nonsingular(1,0,1,1) = 0.65;
     A4Nonsingular(1,1,1,1) = 0.74;
     Tensor4<T> A4NonsingularInv = A4Nonsingular.inv();
-    if (!(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");
-    if (!(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");
+    if (!(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumber)) throw std::runtime_error("Fourth order inverse failed.");
+    if (!(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumber)) throw std::runtime_error("Fourth order inverse failed.");
     
     // In-place inverse
     A4NonsingularInv = A4Nonsingular;
     A4NonsingularInv.invInPlace();
-    if (!(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");
-    if (!(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumberFudge)) throw std::runtime_error("Fourth order inverse failed.");    
+    if (!(((contract(A4NonsingularInv,contract(A4Nonsingular, A2)) - A2).abs()).max() < closeEnoughConditionNumber)) throw std::runtime_error("Fourth order inverse failed.");
+    if (!(((contract(A4Nonsingular,contract(A4NonsingularInv, A2)) - A2).abs()).max() < closeEnoughConditionNumber)) throw std::runtime_error("Fourth order inverse failed.");    
     
     // Outer product
     Tensor2<T> C2(2,2);
