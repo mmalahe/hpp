@@ -336,10 +336,8 @@ std::vector<hsize_t> getDatasetDims(hid_t dset_id);
  * @date 07/12/16
  * @file hdfUtils.h
  * @brief 
- * @details
- * @todo Currently it's unclear how to correctly open and read datasets in parallel
- * using the HDF5 C++ API, so the only functionality here is creating, writing to and
- * closing datasets.
+ * @details The only functionality here is creating, writing to and
+ * closing datasets. Parallel I/O is left to the C API.
  */
 class HDF5MPIHandler
 {
