@@ -632,8 +632,6 @@ public:
         // Add our column offset
         idx += (j-i+1);
         
-        ///@todo Is there a good way to flag an error here for invalid input?
-        
         // Return
         return idx;
     }
@@ -789,8 +787,6 @@ public:
         
         // Add our column offset from the diagonal
         idx += (j-i);
-        
-        ///@todo Is there a good way to flag an error here for invalid input?
         
         // Return
         return idx;
