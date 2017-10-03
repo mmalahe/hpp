@@ -1,6 +1,6 @@
 /// @file continuum.h
 /// @author Michael Malahe
-/// @brief Header file for continuum mechanics classes and functions
+/// @brief Header file for continuum mechanics classes and functions.
 #ifndef HPP_CONTINUUM_H
 #define HPP_CONTINUUM_H
 
