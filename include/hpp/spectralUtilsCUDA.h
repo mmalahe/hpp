@@ -102,6 +102,7 @@ public:
     __device__ T* getGridSteps() {return gridSteps;}
     __device__ unsigned int * getGridDims() {return gridDims;}
     unsigned int getNDsets() const {return nDsets;}
+    unsigned int getNTermsTypical() const {return nTermsTypical;}
     
 protected:
     
@@ -118,6 +119,9 @@ private:
     
     // Number of datasets
     unsigned int nDsets;
+    
+    // Number of terms in a typical dataset
+    unsigned int nTermsTypical;
 
     // Spectral data
     SpectralDatasetCUDA<T,N> *dsets;

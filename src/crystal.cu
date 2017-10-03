@@ -726,8 +726,13 @@ unsigned long long int SpectralPolycrystalCUDA<T,N>::getNTermsComputedHardware()
         return nTerms;
     }
     else {
-        ///@todo implement
-        return 0;
+        unsigned long long int nTerms = 1;
+        nTerms *= this->getNTimestepsTaken();
+        nTerms *= nCrystals;  
+        nTerms *= this->getNComponents();
+        nTerms *= dbH.getNDsets();
+        nTerms *= dbH.getNTermsTypical();
+        return nTerms;
     }
 }
 

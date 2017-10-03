@@ -55,6 +55,7 @@ SpectralDatabaseCUDA<T,N>::SpectralDatabaseCUDA(const SpectralDatabase<T>& dbIn,
         
         // Correct data format on the host
         unsigned int nTerms = dsetRawH.getNTerms();
+        this->nTermsTypical = nTerms;
         std::vector<SpectralCoordCUDA<N>> coordsH(nTerms);
         std::vector<SpectralCoeffCUDA<T>> coeffsH(nTerms);
         for (unsigned int j=0; j<nTerms; j++) {            

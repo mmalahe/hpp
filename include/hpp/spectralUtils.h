@@ -262,6 +262,12 @@ public:
     SpectralDataset<U> getDataset(const SpectralDatasetID& dsetID) const {
         return dsets.at(dsetID);
     }
+    unsigned int getNDsets() const {
+        return dsets.size();
+    }
+    unsigned int getNTerms() const {
+        return dsets.begin()->second.getNTerms();
+    }
 
 private:
     // Number of spatial dimensions
