@@ -139,7 +139,7 @@ Tensor2<U> staticDeformationGradient(U t) {
 /**
  * @brief The velocity gradient for no deformation.
  * @details The velocity gradient is zero.
- * @param shear_rate The shear rate \f$ \dot{\varepsilon}\f$
+ * @param shear_rate the shear rate \f$ \dot{\varepsilon}\f$
  * @tparam U the scalar type
  * @return \f$ \mathbf{L} \f$
  */
@@ -152,48 +152,85 @@ Tensor2<U> staticVelocityGradient(U t) {
 /**
  * @class OrientationGenerator
  * @author Michael Malahe
+ * @brief An abstract class for reproducibly generating a sequence of orientations.
  * @date 22/09/17
  * @file casesUtils.h
- * @brief An abstract class for reproducibly generating a sequence of orientations.
  * @tparam U the scalar type
  */
 template <typename U>
 class OrientationGenerator {
     public:
+        /**
+         * @brief Generate the next orientation in the sequence.
+         * @param rotMatrix the matrix into which to write the new rotation matrix
+         * @tparam U the scalar type
+         */
         virtual void generateNext(Tensor2<U>& rotMatrix) = 0;
+        /**
+         * @brief Generate the next orientation in the sequence.
+         * @param angles the set of angles into which to write the new angles
+         * @tparam U the scalar type
+         */
         virtual void generateNext(EulerAngles<U>& angles) {
             Tensor2<U> rotMatrix(3,3);
             this->generateNext(rotMatrix);
             angles = getEulerZXZAngles(rotMatrix);
         }
+        /**
+         * @brief Default destructor
+         */
         virtual ~OrientationGenerator() {};
 };
 
+/**
+ * @class RandomOrientationGenerator
+ * @author Michael Malahe
+ * @brief A class for reproducibly generating a sequence of random orientations.
+ * @date 03/10/17
+ * @file casesUtils.h
+ * @tparam U the scalar type
+ */
 template <typename U>
 class RandomOrientationGenerator : public OrientationGenerator<U> {
     public:
+        /**
+         * @brief Default constructor
+         */
         RandomOrientationGenerator() {;}
+        /**
+         * @brief Generate the next orientation in the sequence.
+         * @param rotMatrix the matrix into which to write the new rotation matrix
+         * @tparam U the scalar type
+         */
         virtual void generateNext(Tensor2<U>& rotMatrix) {
             randomRotationTensorInPlace(3, rotMatrix, true);
-        }
-        
-    private:
-        
+        } 
 };
 
 /**
- * @class GridTextureOrientationGenerator
+ * @class GridOrientationGenerator
  * @author Michael Malahe
- * @date 28/09/17
- * @file casesUtils.h
- * @brief Generates a texture on a fixed grid over an azimuthal angle of
+ * @brief Generates orientations on a fixed grid over an azimuthal angle of
  * \f$ [0, 2\pi) \f$ and a zenithal angle of \f$ [0, \pi/2) \f$. Does not cover
  * the area of a sphere equally.
+ * @date 28/09/17
+ * @file casesUtils.h
+ * @tparam U the scalar type
  */
 template <typename U>
 class GridOrientationGenerator : public OrientationGenerator<U> {
     public:
+        /**
+         * @brief Default constructor
+         * @param nTheta number of grid points in the azimuthal angle
+         * @param nPhi number of grid points in the zenithal angle
+         */
         GridOrientationGenerator(int nTheta=8, int nPhi=4);
+        /**
+         * @brief Generate the next orientation in the sequence.
+         * @param angles the set of angles into which to write the new angles
+         * @tparam U the scalar type
+         */
         virtual void generateNext(EulerAngles<U>& angles) {
             // Get angles
             U theta = iTheta*dTheta;
@@ -208,35 +245,52 @@ class GridOrientationGenerator : public OrientationGenerator<U> {
                 iTheta = iTheta % nTheta;
             }
         };
+        /**
+         * @brief Generate the next orientation in the sequence.
+         * @param rotMatrix the matrix into which to write the new rotation matrix
+         * @tparam U the scalar type
+         */
         virtual void generateNext(Tensor2<U>& rotMatrix) {
             EulerAngles<U> angles;
             this->generateNext(angles);
             rotMatrix = EulerZXZRotationMatrix(angles);
         };
         
-    private:
-        /// The number of grid points for the azimuthal angle
-        int nTheta;
-        /// The number of grid points for the zenithal angle
-        int nPhi;
-        int iTheta = 0;
-        int iPhi = 0;
-        U dTheta;
-        U dPhi;
+    private:        
+        int nTheta; ///< the number of grid points for the azimuthal angle
+        int nPhi; ///< the number of grid points for the zenithal angle
+        int iTheta = 0; ///< the azimuthal index of the orientation to generate next
+        int iPhi = 0; ///< the zenithal index of the orientation to generate next
+        U dTheta; ///< the spacing between azimuthal angles on the grid
+        U dPhi; ///< the spacing between zenithal angles on the grid
 };
 
+/**
+ * @class Experiment
+ * @author Michael Malahe
+ * @date 03/10/17
+ * @file casesUtils.h
+ * @brief A class to represent the conditions of an imposed strain experiment.
+ */
 template <typename U>
 class Experiment {
     
     public:
+        /**
+         * @brief Construct from a hard-coded experiment name.
+         * @param experimentName the name of the experiment
+         */
         explicit Experiment(std::string experimentName);
-        
-        // Members
-        U tStart;
-        U tEnd;
-        U strainRate;
+        U tStart; ///< the start time of the experiment
+        U tEnd; ///< the end time of the experiment
+        U strainRate; ///< the strain rate throughout the experiment
+        /// the function defining the deformation gradient for a given strain
+        /// rate and time into the experiment
         std::function<Tensor2<U>(U)> F_of_t;
+        /// the function defining the velocity gradient for a given strain
+        /// rate and time into the experiment
         std::function<Tensor2<U>(U)> L_of_t;
+        /// the generator of crystal orientations for the experiment
         std::shared_ptr<OrientationGenerator<U>> orientationGenerator;
 };
 
