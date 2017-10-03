@@ -236,7 +236,6 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     __shared__ SpectralCoeffCUDA<T> sharedCoeffs[nSharedSpectral];
     
     // If out of bounds, go through motions of calculation, but don't update at end
-    /// @fixme: extend this approach to the Cauchy stress sum at the end
     bool doUpdateCrystalState = true;
     if (idx > nCrystals-1) {
         idx = nCrystals-1;
@@ -323,7 +322,10 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     __syncthreads();
     
     // Add up the Cauchy stresses for this block    
-    Tensor2CUDA<T,3,3> TCauchyBlockSum = TCauchy;
+    Tensor2CUDA<T,3,3> TCauchyBlockSum;
+    if (doUpdateCrystalState) {
+        TCauchyBlockSum = TCauchy;
+    }
     __syncthreads();
     TCauchyBlockSum = blockReduceSumTensor2(TCauchyBlockSum);
     if (threadIdx.x==0) {
@@ -349,7 +351,6 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     __shared__ SpectralDataUnifiedCUDA<T,4,P> sharedData[nSharedSpectral];
     
     // If out of bounds, go through motions of calculation, but don't update at end
-    /// @fixme: extend this approach to the Cauchy stress sum at the end
     bool doUpdateCrystalStates = true;
     if (pairIdx > nCrystalPairs-1) {
         pairIdx = nCrystalPairs-1;
@@ -422,8 +423,11 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     pairTCauchySum += sigmaPrimeNext0;
     pairTCauchySum += sigmaPrimeNext1;
     
-    // Add up the Cauchy stresses for this block    
-    Tensor2CUDA<T,3,3> TCauchyBlockSum = pairTCauchySum;
+    // Add up the Cauchy stresses for this block
+    Tensor2CUDA<T,3,3> TCauchyBlockSum;
+    if (doUpdateCrystalStates) {
+        TCauchyBlockSum = pairTCauchySum;
+    }
     __syncthreads();
     TCauchyBlockSum = blockReduceSumTensor2(TCauchyBlockSum);
     if (threadIdx.x==0) {
