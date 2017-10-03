@@ -500,29 +500,6 @@ __global__ void BLOCK_REDUCE_KEPLER_TENSOR2(Tensor2CUDA<T,M,N> *in, Tensor2CUDA<
     }
 }
 
-template <typename T, unsigned int M, unsigned N>
-void reduceKeplertTensor2(Tensor2CUDA<T,M,N> *inArray, Tensor2CUDA<T,M,N>* out, int nTerms, const cudaDeviceProp& prop) {
-    // Get ideal configuration
-    CudaKernelConfig reduceCfg = getKernelConfigMaxOccupancy(prop, BLOCK_REDUCE_KEPLER_TENSOR2<T,M,N>, nTerms);
-
-    // Number of blocks
-    unsigned int nBlocks = reduceCfg.dG.x;
-    
-    // Allocate memory for per-block sums
-    std::shared_ptr<Tensor2CUDA<T,M,N>> perBlockSums = allocDeviceMemorySharedPtr<Tensor2CUDA<T,M,N>>(nBlocks);
-    
-    // Reduce in every block
-    BLOCK_REDUCE_KEPLER<<<reduceCfg.dG, reduceCfg.dB>>>(inArray, perBlockSums.get(), N);
-
-    // Reduce the resulting single block down
-    if (nBlocks > prop.maxThreadsPerBlock) {
-        ///@todo: Implement second-level reduction for sizes requiring more than maxThreadsPerBlock blocks
-        std::cerr << "Warning: Reduction not yet implemented for that many blocks." << std::endl;
-        std::cerr << "Warning: Defaulting to a single block reduction." << std::endl;
-    }
-    BLOCK_REDUCE_KEPLER<<<1, prop.maxThreadsPerBlock>>>(perBlockSums.get(), out, nBlocks);
-}
-
 /**
  * @brief Coresponds to the ZXZ Proper Euler Angles
  * @param R the rotation matrix
