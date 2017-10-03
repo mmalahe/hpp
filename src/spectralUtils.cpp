@@ -898,7 +898,6 @@ void evaluateSpectralCompressionErrorFull(std::string rawDBName, std::string spe
     }    
 }
 
-///@fixme: implement unified version
 void evaluateSpectralCompressionErrorFullUnified(std::string rawDBName, std::string spectralDBName, std::string errorDBName, unsigned int nTermsMax, std::string outFilename, MPI_Comm comm) {
     throw std::runtime_error("Not implemented yet. Currently a copy of non-unified version.");  
     
