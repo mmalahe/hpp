@@ -586,7 +586,6 @@ void SpectralDatabaseUnified<U>::loadDatasets(HDF5MPIHandler& dbfile, std::vecto
     this->nTerms = nTermsNumerical;
     
     // Size down to the new number of terms
-    ///@todo This isn't strictly necessary. Consider removal.
     coordsList.resize(this->nTerms);
     for (auto&& coeffList : coeffLists) {
         coeffList.resize(this->nTerms);
