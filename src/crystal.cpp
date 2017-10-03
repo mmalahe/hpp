@@ -504,13 +504,18 @@ const std::vector<U>& s_alphas_current_time, const std::vector<U>& s_alphas_prev
 {
     // Evaluate shear strain increments
     std::vector<U> Dgamma_alphas = shearStrainIncrements(props, T_next, s_alphas_prev_iter, dt);
-        
-    // Evaluating Equation 41 in Kalidindi1992
-    //hpp::Tensor2<U> h = strainHardeningRates(props, s_alphas_prev_iter);
     
-    // Alternative to Equation 41, Voce-type law:
-    /// @fixme: change this hard-code into an option
-    hpp::Tensor2<U> h = strainHardeningRatesVoce(props, s_alphas_prev_iter);
+    // Evaluating Equation 41 in Kalidindi1992
+    hpp::Tensor2<U> h;
+    if (props.hardeningLaw == HARDENING_LAW_BROWN) {
+        h = strainHardeningRates(props, s_alphas_prev_iter);
+    }
+    else if (props.hardeningLaw == HARDENING_LAW_VOCE) {
+        h = strainHardeningRatesVoce(props, s_alphas_prev_iter);
+    }
+    else {
+        throw std::runtime_error("Did not recognise hardening law.");
+    }
     
     // Evaluating Equation 36 in Kalidindi 1992
     std::vector<U> s_alphas(props.n_alpha);

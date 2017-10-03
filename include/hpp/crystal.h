@@ -40,7 +40,12 @@ namespace hpp
 enum CrystalType {
     CRYSTAL_TYPE_FCC,
     CRYSTAL_TYPE_NONE
-};    
+};
+
+enum HardeningLaw {
+    HARDENING_LAW_BROWN,
+    HARDENING_LAW_VOCE
+};
 
 enum CrystalDatasetIdx {   
     // Symmetric sigma in Voigt order
@@ -101,6 +106,7 @@ class Polycrystal;
 template <typename U>
 struct CrystalProperties {
     CrystalType crystal_type;
+    HardeningLaw hardeningLaw;
     unsigned int n_alpha;
     U mu;
     U kappa;
@@ -118,6 +124,7 @@ struct CrystalProperties {
     hpp::Tensor4<U> L;
     hpp::Tensor2<U> Q;
 };
+
 template <typename U>
 CrystalProperties<U> defaultCrystalProperties()
 {
@@ -125,6 +132,9 @@ CrystalProperties<U> defaultCrystalProperties()
 
     // Crystal type
     props.crystal_type = CRYSTAL_TYPE_FCC;
+    
+    // Hardening behaviour
+    props.hardeningLaw = HARDENING_LAW_VOCE;
 
     // Scalar parameters
     props.n_alpha = 12;
