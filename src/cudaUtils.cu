@@ -60,7 +60,7 @@ CudaKernelConfig getKernelConfigMaxOccupancy(const cudaDeviceProp& devProp, cons
     }
     else {
         ///@todo Either remove 2.x support, or implement distributing the grid size over multiple dimensions
-        throw std::runtime_error("No implementation for compute capability 2.x and lower.");
+        throw std::runtime_error("No implementation for ncrystal greater than about 50m for compute capability 2.x and lower.");
     }
     
     // Determine the occupancy
