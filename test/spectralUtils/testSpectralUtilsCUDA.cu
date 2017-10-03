@@ -21,7 +21,7 @@ struct SpectralDataRawDataPair {
     
 /**
  * @brief Generate a spectral database and corresponding raw data for testing purposes.
- * @detail 
+ * @details 
  * @return 
  */
 template <typename U>
