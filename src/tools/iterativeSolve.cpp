@@ -42,7 +42,6 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     int comm_size, comm_rank;
     MPI_Comm_size(comm, &comm_size);
     MPI_Comm_rank(comm, &comm_rank);
-    int ncrystalsLocal = ncrystalsGlobal/comm_size;
     
     // Generate all Euler angles on root
     std::vector<hpp::EulerAngles<U>> anglesRoot;
@@ -56,7 +55,9 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     // Distribute Euler Angles to processes
     auto EulerAnglesTypeMPI = hpp::getEulerAnglesTypeMPI<U>();
     std::vector<hpp::EulerAngles<U>> anglesLocal = hpp::MPISplitVectorEvenly(anglesRoot, comm, EulerAnglesTypeMPI);
-    if (anglesLocal.size() != ncrystalsLocal) {
+    int ncrystalsLocal = anglesLocal.size();
+    int ncrystalsSum = hpp::MPISum(ncrystalsLocal, comm);
+    if (ncrystalsGlobal != ncrystalsSum) {
         throw std::runtime_error("Mismatch between distributed angles and number of crystals.");
     }
     
