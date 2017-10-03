@@ -109,14 +109,24 @@ void Tensor2<T>::constructFromHDF5Dataset(hid_t dset_id, hid_t plist_id, std::ve
     if (tensorDims.size() != 2) {
         throw TensorError("Incorrect array rank for a rank 2 tensor.");
     }
-    this->initialize(tensorDims[0], tensorDims[1]);    
-    readSingleHDF5Array(dset_id, plist_id, gridOffset, tensorDims, &(vals[0]));
+    this->initialize(tensorDims[0], tensorDims[1]);
+    if (HPP_ARRAY_LAYOUT == LAPACK_ROW_MAJOR) {
+        readSingleHDF5Array(dset_id, plist_id, gridOffset, tensorDims, &(vals[0]));
+    }
+    else {
+        std::vector<T> readVals(this->getNVals());
+        readSingleHDF5Array(dset_id, plist_id, gridOffset, tensorDims, &(readVals[0]));
+        for (unsigned int i=0; i<n1; i++) {
+            for (unsigned int j=0; j<n2; j++) {
+                (*this)(i,j) = readVals[flatC(std::vector<unsigned int>{i,j}, std::vector<unsigned int>{n1,n2})];
+            }
+        }
+    }
 }
 
 /**
  * @brief Construct from HD5 dataset and offset
  * @details C++ API
- * FIXME: deal with column-major case
  * @param file
  * @param datasetName
  */
