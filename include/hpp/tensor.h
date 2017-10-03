@@ -681,7 +681,9 @@ Tensor2<T> identityTensor2(unsigned int n)
 template<typename T>
 void identityTensor2InPlace(unsigned int n, Tensor2<T>& A)
 {
-    /// @todo: check dimensions
+    if (A.getn1() != n || A.getn2() != n) {
+        throw std::runtime_error("Wrong dimensions.");
+    }
     A.vals = (T)0.0;
     for (unsigned int i=0; i<n; i++) {
         A(i,i) = (T)1.0;
@@ -971,7 +973,7 @@ class Tensor4
     friend Tensor2<T>;
     template<typename U, unsigned int M, unsigned int N, unsigned int P, unsigned int Q> friend class Tensor4CUDA;
     
-    public:
+public:
     // Default constructor
     Tensor4();
 
@@ -1006,7 +1008,11 @@ class Tensor4
     // Printing
     void printToStream(std::ostream& out);
     
-    // Writing out
+    // Getters    
+    unsigned int getn1() const {return n1;}
+    unsigned int getn2() const {return n2;}
+    unsigned int getn3() const {return n3;}
+    unsigned int getn4() const {return n4;}
 
     // EXTERNAL FRIEND FUNCTIONS
     
@@ -1192,7 +1198,9 @@ inline Tensor4<T> identityTensor4(unsigned int n)
 template<typename T>
 void identityTensor4InPlace(unsigned int n, Tensor4<T>& A)
 {
-    /// @todo: check dimensions
+    if (A.getn1() != n || A.getn2() != n || A.getn3() != n || A.getn4() != n) {
+        throw std::runtime_error("Wrong dimensions.");
+    }
     for (unsigned int i=0; i<n; i++) {
         for (unsigned int j=0; j<n; j++) {
             for (unsigned int k=0; k<n; k++) {
