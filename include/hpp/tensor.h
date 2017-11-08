@@ -34,6 +34,13 @@ namespace hpp
 {
 
 // SOME OVERLOADS OF STD::VECTOR
+
+/**
+ * @brief Elementwise division
+ * @param vec
+ * @param scalar
+ * @return 
+ */
 template <typename T>
 std::vector<T> operator/(const std::vector<T>& vec, T scalar) {
     std::vector<T> newvec = vec;
@@ -1035,6 +1042,10 @@ public:
     friend Tensor2<U> contract(const Tensor4<U>& A, const Tensor2<U>& B);
     template <typename U>
     friend void contractInPlace(const Tensor4<U>& A, const Tensor2<U>& B, Tensor2<U>& C);
+    template <typename U>
+    friend void assertCompatibleForContraction(const Tensor4<U>& A, const Tensor4<U>& B);
+    template <typename U>
+    friend Tensor4<U> contract(const Tensor4<U>& A, const Tensor4<U>& B);
     
     // Products
     template <typename U>
@@ -1480,6 +1491,40 @@ inline void contractInPlace(const Tensor4<T>& A, const Tensor2<T>& B, Tensor2<T>
             }
         }
     }
+}
+
+template <typename U>
+inline void assertCompatibleForContraction(const Tensor4<U>& A, const Tensor4<U>& B) {
+    if (A.n3 != B.n1 || A.n4 != B.n2) {
+        throw TensorError("Shapes are incompatible for contraction.");
+    }
+}
+
+template <typename U>
+inline Tensor4<U> contract(const Tensor4<U>& A, const Tensor4<U>& B) {
+    assertCompatibleForContraction(A,B);
+    unsigned int m = A.n1;
+    unsigned int n = A.n2;
+    unsigned int p = A.n3;
+    unsigned int q = A.n4;
+    unsigned int r = B.n3;
+    unsigned int s = B.n4;
+    Tensor4<U> C(m,n,r,s);
+    for (unsigned int im=0; im<m; im++) {
+        for (unsigned int in=0; in<n; in++) {
+            for (unsigned int ir=0; ir<r; ir++) {
+                for (unsigned int is=0; is<s; is++) {
+                    C(im,in,ir,is) = 0.0;
+                    for (unsigned int ip=0; ip<p; ip++) {
+                        for (unsigned int iq=0; iq<q; iq++) {
+                            C(im,in,ir,is) += A.getVal(im,in,ip,iq)*B.getVal(ip,iq,ir,is);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return C;
 }
 
 // Interactions with std::vector
