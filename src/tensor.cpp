@@ -967,10 +967,23 @@ void Tensor4<T>::invInPlace() {
 
 // Should probably assert that it's square here
 template <typename T>
-Tensor4<T> Tensor4<T>::inv() {
+Tensor4<T> Tensor4<T>::inv() const {
     Tensor4<T> A = *this;
     A.invInPlace();
     return A;
+}
+
+template <typename T>
+T Tensor4<T>::frobeniusNorm() const{
+    // The norm
+    T norm = 0.0;    
+    for (unsigned int i=0; i<vals.size(); i++) {
+        norm += std::pow(std::abs(vals[i]), 2.0);
+    }
+    norm = std::sqrt(norm);
+    
+    // Return
+    return norm;
 }
 
 // Tensor2 and Tensor4 are restricted to these specific instantiations

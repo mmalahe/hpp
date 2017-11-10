@@ -15,7 +15,7 @@ namespace hpp
 
 template <typename U>
 void testStretchingTensorDecomposition() {
-    // Equivalent limit
+    // Equivalence threshold
     const U closeEnough = 10000*std::numeric_limits<U>::epsilon();
     
     // Test basic stretching tensor construction
@@ -48,7 +48,6 @@ void testStretchingTensorDecomposition() {
             std::cout << "D = " << D << std::endl;
             std::cout << "DBackOut = " << DBackOut << std::endl;
             U error = (D-DBackOut).frobeniusNorm()/D.frobeniusNorm();
-            std::cout << error << std::endl;
             if (error > closeEnough) {
                 std::string errorMsg("D != DBackOut. Error = ");
                 errorMsg += std::to_string(error);
@@ -64,11 +63,40 @@ void testStretchingTensorDecomposition() {
         }
     }
 }    
+
+template <typename U>
+void testHomogenizations() {
+    // Equivalence threshold
+    const U closeEnough = 100*std::numeric_limits<U>::epsilon();
     
+    // Using material constants from Kneer1965, page 831
+    U c11 = 169.05;
+    U c12 = 121.93;
+    U c44 = 75.5;
+    U I0 = 1.858;
+    U I1 = 0.4101;
+    U I2 = 0.02072;
+    
+    // Volume average
+    Tensor4<U> c1 = cubeSymmetricElasticityTensor<U>(1.0*c11, 1.0*c12, 1.0*c44);
+    Tensor4<U> c2 = cubeSymmetricElasticityTensor<U>(2.0*c11, 2.0*c12, 2.0*c44);
+    U v1 = 3.0;
+    U v2 = 1.0;
+    Tensor4<U> cBarAnalyticVolumeAverage = cubeSymmetricElasticityTensor<U>(1.25*c11, 1.25*c12, 1.25*c44);
+    std::vector<Tensor4<U>> cVec = {c1, c2};
+    std::vector<U> vVec = {v1, v2};
+    Tensor4<U> cBarVolumeAverage = getHomogenizedStiffnessVolumeAverage(cVec, vVec); 
+    U error = (cBarVolumeAverage-cBarAnalyticVolumeAverage).frobeniusNorm()/cBarAnalyticVolumeAverage.frobeniusNorm();
+    if (error > closeEnough) {
+        throw std::runtime_error("Mismatch in volume averages.");
+    }
+}
+
 template <typename U>
 void testContinuum() 
 {
     testStretchingTensorDecomposition<U>();
+    testHomogenizations<U>();
 }    
     
 }//END NAMESPACE HPP

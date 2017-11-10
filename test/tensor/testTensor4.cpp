@@ -233,6 +233,11 @@ void testTensor4BinaryOperations() {
     Tensor4<T> ADividedByEqualsTwo(A);
     ADividedByEqualsTwo /= two;
     if (!(A/two == ADividedByEqualsTwo)) throw std::runtime_error("Scalar division failed.");
+    
+    // Contraction size mismatch
+    
+    // Contraction
+    
 }
 
 } //end namespace hpp

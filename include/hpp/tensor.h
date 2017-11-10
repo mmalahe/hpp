@@ -1008,9 +1008,12 @@ public:
     T getVal(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
     T getValFlat(unsigned int flatIdx) const;
     
+    // Basic properties
+    T frobeniusNorm() const;
+    
     // Inverse
     void invInPlace();
-    Tensor4<T> inv();
+    Tensor4<T> inv() const;
     
     // Printing
     void printToStream(std::ostream& out);

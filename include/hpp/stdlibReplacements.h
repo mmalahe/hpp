@@ -11,8 +11,8 @@
 
 /**
  * @brief The standard library function aligned_alloc
- * @param size
- * @param align
+ * @param size the size to allocate
+ * @param align the number of bytes to align to
  * @details This is taken directly from the GCC-4.9 implementation of _mm_malloc,
  * found in gmm_malloc.h. The copyright notice at the top of gmm_malloc.h is
  * reproduced below.

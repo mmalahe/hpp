@@ -18,7 +18,7 @@ namespace hpp
 {
 
 template <typename U>
-hpp::Tensor2<U> stretchingVelocityGradient(U theta, U eDot) {
+Tensor2<U> stretchingVelocityGradient(U theta, U eDot) {
     // D components
     std::vector<U> D_comps(3);
     D_comps[0] = std::sqrt(2.0/3.0)*std::cos(theta-M_PI/3.0);
@@ -33,12 +33,12 @@ hpp::Tensor2<U> stretchingVelocityGradient(U theta, U eDot) {
     }
     
     // Construct D_0
-    hpp::Tensor2<U> D_0(3,3);
+    Tensor2<U> D_0(3,3);
     for (int i=0; i<3; i++) {
         std::vector<U> e_i = basis[i];
-        D_0 += D_comps[i]*hpp::outer(e_i, e_i);
+        D_0 += D_comps[i]*outer(e_i, e_i);
     }
-    hpp::Tensor2<U> D = eDot*D_0;
+    Tensor2<U> D = eDot*D_0;
     
     // Return
     return D;
@@ -57,12 +57,12 @@ struct StretchingTensorDecomposition {
 * @return 
 */
 template <typename T>
-StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Tensor2<T>& L) {
+StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const Tensor2<T>& L) {
     // The decomposition
     StretchingTensorDecomposition<T> decomp;
 
     // Stretching tensor from velocity gradient
-    hpp::Tensor2<T> D = ((T)0.5)*(L + L.trans());
+    Tensor2<T> D = ((T)0.5)*(L + L.trans());
 
     // Evec decomposition of D
     std::valarray<T> Devals;
@@ -70,7 +70,7 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
     
     // Ensure that the determinant of the eigenvector matrix is positive
     // for the purposes of treating it like a rotation
-    hpp::Tensor2<T> RTest(decomp.evecs);
+    Tensor2<T> RTest(decomp.evecs);
     if (RTest.det() < 0) {
         std::swap(Devals[0], Devals[1]);
         for (int i=0; i<3; i++) {
@@ -82,7 +82,7 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
     }
 
     // D in its principal frame
-    hpp::Tensor2<T> DPrincipal(3,3);
+    Tensor2<T> DPrincipal(3,3);
     for (int i=0; i<3; i++) {
         DPrincipal(i,i) = Devals[i];
     }
@@ -140,9 +140,9 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const hpp::Ten
  * @return The elasticity tensor
  */
 template <typename U>
-hpp::Tensor4<U> isotropicElasticityTensor(U mu, U kappa) {
-    hpp::Tensor4<U> L(3,3,3,3);
-    L = 2*mu*hpp::identityTensor4<U>(3) ;
+Tensor4<U> isotropicElasticityTensor(U mu, U kappa) {
+    Tensor4<U> L(3,3,3,3);
+    L = 2*mu*identityTensor4<U>(3) ;
     L += ((U)(kappa-(2.0/3)*mu))*outer<U>(identityTensor2<U>(3), identityTensor2<U>(3));
     return L;
 }
@@ -155,8 +155,8 @@ hpp::Tensor4<U> isotropicElasticityTensor(U mu, U kappa) {
  * @return The elasticity tensor
  */
 template <typename U>
-hpp::Tensor4<U> cubeSymmetricElasticityTensor(U c11, U c12, U c44) {
-    hpp::Tensor4<U> L(3,3,3,3);  
+Tensor4<U> cubeSymmetricElasticityTensor(U c11, U c12, U c44) {
+    Tensor4<U> L(3,3,3,3);  
     U cbar = c11-c12-2*c44;
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
@@ -172,6 +172,176 @@ hpp::Tensor4<U> cubeSymmetricElasticityTensor(U c11, U c12, U c44) {
         }
     }
     return L;
+}
+
+/**
+ * @brief Volume average fourth order tensors
+ * @param tVec a vector of the tensors
+ * @param vVec a vector of the volumes in which each tensor holds
+ * @return the volume average
+ */
+template <typename U>
+Tensor4<U> volumeAverage(const std::vector<Tensor4<U>>& tVec, const std::vector<U>& vVec) {
+    // Check sizes
+    unsigned int nT = tVec.size();
+    unsigned int nV = vVec.size();
+    if (nT != nV) {
+        throw std::runtime_error("Different number of stiffness tensors and volumes.");
+    }
+    
+    // Sum up
+    Tensor4<U> tTot = tVec[0];
+    U vTot = vVec[0];
+    for (unsigned int i=1; i<nT; i++) {
+        tTot += tVec[i];
+        vTot += vVec[i];
+    }
+    
+    // Average
+    Tensor4<U> tAvg = tTot/vTot;
+    return tAvg;
+}
+
+template <typename U>
+Tensor4<U> getEshelbyTensorCubicMaterialSphericalInclusion(U c11, U c12, U c44, U I0, U I1, U I2) {
+    U mu = c11 - c12 - 2.0*c44;
+    U a = mu*(c11+c12)/(c11*c44);
+    U b = std::pow(mu, 2.0)*(c11+2*c12+c44)/(c11*std::pow(c44,2.0));
+    U m = c11-c44;
+    U p = c12+c44;
+    
+    // Construct E
+    Tensor4<U> A0(3,3,3,3);
+    Tensor4<U> A1(3,3,3,3);
+    Tensor4<U> A2(3,3,3,3);
+    A0(0,0,0,0) = (1.0/3.0)*c11;
+    A1(0,0,0,0) = (2*m/3.0)*c11*c44;
+    A2(0,0,0,0) = a/c44;
+    A0(0,0,1,1) = 0.0;
+    A1(0,0,1,1) = -(p/3.0)*c11*c44;
+    A2(0,0,1,1) = -p*mu/(c11*std::pow(c44,2.0));
+    A0(0,1,0,1) = (1.0/6.0)*c44;
+    A1(0,1,0,1) = a*(mu-2.0*c44)/(12.0*mu*c44);
+    A2(0,1,0,1) = (1.0/2.0)*(a/(2.0*c44)-b/mu);   
+    Tensor4<U> E = I0*A0+I1*A1+I2*A2;
+    
+    
+    
+    // Note that S has the both minor symmetries S_{ijkl} = S{jikl} = S{ijlk}
+    // Here we apply leading minor symmetry to E before using it to construct S
+    E(1,0,0,1) = E(0,1,0,1);
+    
+    // EXPERIMENT
+    E(0,1,1,0) = E(0,1,0,1);
+    
+    std::cout << "E = " << E << std::endl;
+    
+    // Construct S
+    Tensor4<U> C = cubeSymmetricElasticityTensor(c11, c12, c44);
+    
+    std::cout << "C = " << C << std::endl;
+    
+    Tensor4<U> S = contract(C, E);
+    
+    // Return
+    return S;
+}
+
+/**
+ * @brief Get the homogenized stiffness tensor using a volume average.
+ * @param cVec a vector of stiffness tensors to homogenize
+ * @param vVec a vector of volumes occupied by the stiffness tensors
+ * @return the homogenized stiffness tensor
+ */
+template <typename U>
+Tensor4<U> getHomogenizedStiffnessVolumeAverage(const std::vector<Tensor4<U>>& cVec, const std::vector<U>& vVec) {
+    // Check sizes
+    unsigned int nC = cVec.size();
+    unsigned int nV = vVec.size();
+    if (nC != nV) {
+        throw std::runtime_error("Different number of stiffness tensors and volumes.");
+    }
+    
+    // Get volume average
+    Tensor4<U> cTot = (U)0.0*cVec[0];
+    U vTot = 0.0;
+    for (unsigned int i=0; i<cVec.size(); i++) {
+        cTot += cVec[i]*vVec[i];
+        vTot += vVec[i];
+    }
+    Tensor4<U> cBar = cTot/vTot;
+    return cBar;
+}
+
+/**
+ * @brief Get the homogenized stiffness tensor using the elastic self-consistent method.
+ * @param cVec a vector of stiffness tensors to homogenize
+ * @param vVec a vector of volumes occupied by the stiffness tensors
+ * @param S the Eshelby tensor
+ * @return the homogenized stiffness tensor
+ */
+template <typename U>
+Tensor4<U> getHomogenizedStiffnessELSC(const std::vector<Tensor4<U>>& cVec, const std::vector<U>& vVec, const Tensor4<U>& S) {
+    // Check sizes
+    unsigned int nC = cVec.size();
+    unsigned int nV = vVec.size();
+    if (nC != nV) {
+        throw std::runtime_error("Different number of stiffness tensors and volumes.");
+    }
+    
+    // Convergence criterion
+    U cTol = 1.0e2*std::numeric_limits<U>::epsilon();
+    int maxIters = 100;
+    
+    // Initialize
+    Tensor4<U> cBar = volumeAverage(cVec, vVec);
+    U vTot = 0.0;
+    for (const auto& v : vVec) {
+        vTot += v;
+    }
+    
+    // Common terms
+    Tensor4<U> SInv = S.inv();
+    
+    // Single allocations for frequent terms
+    Tensor4<U> Ar = (U)0.0*cBar;
+    Tensor4<U> cBarTot = (U)0.0*cBar;
+    Tensor4<U> cBarPrev = (U)0.0*cBar;
+    Tensor4<U> cTilde = (U)0.0*cBar;
+    Tensor4<U> cDiff = (U)0.0*cBar;
+    
+    // Iterate
+    bool converged = false;
+    for (unsigned int i=0; i<maxIters; i++) {
+        // Previous
+        cBarPrev = cBar;
+        
+        // Common terms
+        cTilde = contract(contract(cBarPrev, SInv), identityTensor4<U>(3)-S);
+        
+        // Volume average of ELSC update terms
+        cBarTot = (U)0.0*cBar;
+        for (unsigned int r=0; r<nC; r++) {
+            Ar = contract((cVec[r]+cTilde).inv(), cBarPrev+cTilde);
+            cBarTot += contract(cVec[r], Ar)*vVec[r];
+        }
+        cBar = cBarTot/vTot;
+        
+        // Check convergence
+        cDiff = cBar-cBarPrev;
+        U relDiff = cDiff.frobeniusNorm()/cBar.frobeniusNorm();
+        if (relDiff < cTol) {
+            converged = true;
+            break;
+        }
+    }
+    
+    if (!converged) {
+        throw std::runtime_error("ELSC homogenization failed to converge.");
+    }
+
+    // Return
+    return cBar;
 }
 
 } //END NAMESPACE HPP

@@ -145,9 +145,14 @@ CrystalProperties<U> defaultCrystalProperties()
     
     // Elastic constants from Anders and Thompson 1961
     // See Ledbetter and Naimon 1974, page 908 for the values actually tabulated
-    props.c11 = 168.7*GPA;
-    props.c12 = 121.7*GPA;
-    props.c44 = 75.0*GPA;
+    //props.c11 = 168.7*GPA;
+    //props.c12 = 121.7*GPA;
+    //props.c44 = 75.0*GPA;
+    
+    // Values in Kneer 1965
+    props.c11 = 169.05*GPA;
+    props.c12 = 121.93*GPA;
+    props.c44 = 75.5*GPA;
     
     // From Kalidindi1992
     props.m = 0.012;
