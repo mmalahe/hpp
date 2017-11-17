@@ -15,6 +15,9 @@ Python modules:
 Optional dependencies
 ---------------------
 
+Boost.Python:
+- Allows for the Python interface to the library to be built.
+
 Doxygen and doxypypy:
 - Allow for generation of documentation
 - Doxygen: "sudo apt-get install doxygen"
