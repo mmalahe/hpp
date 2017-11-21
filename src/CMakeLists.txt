@@ -1,6 +1,10 @@
-###########
-# LIBRARY #
-###########
+# CMake modules
+include(HPPCommon)
+
+###############
+# C++ LIBRARY #
+###############
+
 set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp crystal.cpp hdfUtils.cpp spectralUtils.cpp mpiUtils.cpp profUtils.cpp)
 set (HPP_CU_SOURCES cudaUtils.cu tensor.cu spectralUtils.cu crystal.cu)
 
@@ -20,8 +24,12 @@ target_link_libraries(hpp ${BLAS_LIBRARIES})
 ####################
 # PYTHON INTERFACE #
 ####################
-if (${HPP_BUILD_PYTHON})
-    PYTHON_ADD_MODULE(hpppy python)
+if (${HPP_BUILD_PYTHON})    
+    if (${HPP_USE_CUDA})
+        PYTHON_ADD_CUDA_MODULE(hpppy python.cu)
+    else()
+        PYTHON_ADD_MODULE(hpppy python)
+    endif()        
     target_link_libraries(hpppy ${Boost_LIBRARIES})
     target_link_libraries(hpppy hpp)
 endif()

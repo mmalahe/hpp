@@ -53,6 +53,8 @@ find_package(SSE)
 find_package(CUDA 7.5)
 if (${CUDA_FOUND})
     find_package(GPUS)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    message(${CUDA_INCLUDE_DIRS})
 endif()
 
 # Packages for the Python wrapper
@@ -179,10 +181,6 @@ if (${HPP_USE_CUDA})
     # This is a workaround for another GCC 5 + CUDA 7.5 issue.
     # See https://groups.google.com/forum/#!msg/caffe-users/Tm3OsZBwN9Q/XKGRKNdmBAAJ
     set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} -D_FORCE_INLINES")
-
-    # This is a workaround for an fftw + CUDA interaction, resolved in fftw 3.3.5 and higher
-    # See https://github.com/FFTW/fftw3/issues/18
-    set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} -D__INTEL_COMPILER")
 
     # Add the common flags
     set(CUDA_NVCC_FLAGS_DEBUG "${CUDA_NVCC_FLAGS_DEBUG} ${COMMON_NVCC_FLAGS}")

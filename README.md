@@ -2,6 +2,7 @@ Mandatory dependencies:
 -----------------------
 C/C++ dependencies:
 - Should all be encoded in the CMakeLists.txt
+- FFTW 3.3.5 or greater
 
 CUDA:
 - Toolkit version 7.5 or higher.
@@ -54,8 +55,8 @@ Build:
 make -j 8
 ~~~~
 
-Default installation instructions:
-----------------------------------
+Default installation instructions
+---------------------------------
 Enter the build directory, which will be "build-release" for the default settings, and run
 ~~~~
 make install
@@ -64,4 +65,29 @@ make install
 Custom build options
 --------------------
 At the configuration step there are a number of options available.
+
+Installing custom FFTW
+----------------------
+You may need to build your own FFTW (http://www.fftw.org/download.html) if your package manager doesn't provide 3.3.5 and above.
+
+Configure it like this (assuming you want a non-default path, otherwise leave off "--prefix=..."):
+~~~~
+./configure --prefix=/your/install/prefix \
+--enable-shared \
+--enable-mpi \
+--enable-openmp \
+--enable-threads
+~~~~
+Optionally also include instructions available on your machine:
+~~~~
+./configure --prefix=/your/install/prefix \
+--enable-shared \
+--enable-mpi \
+--enable-openmp \
+--enable-threads \
+--enable-sse2 \
+--enable-avx \
+--enable-avx2 \
+--enable-fma
+~~~~
 
