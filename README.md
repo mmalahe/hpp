@@ -26,3 +26,42 @@ Doxygen and doxypypy:
 ffmpeg:
 - Allows for creation of videos
 
+Default building instructions
+-----------------------------
+We recommend an out of source CMake build. The easiest is to run
+~~~~
+sh release.sh
+~~~~
+which will create the build in the directory build-release. This build script does the following steps, which you can do manually for a more precise configuration.
+
+Make the build directory and enter it:
+~~~~
+mkdir -p build-release
+cd build-release
+~~~~
+
+Configure the build
+~~~~
+cmake .. -DCMAKE_BUILD_TYPE=Release
+~~~~
+You may want to provide a custom installation directory, in which case instead run
+~~~~
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/my/custom/install/dir
+~~~~
+
+Build:
+~~~~
+make -j 8
+~~~~
+
+Default installation instructions:
+----------------------------------
+Enter the build directory, which will be "build-release" for the default settings, and run
+~~~~
+make install
+~~~~
+
+Custom build options
+--------------------
+At the configuration step there are a number of options available.
+
