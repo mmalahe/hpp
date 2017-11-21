@@ -5,9 +5,9 @@ set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp crystal.cpp hdfUtils.cpp spectral
 set (HPP_CU_SOURCES cudaUtils.cu tensor.cu spectralUtils.cu crystal.cu)
 
 if (${HPP_USE_CUDA})
-    CUDA_ADD_LIBRARY(hpp ${HPP_CPP_SOURCES} ${HPP_CU_SOURCES})
+    CUDA_ADD_LIBRARY(hpp SHARED ${HPP_CPP_SOURCES} ${HPP_CU_SOURCES})
 else()
-    add_library(hpp ${HPP_CPP_SOURCES})
+    add_library(hpp SHARED ${HPP_CPP_SOURCES})
 endif()
     
 target_link_libraries(hpp ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
@@ -23,6 +23,7 @@ target_link_libraries(hpp ${BLAS_LIBRARIES})
 if (${HPP_BUILD_PYTHON})
     PYTHON_ADD_MODULE(hpppy python)
     target_link_libraries(hpppy ${Boost_LIBRARIES})
+    target_link_libraries(hpppy hpp)
 endif()
 
 #########
