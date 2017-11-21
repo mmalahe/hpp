@@ -30,7 +30,7 @@ def spectralSolve(experiment_name,
     for i in range(ncrystals):
         crystals.append(hpp.SpectralCrystalCUDAF())
     
-    print(props)
+    print(hpp.listDemo(crystals))
 
 # Inputs
 experiment_name = 'mihaila2014_simple_shear'
@@ -41,8 +41,6 @@ ncrystals = 1024
 nterms = 2**12
 output_filename = "output.hdf5"
 default_seed=True
-
-print(hpp.makeADoubleList())
 
 # Run
 spectralSolve(experiment_name,

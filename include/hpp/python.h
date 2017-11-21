@@ -16,7 +16,7 @@ boost::python::list toPythonList(const std::vector<T>& vec) {
 }
 
 template <class T>
-boost::python::list toStdVector(const boost::python::list& list) {
+std::vector<T> toStdVector(const boost::python::list& list) {
     int length = boost::python::len(list);
     std::vector<T> vec(length);
     for (int i=0; i<length; i++) {

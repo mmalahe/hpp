@@ -9,21 +9,17 @@
 #include <hpp/crystalCUDA.h>
 #include <hpp/python.h>
 
-std::vector<double> makeADoubleVec() {
-    std::vector<double> vec;
-    vec.push_back(0.2);
-    vec.push_back(0.4);
-    return vec;
-}
-
-boost::python::list makeADoubleList() {
-    auto vec = makeADoubleVec();
-    return hpp::toPythonList(vec);
+float listDemo(const boost::python::list& list) {
+    auto vec = hpp::toStdVector<hpp::SpectralCrystalCUDA<float>>(list);
+    for (const auto& v : vec) {
+        std::cout << v.s << std::endl;
+    }
+    return vec[0].s;
 }
 
 BOOST_PYTHON_MODULE(hpppy) {    
     // debugging/testing/experimenting
-    boost::python::def("makeADoubleList", makeADoubleList);
+    boost::python::def("listDemo", listDemo, boost::python::args("list"), "list demo");
     
     // tensor.h
     boost::python::class_<hpp::Tensor2<float>>("Tensor2F", 
