@@ -293,11 +293,10 @@ class Experiment {
         /// the generator of crystal orientations for the experiment
         std::shared_ptr<OrientationGenerator<U>> orientationGenerator;
         
-        // Getters/setters        
+        // Getters/setters (mainly intended for Python interface)
         U getTStart() const {return tStart;}
         U getTEnd() const {return tEnd;}
-        U getStrainRate() const {return strainRate;}
-        
+        U getStrainRate() const {return strainRate;}        
 };
 
 } // END NAMESPACE hpp

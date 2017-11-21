@@ -26,11 +26,13 @@ def spectralSolve(experiment_name,
     init = hpp.defaultCrystalInitialConditionsF()
     
     # Make the list of crystals
-    crystals = []
+    crystal_list = []
     for i in range(ncrystals):
-        crystals.append(hpp.SpectralCrystalCUDAF())
+        crystal = hpp.SpectralCrystalCUDAF()
+        crystal.s = init.s_0
+        crystal_list.append(crystal)
     
-    print(hpp.listDemo(crystals))
+    print(hpp.listDemo(crystal_list))
 
 # Inputs
 experiment_name = 'mihaila2014_simple_shear'

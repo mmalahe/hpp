@@ -304,6 +304,10 @@ struct CrystalInitialConditions {
     U s_0;
     hpp::Tensor2<U> F_p_0;
     hpp::Tensor2<U> crystalRotation;
+    
+    // Getters/setters (mainly intended for Python interface)
+    U getS0() const {return s_0;}
+    void setS0(const U& s_0) {this->s_0 = s_0;}
 };
 template <typename U>
 CrystalInitialConditions<U> defaultCrystalInitialConditions()

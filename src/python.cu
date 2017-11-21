@@ -37,10 +37,14 @@ BOOST_PYTHON_MODULE(hpppy) {
     
     // crystal.h
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
-    boost::python::class_<hpp::CrystalInitialConditions<float>>("CrystalInitialConditionsF");
+    boost::python::class_<hpp::CrystalInitialConditions<float>>("CrystalInitialConditionsF")
+        .add_property("s_0", &hpp::CrystalInitialConditions<float>::getS0, &hpp::CrystalInitialConditions<float>::setS0)
+    ;
     boost::python::def("defaultCrystalPropertiesF", hpp::defaultCrystalProperties<float>);
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
     
     // crystalCUDA.h
-    boost::python::class_<hpp::SpectralCrystalCUDA<float>>("SpectralCrystalCUDAF");    
+    boost::python::class_<hpp::SpectralCrystalCUDA<float>>("SpectralCrystalCUDAF")
+        .add_property("s", &hpp::SpectralCrystalCUDA<float>::getS, &hpp::SpectralCrystalCUDA<float>::setS)
+    ;
 }

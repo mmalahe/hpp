@@ -63,6 +63,10 @@ struct SpectralCrystalCUDA{
     
     // The slip-system deformation resistance
     T s;
+    
+    // Getters/setters (mainly intended for Python interface)
+    T getS() const {return s;}
+    void setS(const T& s) {this->s = s;}
 };
 
 /**
