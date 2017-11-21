@@ -292,6 +292,12 @@ class Experiment {
         std::function<Tensor2<U>(U)> L_of_t;
         /// the generator of crystal orientations for the experiment
         std::shared_ptr<OrientationGenerator<U>> orientationGenerator;
+        
+        // Getters/setters        
+        U getTStart() const {return tStart;}
+        U getTEnd() const {return tEnd;}
+        U getStrainRate() const {return strainRate;}
+        
 };
 
 } // END NAMESPACE hpp

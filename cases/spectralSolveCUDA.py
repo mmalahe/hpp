@@ -12,11 +12,18 @@ def spectralSolve(experiment_name,
                   output_filename,
                   default_seed=False):
     
+    # Experiment parameters
+    experiment = hpp.ExperimentF(experiment_name)
+    
     # Method constants
     strain_increment = 2e-2
+    
+    # Derive method constants
+    dt = abs(strain_increment/experiment.strainRate)
+    print dt
 
 # Inputs
-experiment_name = 'simple_shear'
+experiment_name = 'mihaila2014_simple_shear'
 database_filename = 'databaseSpectralOrderedUnified128.hdf5'
 unified_coeff_order = True
 ref_multiplier = 128
