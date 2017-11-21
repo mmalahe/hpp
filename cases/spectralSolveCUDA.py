@@ -25,11 +25,12 @@ def spectralSolve(experiment_name,
     props = hpp.defaultCrystalPropertiesF()
     init = hpp.defaultCrystalInitialConditionsF()
     
-    # Make the list of crystals
+    # Make the list of crystals with their orientations
     crystal_list = []
     for i in range(ncrystals):
-        crystal = hpp.SpectralCrystalCUDAF()
-        crystal.s = init.s_0
+        crystal = hpp.SpectralCrystalCUDAF() # default crystal
+        crystal.s = init.s_0 # initial deformation resistance
+        crystal.angles = experiment.generateNextOrientationAngles() # initial orientation
         crystal_list.append(crystal)
     
     print(hpp.listDemo(crystal_list))

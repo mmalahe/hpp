@@ -67,6 +67,8 @@ struct SpectralCrystalCUDA{
     // Getters/setters (mainly intended for Python interface)
     T getS() const {return s;}
     void setS(const T& s) {this->s = s;}
+    EulerAngles<T> getAngles() const {return angles;}
+    void setAngles(const EulerAngles<T>& angles) {this->angles = angles;}
 };
 
 /**

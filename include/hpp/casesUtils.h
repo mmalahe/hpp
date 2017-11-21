@@ -293,6 +293,15 @@ class Experiment {
         /// the generator of crystal orientations for the experiment
         std::shared_ptr<OrientationGenerator<U>> orientationGenerator;
         
+        // Generating next orientation
+        void generateNextOrientationInPlace(Tensor2<U>& rotMatrix) {this->orientationGenerator->generateNext(rotMatrix);}
+        void generateNextOrientationInPlace(EulerAngles<U>& angles) {this->orientationGenerator->generateNext(angles);}
+        EulerAngles<U> generateNextOrientationAngles() {
+            EulerAngles<U> angles;
+            this->orientationGenerator->generateNext(angles);
+            return angles;
+        }
+        
         // Getters/setters (mainly intended for Python interface)
         U getTStart() const {return tStart;}
         U getTEnd() const {return tEnd;}

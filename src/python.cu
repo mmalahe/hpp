@@ -7,12 +7,14 @@
 #include <hpp/casesUtils.h>
 #include <hpp/crystal.h>
 #include <hpp/crystalCUDA.h>
+#include <hpp/continuum.h>
 #include <hpp/python.h>
 
 float listDemo(const boost::python::list& list) {
     auto vec = hpp::toStdVector<hpp::SpectralCrystalCUDA<float>>(list);
     for (const auto& v : vec) {
         std::cout << v.s << std::endl;
+        std::cout << v.angles << std::endl;
     }
     return vec[0].s;
 }
@@ -26,13 +28,15 @@ BOOST_PYTHON_MODULE(hpppy) {
         boost::python::init<const unsigned int, const unsigned int>())
         .def("getn1", &hpp::Tensor2<float>::getn1)
     ;
+    boost::python::class_<hpp::EulerAngles<float>>("EulerAnglesF");
     
     // casesUtils.h
     boost::python::class_<hpp::Experiment<float>>("ExperimentF", 
         boost::python::init<std::string>())
         .add_property("strainRate", &hpp::Experiment<float>::getStrainRate)
         .add_property("tStart", &hpp::Experiment<float>::getTStart)
-        .add_property("tEnd", &hpp::Experiment<float>::getTEnd)      
+        .add_property("tEnd", &hpp::Experiment<float>::getTEnd)
+        .def("generateNextOrientationAngles", &hpp::Experiment<float>::generateNextOrientationAngles)
     ;
     
     // crystal.h
@@ -46,5 +50,6 @@ BOOST_PYTHON_MODULE(hpppy) {
     // crystalCUDA.h
     boost::python::class_<hpp::SpectralCrystalCUDA<float>>("SpectralCrystalCUDAF")
         .add_property("s", &hpp::SpectralCrystalCUDA<float>::getS, &hpp::SpectralCrystalCUDA<float>::setS)
+        .add_property("angles", &hpp::SpectralCrystalCUDA<float>::getAngles, &hpp::SpectralCrystalCUDA<float>::setAngles)
     ;
 }
