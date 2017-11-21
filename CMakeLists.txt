@@ -58,12 +58,11 @@ endif()
 # Packages for the Python wrapper
 option(HPP_BUILD_PYTHON "Build the Python interface to the library." TRUE)
 if (${HPP_BUILD_PYTHON})
-    find_package(PythonInterp)
-    find_package(PythonLibs)
-    find_package(Boost COMPONENTS python)
+    find_package(PythonInterp REQUIRED)
+    find_package(PythonLibs REQUIRED)
+    find_package(Boost REQUIRED COMPONENTS python)
     include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 endif()
-
 
 # FIND STANDARD LIBRARY FUNCTIONS #
 ###################################
