@@ -676,10 +676,34 @@ void SpectralDatabaseUnified<U>::constructFromFile(std::string dbFilename, std::
     //this->generateExponentialTable();
 }
 
+// For constructing with no MPI communicator input
+template <typename U>
+void SpectralDatabaseUnified<U>::constructFromFile(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult){    
+    int MPIWasInitializedAlready = 0;    
+    MPI_Initialized(&MPIWasInitializedAlready);
+    if (MPIWasInitializedAlready) {
+        MPI_Comm comm = MPI_COMM_WORLD;
+        this->constructFromFile(dbFilename, dsetIDs, nTerms, comm, refineMult);
+    }
+    else {
+        // We temporarily create an MPI setup while we construct
+        MPI_Init(NULL, NULL);
+        MPI_Comm comm = MPI_COMM_WORLD;
+        this->constructFromFile(dbFilename, dsetIDs, nTerms, comm, refineMult);
+        MPI_Finalize();
+    }    
+}
+
 // Construct from database with given dataset IDs
 template <typename U>
 SpectralDatabaseUnified<U>::SpectralDatabaseUnified(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult){    
     this->constructFromFile(dbFilename, dsetIDs, nTerms, comm, refineMult);
+}
+
+// Construct from database with given dataset IDs, no MPI communicator given
+template <typename U>
+SpectralDatabaseUnified<U>::SpectralDatabaseUnified(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult){    
+    this->constructFromFile(dbFilename, dsetIDs, nTerms, refineMult);
 }
 
 // Construct from database with discovered dataset IDs

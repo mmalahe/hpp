@@ -319,6 +319,7 @@ public:
     
     // Construction from file using given dataset IDs
     SpectralDatabaseUnified(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult=1);
+    SpectralDatabaseUnified(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult=1);
     
     // Construction from file using discovered dataset IDs
     SpectralDatabaseUnified(std::string dbFilename, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult=1);
@@ -360,6 +361,7 @@ public:
 private:
     //
     void constructFromFile(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult=1);
+    void constructFromFile(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult=1);
     
     // Number of spatial dimensions
     hsize_t nDims = 0;

@@ -23,7 +23,7 @@
 #include <hpp/crystalCUDA.h>
 
 template <typename U>
-void spectralSolve(std::string experimentName, std::string databaseFilename, bool unifiedCoeffOrder, unsigned int refinementMultiplier, unsigned int ncrystalsGlobal, unsigned int nTerms, std::string outputFilename, MPI_Comm comm, bool defaultSeed=false)
+void spectralSolve(std::string experimentName, std::string databaseFilename, bool unifiedCoeffOrder, unsigned int refinementMultiplier, unsigned int ncrystals, unsigned int nTerms, std::string outputFilename, bool defaultSeed=false)
 {    
     // Experiment parameters
     hpp::Experiment<U> experiment(experimentName);
@@ -38,45 +38,28 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
     hpp::CrystalPropertiesCUDA<U,12> props(hpp::defaultCrystalProperties<U>());
     hpp::CrystalInitialConditions<U> init = hpp::defaultCrystalInitialConditions<U>();
     
-    // Divide crystals between processes
-    int comm_size, comm_rank;
-    MPI_Comm_size(comm, &comm_size);
-    MPI_Comm_rank(comm, &comm_rank);
-    if (comm_size != 1) {
-        throw std::runtime_error("This GPU implementation should not be invoked with mpirun/mpiexec on more than one process.");
-    }
-    int ncrystals = ncrystalsGlobal;
-    
     // Crystal list
     std::vector<hpp::SpectralCrystalCUDA<U>> crystalList(ncrystals);
     
     // Add crystals
-    unsigned int reportInterval = 10000000;
-    hpp::Tensor2<U> rotation(3,3);
-    for (unsigned int i=0; i<crystalList.size(); i++) {
-        // Report
-        if (i%reportInterval == 0 && i/reportInterval > 0) {
-            std::cout << "Generating crystal " << i << std::endl;
-        }
-        
-        // Initial slip-system deformation resistance
-        crystalList[i].s = init.s_0;
-        
-        // Get angles
-        experiment.orientationGenerator->generateNext(crystalList[i].angles);
+    for (auto&& crystal : crystalList) {        
+        // Initial slip-system deformation resistance and angles
+        crystal.s = init.s_0;
+        experiment.orientationGenerator->generateNext(crystal.angles);
     }
     
     // Create polycrystal
     hpp::SpectralPolycrystalCUDA<U,12> polycrystal;
     if (unifiedCoeffOrder) {
         std::vector<hpp::SpectralDatasetID> dsetIDs = hpp::defaultCrystalSpectralDatasetIDs();
-        hpp::SpectralDatabaseUnified<U> db(databaseFilename, dsetIDs, nTerms, comm, refinementMultiplier);
+        hpp::SpectralDatabaseUnified<U> db(databaseFilename, dsetIDs, nTerms, refinementMultiplier);
         polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, props, db);
     }
     else {
-        std::vector<std::string> dsetBasenames = {"sigma_prime", "W_p", "gammadot_abs_sum"};
-        hpp::SpectralDatabase<U> db(databaseFilename, dsetBasenames, nTerms, comm, refinementMultiplier);
-        polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, props, db);     
+        throw std::runtime_error("Not using this any more.");
+//        std::vector<std::string> dsetBasenames = {"sigma_prime", "W_p", "gammadot_abs_sum"};
+//        hpp::SpectralDatabase<U> db(databaseFilename, dsetBasenames, nTerms, comm, refinementMultiplier);
+//        polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, props, db);     
     }        
     
     // Evolve
@@ -86,20 +69,13 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
     polycrystal.writeResultHDF5(outputFilename);
     
     // Write out true strain history
-    if (comm_rank == 0) {
-        // True strain history
-        std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, polycrystal.getTHistory());        
-        H5::H5File outfile(outputFilename, H5F_ACC_RDWR);
-        hpp::writeVectorToHDF5Array(outfile, "trueStrainHistory", trueStrainHistory);  
-    }
+    std::vector<U> trueStrainHistory = hpp::operator*(experiment.strainRate, polycrystal.getTHistory());        
+    H5::H5File outfile(outputFilename, H5F_ACC_RDWR);
+    hpp::writeVectorToHDF5Array(outfile, "trueStrainHistory", trueStrainHistory);  
 }
 
 int main(int argc, char *argv[])
-{
-    // MPI init
-    MPI_Init(&argc, &argv);
-    MPI_Comm comm = MPI_COMM_WORLD;
-    
+{    
     // Options
     std::string databaseFilename;
     std::string experimentName;
@@ -191,10 +167,7 @@ int main(int argc, char *argv[])
     }
     
     // Run
-    spectralSolve<float>(experimentName, databaseFilename, unifiedCoeffOrder, refinementMultiplier, nCrystals, nTerms, resultsFilename, comm, defaultSeed);
-    
-    // MPI finalize
-    MPI_Finalize();
+    spectralSolve<float>(experimentName, databaseFilename, unifiedCoeffOrder, refinementMultiplier, nCrystals, nTerms, resultsFilename, defaultSeed);
     
     // Return
     return 0;
