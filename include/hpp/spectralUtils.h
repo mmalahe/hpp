@@ -363,8 +363,7 @@ public:
     const std::shared_ptr<int>& getCoords() const {return coords;}
 private:
     //
-    void constructFromFile(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult=1);
-    void constructFromFile(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult=1);
+    void constructFromHandler(HDF5Handler& dbFile, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult=1);
     
     // Number of spatial dimensions
     hsize_t nDims = 0;

@@ -35,15 +35,13 @@ def spectralSolve(experiment_name,
     # Choose the dataset IDs for the crystal response database
     dsetIDs = hpp.defaultCrystalSpectralDatasetIDs()
     
-    print dsetIDs
-    
     # Load the crystal response database
-    #~ db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)
+    db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)
     
 
 # Inputs
 experiment_name = 'mihaila2014_simple_shear'
-database_filename = 'databaseSpectralOrderedUnified128.hdf5'
+database_filename = 'databases/databaseSpectralOrderedUnified128.hdf5'
 ref_multiplier = 128
 ncrystals = 1024
 nterms = 2**12
