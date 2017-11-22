@@ -89,6 +89,7 @@ MainQuantities<U> solveForMainQuantities(hpp::CrystalProperties<U> props, hpp::T
     // Rotate the crystal properties
     hpp::Tensor2<U> crystalRotation = hpp::EulerZXZRotationMatrix(g_p.alpha, g_p.beta, g_p.gamma);
     hpp::CrystalProperties<U> propsRotated = hpp::rotate(props, crystalRotation);
+    init.crystalRotation = crystalRotation;
     
     // Construct crystal
     std::vector<hpp::Crystal<U>> initialCrystals = {hpp::Crystal<U>(propsRotated, config, init)};
