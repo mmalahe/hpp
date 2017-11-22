@@ -5,7 +5,6 @@ import hpppy as hpp
 
 def spectralSolve(experiment_name,
                   database_filename,
-                  unified_coeff_order,
                   ref_multiplier,
                   ncrystals,
                   nterms,
@@ -23,22 +22,27 @@ def spectralSolve(experiment_name,
     
     # Crystal properties and initial conditions
     props = hpp.defaultCrystalPropertiesF()
+    propsCUDA = hpp.CrystalPropertiesCUDAF12(props)
     init = hpp.defaultCrystalInitialConditionsF()
     
     # Make the list of crystals with their orientations
     crystal_list = []
     for i in range(ncrystals):
-        crystal = hpp.SpectralCrystalCUDAF() # default crystal
-        crystal.s = init.s_0 # initial deformation resistance
-        crystal.angles = experiment.generateNextOrientationAngles() # initial orientation
+        crystal = hpp.SpectralCrystalCUDAF()                            # default crystal
+        crystal.s = init.s_0                                            # initial deformation resistance
+        crystal.angles = experiment.generateNextOrientationAngles()     # initial orientation
         crystal_list.append(crystal)
+        
+    # Choose the dataset IDs for the crystal response database
+    dsetIDs = hpp.defaultCrystalSpectralDatasetIDs()
     
-    print(hpp.listDemo(crystal_list))
+    # Load the crystal response database
+    #~ db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)
+    
 
 # Inputs
 experiment_name = 'mihaila2014_simple_shear'
 database_filename = 'databaseSpectralOrderedUnified128.hdf5'
-unified_coeff_order = True
 ref_multiplier = 128
 ncrystals = 1024
 nterms = 2**12
@@ -48,7 +52,6 @@ default_seed=True
 # Run
 spectralSolve(experiment_name,
                   database_filename,
-                  unified_coeff_order,
                   ref_multiplier,
                   ncrystals,
                   nterms,

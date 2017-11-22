@@ -5,6 +5,7 @@
 #include <boost/python.hpp>
 #include <hpp/tensor.h>
 #include <hpp/casesUtils.h>
+#include <hpp/spectralUtils.h>
 #include <hpp/crystal.h>
 #include <hpp/crystalCUDA.h>
 #include <hpp/continuum.h>
@@ -19,6 +20,14 @@ float listDemo(const boost::python::list& list) {
     return vec[0].s;
 }
 
+// Wrappers/conversions
+boost::python::list defaultCrystalSpectralDatasetIDsPy() {
+    std::vector<hpp::SpectralDatasetID> dsetIDs = hpp::defaultCrystalSpectralDatasetIDs();
+    boost::python::list dsetIDsPy = hpp::toPythonList<hpp::SpectralDatasetID>(dsetIDs);
+    return dsetIDsPy;
+}
+
+// The module
 BOOST_PYTHON_MODULE(hpppy) {    
     // debugging/testing/experimenting
     boost::python::def("listDemo", listDemo, boost::python::args("list"), "list demo");
@@ -39,6 +48,9 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("generateNextOrientationAngles", &hpp::Experiment<float>::generateNextOrientationAngles)
     ;
     
+    // spectralUtils.h
+    boost::python::class_<hpp::SpectralDatasetID>("SpectralDatasetID");
+    
     // crystal.h
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
     boost::python::class_<hpp::CrystalInitialConditions<float>>("CrystalInitialConditionsF")
@@ -46,8 +58,12 @@ BOOST_PYTHON_MODULE(hpppy) {
     ;
     boost::python::def("defaultCrystalPropertiesF", hpp::defaultCrystalProperties<float>);
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
+    boost::python::def("defaultCrystalSpectralDatasetIDs", defaultCrystalSpectralDatasetIDsPy);
     
     // crystalCUDA.h
+    boost::python::class_<hpp::CrystalPropertiesCUDA<float,12>>("CrystalPropertiesCUDAF12", 
+        boost::python::init<const hpp::CrystalProperties<float>&>())
+    ;
     boost::python::class_<hpp::SpectralCrystalCUDA<float>>("SpectralCrystalCUDAF")
         .add_property("s", &hpp::SpectralCrystalCUDA<float>::getS, &hpp::SpectralCrystalCUDA<float>::setS)
         .add_property("angles", &hpp::SpectralCrystalCUDA<float>::getAngles, &hpp::SpectralCrystalCUDA<float>::setAngles)
