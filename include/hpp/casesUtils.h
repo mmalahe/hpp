@@ -305,7 +305,9 @@ class Experiment {
         // Getters/setters (mainly intended for Python interface)
         U getTStart() const {return tStart;}
         U getTEnd() const {return tEnd;}
-        U getStrainRate() const {return strainRate;}        
+        U getStrainRate() const {return strainRate;}
+        std::function<Tensor2<U>(U)> getF_of_t() const {return F_of_t;}
+        std::function<Tensor2<U>(U)> getL_of_t() const {return L_of_t;}
 };
 
 } // END NAMESPACE hpp

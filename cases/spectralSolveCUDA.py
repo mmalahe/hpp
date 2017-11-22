@@ -39,8 +39,10 @@ def spectralSolve(experiment_name,
     db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)
     
     # Create the polycrystal
-    polcrystal = hpp.SpectralPolycrystalCUDAF12(crystal_list, props, db)
+    polycrystal = hpp.SpectralPolycrystalCUDAF12(crystal_list, props, db)
     
+    # Run a simulation
+    polycrystal.evolve(experiment.tStart, experiment.tEnd, dt, experiment.F_of_t, experiment.L_of_t)    
 
 # Inputs
 experiment_name = 'mihaila2014_simple_shear'

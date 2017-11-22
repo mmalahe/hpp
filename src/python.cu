@@ -13,10 +13,14 @@
 
 // The module
 BOOST_PYTHON_MODULE(hpppy) {    
+    // General
+    boost::python::class_<std::function<hpp::Tensor2<float>(float)>>("Tensor2FunctionOfScalarF");
+    
     // tensor.h
     boost::python::class_<hpp::Tensor2<float>>("Tensor2F", 
         boost::python::init<const unsigned int, const unsigned int>())
         .def("getn1", &hpp::Tensor2<float>::getn1)
+        .def("getn2", &hpp::Tensor2<float>::getn2)
     ;
     boost::python::class_<hpp::EulerAngles<float>>("EulerAnglesF");
     
@@ -26,6 +30,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         .add_property("strainRate", &hpp::Experiment<float>::getStrainRate)
         .add_property("tStart", &hpp::Experiment<float>::getTStart)
         .add_property("tEnd", &hpp::Experiment<float>::getTEnd)
+        .add_property("F_of_t", &hpp::Experiment<float>::getF_of_t)
+        .add_property("L_of_t", &hpp::Experiment<float>::getL_of_t)
         .def("generateNextOrientationAngles", &hpp::Experiment<float>::generateNextOrientationAngles)
     ;
     
@@ -60,5 +66,6 @@ BOOST_PYTHON_MODULE(hpppy) {
     ;
     boost::python::class_<hpp::SpectralPolycrystalCUDA<float,12>>("SpectralPolycrystalCUDAF12", 
         boost::python::init<std::vector<hpp::SpectralCrystalCUDA<float>>&, const hpp::CrystalPropertiesCUDA<float, 12>&, const hpp::SpectralDatabaseUnified<float>&>())
+        .def("evolve", &hpp::SpectralPolycrystalCUDA<float,12>::evolve)
     ;
 }
