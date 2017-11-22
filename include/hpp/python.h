@@ -2,6 +2,7 @@
 #define HPP_PYTHON_H
 
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 namespace hpp
 {

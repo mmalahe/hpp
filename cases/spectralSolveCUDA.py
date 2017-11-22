@@ -35,7 +35,7 @@ def spectralSolve(experiment_name,
     # Choose the dataset IDs for the crystal response database
     dsetIDs = hpp.defaultCrystalSpectralDatasetIDs()
     
-    print props
+    print dsetIDs
     
     # Load the crystal response database
     #~ db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)

@@ -128,6 +128,19 @@ bool operator<(const SpectralDatasetID& l, const SpectralDatasetID& r) {
     }
 }
 
+// Operators defined for the sake of Boost Python vector indexing suite
+bool operator==(const SpectralDatasetID& l, const SpectralDatasetID& r) {
+    if (l.baseName != r.baseName) {
+        return false;
+    }
+    if (l.component != r.component) {
+        return false;
+    }
+    
+    // All checks passed
+    return true;
+}
+
 ///////////////////////
 // SPECTRAL DATABASE //
 ///////////////////////

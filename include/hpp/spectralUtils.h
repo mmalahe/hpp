@@ -177,6 +177,9 @@ struct SpectralDatasetID {
 // Comparison for use with std::map
 bool operator<(const SpectralDatasetID& l, const SpectralDatasetID& r);
 
+// Operators defined for the sake of Boost Python vector indexing suite
+bool operator==(const SpectralDatasetID& l, const SpectralDatasetID& r);
+
 // Set names
 #define HPP_DEFAULT_UNIFIED_COORDS_NAME "unified_coords"
 #define HPP_DEFAULT_COORDS_SUFFIX "_coords"

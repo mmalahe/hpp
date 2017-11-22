@@ -11,27 +11,8 @@
 #include <hpp/continuum.h>
 #include <hpp/python.h>
 
-float listDemo(const boost::python::list& list) {
-    auto vec = hpp::toStdVector<hpp::SpectralCrystalCUDA<float>>(list);
-    for (const auto& v : vec) {
-        std::cout << v.s << std::endl;
-        std::cout << v.angles << std::endl;
-    }
-    return vec[0].s;
-}
-
-// Wrappers/conversions
-boost::python::list defaultCrystalSpectralDatasetIDsPy() {
-    std::vector<hpp::SpectralDatasetID> dsetIDs = hpp::defaultCrystalSpectralDatasetIDs();
-    boost::python::list dsetIDsPy = hpp::toPythonList<hpp::SpectralDatasetID>(dsetIDs);
-    return dsetIDsPy;
-}
-
 // The module
 BOOST_PYTHON_MODULE(hpppy) {    
-    // debugging/testing/experimenting
-    boost::python::def("listDemo", listDemo, boost::python::args("list"), "list demo");
-    
     // tensor.h
     boost::python::class_<hpp::Tensor2<float>>("Tensor2F", 
         boost::python::init<const unsigned int, const unsigned int>())
@@ -50,6 +31,12 @@ BOOST_PYTHON_MODULE(hpppy) {
     
     // spectralUtils.h
     boost::python::class_<hpp::SpectralDatasetID>("SpectralDatasetID");
+    boost::python::class_<std::vector<hpp::SpectralDatasetID> >("SpectralDatasetIDVec")
+        .def(boost::python::vector_indexing_suite<std::vector<hpp::SpectralDatasetID>>())
+    ;
+    boost::python::class_<hpp::SpectralDatabaseUnified<float>>("SpectralDatabaseUnifiedF",
+        boost::python::init<std::string, std::vector<hpp::SpectralDatasetID>, unsigned int, unsigned int>())
+    ;
     
     // crystal.h
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
@@ -58,7 +45,7 @@ BOOST_PYTHON_MODULE(hpppy) {
     ;
     boost::python::def("defaultCrystalPropertiesF", hpp::defaultCrystalProperties<float>);
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
-    boost::python::def("defaultCrystalSpectralDatasetIDs", defaultCrystalSpectralDatasetIDsPy);
+    boost::python::def("defaultCrystalSpectralDatasetIDs", hpp::defaultCrystalSpectralDatasetIDs);
     
     // crystalCUDA.h
     boost::python::class_<hpp::CrystalPropertiesCUDA<float,12>>("CrystalPropertiesCUDAF12", 
