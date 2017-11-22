@@ -1846,6 +1846,21 @@ std::ostream& operator<<(std::ostream& out, const EulerAngles<T>& angles)
 }
 
 template <typename T>
+bool operator==(const EulerAngles<T>& l, const EulerAngles<T>& r) {
+    if (l.alpha != r.alpha) return false;
+    if (l.beta != r.beta) return false;
+    if (l.gamma != r.gamma) return false;
+    
+    // All checks passed
+    return true;
+}
+
+template <typename T>
+bool operator!=(const EulerAngles<T>& l, const EulerAngles<T>& r) {
+    return !(l==r);
+}
+
+template <typename T>
 Tensor2<T> EulerZXZRotationMatrix(EulerAngles<T> angle) {
     return EulerZXZRotationMatrix(angle.alpha, angle.beta, angle.gamma);
 }

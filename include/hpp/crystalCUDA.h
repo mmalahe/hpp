@@ -71,6 +71,19 @@ struct SpectralCrystalCUDA{
     void setAngles(const EulerAngles<T>& angles) {this->angles = angles;}
 };
 
+template <typename T>
+bool operator==(const SpectralCrystalCUDA<T>& l, const SpectralCrystalCUDA<T>& r) {
+    if (l.angles != r.angles) {
+        return false;
+    }
+    if (l.s != r.s) {
+        return false;
+    }
+    
+    // All checks passed
+    return true;
+}
+
 /**
  * @class SpectralCrystalListCUDA
  * @author Michael Malahe

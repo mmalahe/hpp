@@ -38,6 +38,9 @@ def spectralSolve(experiment_name,
     # Load the crystal response database
     db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)
     
+    # Create the polycrystal
+    
+    
 
 # Inputs
 experiment_name = 'mihaila2014_simple_shear'

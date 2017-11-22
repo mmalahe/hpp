@@ -55,4 +55,7 @@ BOOST_PYTHON_MODULE(hpppy) {
         .add_property("s", &hpp::SpectralCrystalCUDA<float>::getS, &hpp::SpectralCrystalCUDA<float>::setS)
         .add_property("angles", &hpp::SpectralCrystalCUDA<float>::getAngles, &hpp::SpectralCrystalCUDA<float>::setAngles)
     ;
+    boost::python::class_<std::vector<hpp::SpectralCrystalCUDA<float>> >("SpectralCrystalCUDAFVec")
+        .def(boost::python::vector_indexing_suite<std::vector<hpp::SpectralCrystalCUDA<float>>>())
+    ;
 }
