@@ -25,7 +25,7 @@ def spectralSolve(experiment_name,
     init = hpp.defaultCrystalInitialConditionsF()
     
     # Make the list of crystals with their orientations
-    crystal_list = []
+    crystal_list = hpp.SpectralCrystalCUDAFVec()
     for i in range(ncrystals):
         crystal = hpp.SpectralCrystalCUDAF()                            # default crystal
         crystal.s = init.s_0                                            # initial deformation resistance
@@ -39,7 +39,7 @@ def spectralSolve(experiment_name,
     db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)
     
     # Create the polycrystal
-    
+    polcrystal = hpp.SpectralPolycrystalCUDAF12(crystal_list, props, db)
     
 
 # Inputs
