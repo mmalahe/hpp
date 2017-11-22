@@ -49,7 +49,7 @@ std::vector<hsize_t> getDatasetDims(hid_t dset_id) {
  * @param flags the 
  * @return 
  */
-HDF5MPIHandler::HDF5MPIHandler(std::string filename, MPI_Comm comm, bool doCreate) {
+HDF5Handler::HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate) {
     MPI_Barrier(comm);
     
     // Basics
@@ -91,7 +91,7 @@ HDF5MPIHandler::HDF5MPIHandler(std::string filename, MPI_Comm comm, bool doCreat
     MPI_Barrier(comm);
 }
 
-hid_t HDF5MPIHandler::getDataset(std::string datasetName) {    
+hid_t HDF5Handler::getDataset(std::string datasetName) {    
     if (currentlyOpenDatasets.count(datasetName) == 0) {
         this->openDataset(datasetName);
     }
@@ -99,32 +99,32 @@ hid_t HDF5MPIHandler::getDataset(std::string datasetName) {
 }
 
 template <typename T>
-hid_t HDF5MPIHandler::createDataset(std::string datasetName, std::vector<hsize_t> dataDims) {                
+hid_t HDF5Handler::createDataset(std::string datasetName, std::vector<hsize_t> dataDims) {                
     MPI_Barrier(comm);
     hid_t dset_id = createHDF5Dataset<T>(file_id, datasetName, dataDims);
     currentlyOpenDatasets.insert(std::pair<std::string, hid_t>(datasetName, dset_id));
     MPI_Barrier(comm);
     return dset_id;
 }
-template hid_t HDF5MPIHandler::createDataset<float>(std::string datasetName, std::vector<hsize_t> dataDims);
-template hid_t HDF5MPIHandler::createDataset<double>(std::string datasetName, std::vector<hsize_t> dataDims);
-template hid_t HDF5MPIHandler::createDataset<hdf_complex_t>(std::string datasetName, std::vector<hsize_t> dataDims);
-template hid_t HDF5MPIHandler::createDataset<unsigned short>(std::string datasetName, std::vector<hsize_t> dataDims);
+template hid_t HDF5Handler::createDataset<float>(std::string datasetName, std::vector<hsize_t> dataDims);
+template hid_t HDF5Handler::createDataset<double>(std::string datasetName, std::vector<hsize_t> dataDims);
+template hid_t HDF5Handler::createDataset<hdf_complex_t>(std::string datasetName, std::vector<hsize_t> dataDims);
+template hid_t HDF5Handler::createDataset<unsigned short>(std::string datasetName, std::vector<hsize_t> dataDims);
 
 template <typename T>
-hid_t HDF5MPIHandler::createDataset(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims) {                
+hid_t HDF5Handler::createDataset(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims) {                
     MPI_Barrier(comm);
     hid_t dset_id = createHDF5GridOfArrays<T>(file_id, datasetName, gridDims, arrayDims);
     currentlyOpenDatasets.insert(std::pair<std::string, hid_t>(datasetName, dset_id));
     MPI_Barrier(comm);
     return dset_id;
 }
-template hid_t HDF5MPIHandler::createDataset<float>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
-template hid_t HDF5MPIHandler::createDataset<double>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
-template hid_t HDF5MPIHandler::createDataset<hdf_complex_t>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
-template hid_t HDF5MPIHandler::createDataset<unsigned short>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
+template hid_t HDF5Handler::createDataset<float>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
+template hid_t HDF5Handler::createDataset<double>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
+template hid_t HDF5Handler::createDataset<hdf_complex_t>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
+template hid_t HDF5Handler::createDataset<unsigned short>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
 
-void HDF5MPIHandler::openDataset(std::string datasetName) {                
+void HDF5Handler::openDataset(std::string datasetName) {                
     if (currentlyOpenDatasets.count(datasetName) == 0) {
         MPI_Barrier(comm);
         hid_t dset_id = H5Dopen(file_id, datasetName.c_str(), H5P_DEFAULT);
@@ -136,7 +136,7 @@ void HDF5MPIHandler::openDataset(std::string datasetName) {
     }
 }
 
-std::vector<std::string> HDF5MPIHandler::getDatasetNames() {
+std::vector<std::string> HDF5Handler::getDatasetNames() {
     hsize_t numObjs;
     HDFCHECK(H5Gget_num_objs(this->file_id, &numObjs));
     std::vector<std::string> names;
@@ -154,7 +154,7 @@ std::vector<std::string> HDF5MPIHandler::getDatasetNames() {
     return names;
 }
 
-HDF5MPIHandler::~HDF5MPIHandler() {
+HDF5Handler::~HDF5Handler() {
     // Close datasets
     for (auto&& nameIDPair : currentlyOpenDatasets) {
         HDFCHECK(H5Dclose(nameIDPair.second));
