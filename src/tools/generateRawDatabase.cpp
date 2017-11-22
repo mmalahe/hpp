@@ -221,7 +221,7 @@ void generateDatabase(std::string output_filename, unsigned int gridLength, MPI_
     //////////////////////////////
 
     // File
-    hpp::HDF5MPIHandler file(output_filename, comm, true);
+    hpp::HDF5Handler file(output_filename, comm, true);
     hid_t plist_id_xfer_independent = file.getPropertyListTransferIndependent();
     std::vector<hsize_t> tensorDims = {3,3};
     

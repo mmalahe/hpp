@@ -50,6 +50,8 @@ std::vector<hsize_t> getDatasetDims(hid_t dset_id) {
  * @return 
  */
 HDF5Handler::HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate) {
+    usingMPI = true;
+    
     MPI_Barrier(comm);
     
     // Basics
@@ -91,6 +93,40 @@ HDF5Handler::HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate) {
     MPI_Barrier(comm);
 }
 
+/**
+ * @brief Create a handler for HDF5 serial I/O on a file
+ * @param filename the name of the file
+ * @param comm the MPI communicator
+ * @param flags the 
+ * @return 
+ */
+HDF5Handler::HDF5Handler(std::string filename, bool doCreate) {    
+    usingMPI = false;
+    
+    // Basics
+    this->filename = filename;
+    
+    // Properties for file for access
+    // plist_id_file_access is a "file access" property list    
+    this->plist_id_file_access = H5Pcreate(H5P_FILE_ACCESS);
+    HDFCHECK(this->plist_id_file_access);
+    
+    // Create file if requested
+    if (doCreate) {
+        hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, this->plist_id_file_access);
+        HDFCHECK(H5Fclose(file));
+    }    
+
+    // Open file   
+    file_id = H5Fopen(filename.c_str(), H5F_ACC_RDWR, this->plist_id_file_access);
+    HDFCHECK(file_id);
+    
+    // Properties for independent I/O
+    // plist_id_xfer_independent is a "data transfer" Property List
+    this->plist_id_xfer_independent = H5Pcreate(H5P_DATASET_XFER);
+    HDFCHECK(this->plist_id_xfer_independent);
+}
+
 hid_t HDF5Handler::getDataset(std::string datasetName) {    
     if (currentlyOpenDatasets.count(datasetName) == 0) {
         this->openDataset(datasetName);
@@ -100,10 +136,10 @@ hid_t HDF5Handler::getDataset(std::string datasetName) {
 
 template <typename T>
 hid_t HDF5Handler::createDataset(std::string datasetName, std::vector<hsize_t> dataDims) {                
-    MPI_Barrier(comm);
+    if (usingMPI) {MPI_Barrier(comm);}
     hid_t dset_id = createHDF5Dataset<T>(file_id, datasetName, dataDims);
     currentlyOpenDatasets.insert(std::pair<std::string, hid_t>(datasetName, dset_id));
-    MPI_Barrier(comm);
+    if (usingMPI) {MPI_Barrier(comm);}
     return dset_id;
 }
 template hid_t HDF5Handler::createDataset<float>(std::string datasetName, std::vector<hsize_t> dataDims);
@@ -113,10 +149,10 @@ template hid_t HDF5Handler::createDataset<unsigned short>(std::string datasetNam
 
 template <typename T>
 hid_t HDF5Handler::createDataset(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims) {                
-    MPI_Barrier(comm);
+    if (usingMPI) {MPI_Barrier(comm);}
     hid_t dset_id = createHDF5GridOfArrays<T>(file_id, datasetName, gridDims, arrayDims);
     currentlyOpenDatasets.insert(std::pair<std::string, hid_t>(datasetName, dset_id));
-    MPI_Barrier(comm);
+    if (usingMPI) {MPI_Barrier(comm);}
     return dset_id;
 }
 template hid_t HDF5Handler::createDataset<float>(std::string datasetName, std::vector<hsize_t> gridDims, std::vector<hsize_t> arrayDims);
@@ -126,10 +162,10 @@ template hid_t HDF5Handler::createDataset<unsigned short>(std::string datasetNam
 
 void HDF5Handler::openDataset(std::string datasetName) {                
     if (currentlyOpenDatasets.count(datasetName) == 0) {
-        MPI_Barrier(comm);
+        if (usingMPI) {MPI_Barrier(comm);}
         hid_t dset_id = H5Dopen(file_id, datasetName.c_str(), H5P_DEFAULT);
         currentlyOpenDatasets.insert(std::pair<std::string, hid_t>(datasetName, dset_id));
-        MPI_Barrier(comm);
+        if (usingMPI) {MPI_Barrier(comm);}
     }
     else {
         std::cerr << "Warning: attempted to open dataset " << datasetName << " that was already open." << std::endl;

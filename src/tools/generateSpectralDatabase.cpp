@@ -23,7 +23,7 @@ inline double complexMag(double im, double re) {
     return std::sqrt(std::pow(im,2) + std::pow(re,2));
 }
     
-void readPerformDFTThenWriteOrderedCoeffs(hpp::HDF5MPIHandler& infile, std::string dsetInName, hpp::FFTWConfigRealND& cfg, std::vector<hsize_t> componentIdx, hpp::HDF5MPIHandler& outfile, hid_t dsetOutCoords, hid_t dsetOutVals, unsigned int nCoeffs, MPI_Comm comm) 
+void readPerformDFTThenWriteOrderedCoeffs(hpp::HDF5Handler& infile, std::string dsetInName, hpp::FFTWConfigRealND& cfg, std::vector<hsize_t> componentIdx, hpp::HDF5Handler& outfile, hid_t dsetOutCoords, hid_t dsetOutVals, unsigned int nCoeffs, MPI_Comm comm) 
 {   
     // Comm
     int comm_size, comm_rank;
@@ -174,7 +174,7 @@ void generateSpectralDatabase(std::string rawDatabaseFilename, std::string spect
     MPI_Comm_rank(comm, &comm_rank);
     
     // Open handle to input file and get transfer property list
-    hpp::HDF5MPIHandler infile(rawDatabaseFilename, comm, false);
+    hpp::HDF5Handler infile(rawDatabaseFilename, comm, false);
     
     // Input dataset names
     std::string gammadotAbsSumNameIn = "gammadot_abs_sum";
@@ -198,7 +198,7 @@ void generateSpectralDatabase(std::string rawDatabaseFilename, std::string spect
     hpp::FFTWConfigRealND cfg = hpp::prepareFFTWConfigRealND(gridDimsPtrDiff, comm);
     
     // Open handle to output file and get transfer property list
-    hpp::HDF5MPIHandler outfile(spectralDatabaseFilename, comm, true);
+    hpp::HDF5Handler outfile(spectralDatabaseFilename, comm, true);
     hid_t plist_out = outfile.getPropertyListTransferIndependent();
     
     // Write dimensions
@@ -317,7 +317,7 @@ void executeAndCheckFFTW(hpp::FFTWConfigRealND& cfg) {
     }
 }
 
-void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5MPIHandler& infile, hid_t dsetOutCoords, std::vector<hpp::SpectralDatasetID> spectralDatasetIDs , hpp::FFTWConfigRealND& cfg, hpp::HDF5MPIHandler& outfile, unsigned int nCoeffs, MPI_Comm comm) 
+void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5Handler& infile, hid_t dsetOutCoords, std::vector<hpp::SpectralDatasetID> spectralDatasetIDs , hpp::FFTWConfigRealND& cfg, hpp::HDF5Handler& outfile, unsigned int nCoeffs, MPI_Comm comm) 
 {   
     // Comm
     int comm_size, comm_rank;
@@ -518,7 +518,7 @@ void generateSpectralDatabaseUnified(std::string rawDatabaseFilename, std::strin
     MPI_Comm_rank(comm, &comm_rank);
     
     // Open handle to input file and get transfer property list
-    hpp::HDF5MPIHandler infile(rawDatabaseFilename, comm, false);
+    hpp::HDF5Handler infile(rawDatabaseFilename, comm, false);
     hid_t plist_in = infile.getPropertyListTransferIndependent();
     
     // Read in number of dimensions
@@ -544,7 +544,7 @@ void generateSpectralDatabaseUnified(std::string rawDatabaseFilename, std::strin
     hpp::FFTWConfigRealND cfg = hpp::prepareFFTWConfigRealND(gridDimsPtrDiff, comm);
     
     // Open handle to output file and get transfer property list
-    hpp::HDF5MPIHandler outfile(spectralDatabaseFilename, comm, true);
+    hpp::HDF5Handler outfile(spectralDatabaseFilename, comm, true);
     hid_t plist_out = outfile.getPropertyListTransferIndependent();
     
     // Write dimensions

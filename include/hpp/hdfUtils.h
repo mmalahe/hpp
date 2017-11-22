@@ -327,22 +327,23 @@ void writeSingleHDF5Value(hid_t dset_id, hid_t plist_id, std::vector<hsize_t> gr
 
 std::vector<hsize_t> getDatasetDims(hid_t dset_id);
 
-// HANDLER FOR MPI I/O //
-/////////////////////////
-
 /**
- * @class HDF5MPIHandler
+ * @class HDF5Handler
  * @author Michael
  * @date 07/12/16
  * @file hdfUtils.h
  * @brief 
  * @details The only functionality here is creating, writing to and
- * closing datasets. Parallel I/O is left to the C API.
+ * closing datasets. I/O, parallel or otherwise is left to the C API.
  */
-class HDF5MPIHandler
+class HDF5Handler
 {
-    public:
-        HDF5MPIHandler(std::string filename, MPI_Comm comm, bool doCreate);
+    public:        
+        // MPI constructor
+        HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate);
+        
+        // Serial constructor
+        HDF5Handler(std::string filename, bool doCreate);
         
         // Create datasets
         template <typename T>
@@ -360,13 +361,14 @@ class HDF5MPIHandler
         std::vector<std::string> getDatasetNames();
         
         // Default destructor
-        ~HDF5MPIHandler();
+        ~HDF5Handler();
     private:
         // File
         std::string filename;
         hid_t file_id;
         
         // MPI Configuration
+        bool usingMPI = false;
         MPI_Comm comm;
         int comm_size;
         int comm_rank;
@@ -379,8 +381,13 @@ class HDF5MPIHandler
         // Datasets
         void openDataset(std::string datasetName);
         
-        // Property lists
+        // Property list for file access
         hid_t plist_id_file_access;
+        
+        // Property list for independent transfers
+        // In MPI context, this is each process making transfers asynchronously
+        // In serial context, this is just a usual transfer. It's technically
+        // "independent" since there is only one process.
         hid_t plist_id_xfer_independent;
 };
 

@@ -60,7 +60,7 @@ void testTensor2ParallelIO(MPI_Comm comm, int comm_size, int comm_rank) {
     // Create file and dataset //
     /////////////////////////////
     
-    HDF5MPIHandler file(filename, comm, true);
+    HDF5Handler file(filename, comm, true);
     file.createDataset<T>(datasetName, tensorGridDims, tensorDims);    
     hid_t dset_main = file.getDataset(datasetName);
     hid_t plist_id_xfer_independent = file.getPropertyListTransferIndependent();

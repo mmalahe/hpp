@@ -21,7 +21,7 @@ void testHDFReadWriteParallel(MPI_Comm comm) {
     
     // File
     std::string filename = "parallelFile.hdf5";
-    HDF5MPIHandler file(filename, comm, true);
+    HDF5Handler file(filename, comm, true);
     
     // Common grid for datasets
     std::vector<hsize_t> gridDims = {2,3};

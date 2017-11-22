@@ -152,7 +152,7 @@ bool operator==(const SpectralDatasetID& l, const SpectralDatasetID& r) {
  * @param componentIdxUint
  */
 template <typename U>
-void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5MPIHandler& dbfile, std::string dsetBasename, std::vector<unsigned int> componentIdxUint, unsigned int nTerms, unsigned int refineMult) {
+void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5Handler& dbfile, std::string dsetBasename, std::vector<unsigned int> componentIdxUint, unsigned int nTerms, unsigned int refineMult) {
     // Property list for reading in data
     hid_t plist_in = dbfile.getPropertyListTransferIndependent();
     
@@ -269,7 +269,7 @@ void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5MPIHandler& dbfile, std
  * @param dsetBasename
  */
 template <typename U>
-void SpectralDatabase<U>::loadDataset(HDF5MPIHandler& dbfile, std::string dsetBasename, unsigned int nTerms, unsigned int refineMult) {
+void SpectralDatabase<U>::loadDataset(HDF5Handler& dbfile, std::string dsetBasename, unsigned int nTerms, unsigned int refineMult) {
     // Get the coefficients dataset
     std::string dsetNameCoeffs = getCoeffsName(dsetBasename);
     hid_t dsetCoeffs = dbfile.getDataset(dsetNameCoeffs);
@@ -334,7 +334,7 @@ void SpectralDatabase<U>::generateExponentialTable() {
 template <typename U>
 SpectralDatabase<U>::SpectralDatabase(std::string dbFilename, std::vector<std::string> dsetBasenames, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult) {    
     // Open handle to input data file
-    HDF5MPIHandler dbFile(dbFilename, comm, false);
+    HDF5Handler dbFile(dbFilename, comm, false);
     hid_t plist = dbFile.getPropertyListTransferIndependent();
     
     // Read in number of dimensions
@@ -475,7 +475,7 @@ U SpectralDatabaseUnified<U>::getIDFTReal(std::string dsetBasename, std::vector<
  * @param componentIdxUint
  */
 template <typename U>
-void SpectralDatabaseUnified<U>::loadDatasets(HDF5MPIHandler& dbfile, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult) {
+void SpectralDatabaseUnified<U>::loadDatasets(HDF5Handler& dbfile, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult) {
     // Number of datasets
     unsigned int nDatasets = dsetIDs.size();
     
@@ -637,7 +637,7 @@ void SpectralDatabaseUnified<U>::loadDatasets(HDF5MPIHandler& dbfile, std::vecto
 template <typename U>
 void SpectralDatabaseUnified<U>::constructFromFile(std::string dbFilename, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult){    
     // Open handle to input data file
-    HDF5MPIHandler dbFile(dbFilename, comm, false);
+    HDF5Handler dbFile(dbFilename, comm, false);
     hid_t plist = dbFile.getPropertyListTransferIndependent();
     
     // Read in number of dimensions
@@ -722,7 +722,7 @@ SpectralDatabaseUnified<U>::SpectralDatabaseUnified(std::string dbFilename, std:
 // Construct from database with discovered dataset IDs
 template <typename U>
 SpectralDatabaseUnified<U>::SpectralDatabaseUnified(std::string dbFilename, unsigned int nTerms, MPI_Comm comm, unsigned int refineMult) {
-    HDF5MPIHandler spectralFile(dbFilename, comm, false);
+    HDF5Handler spectralFile(dbFilename, comm, false);
     std::vector<hpp::SpectralDatasetID> dsetIDs;
     for (auto dsetCoeffsName : spectralFile.getDatasetNames()) {
         size_t startOfCoeffsSuffix = dsetCoeffsName.rfind(HPP_DEFAULT_COEFFS_SUFFIX);
@@ -744,9 +744,9 @@ template class SpectralDatabaseUnified<double>;
 
 void evaluateSpectralCompressionErrorFull(std::string rawDBName, std::string spectralDBName, std::string errorDBName, unsigned int nTermsMax, std::string outFilename, MPI_Comm comm) {
     // Open files for reading
-    HDF5MPIHandler rawFile(rawDBName, comm, false);
+    HDF5Handler rawFile(rawDBName, comm, false);
     hid_t plistRaw = rawFile.getPropertyListTransferIndependent();
-    HDF5MPIHandler spectralFile(spectralDBName, comm, false);
+    HDF5Handler spectralFile(spectralDBName, comm, false);
     
     // Spatial grid dimensions
     hid_t dsetGridDims = rawFile.getDataset("grid_dims");
@@ -938,9 +938,9 @@ void evaluateSpectralCompressionErrorFullUnified(std::string rawDBName, std::str
     throw std::runtime_error("Not implemented yet. Currently a copy of non-unified version.");  
     
     // Open files for reading
-    HDF5MPIHandler rawFile(rawDBName, comm, false);
+    HDF5Handler rawFile(rawDBName, comm, false);
     hid_t plistRaw = rawFile.getPropertyListTransferIndependent();
-    HDF5MPIHandler spectralFile(spectralDBName, comm, false);
+    HDF5Handler spectralFile(spectralDBName, comm, false);
     
     // Spatial grid dimensions
     hid_t dsetGridDims = rawFile.getDataset("grid_dims");
@@ -1159,7 +1159,7 @@ void evaluateSpectralCompressionErrorAxisSlice(std::string rawDBName, std::strin
     SpectralDatabase<double> dbSpectral(spectralDBName, dsetBasenames, nTermsMax, comm, refineMult);
     
     // Open raw database file for reading
-    HDF5MPIHandler rawFile(rawDBName, comm, false);
+    HDF5Handler rawFile(rawDBName, comm, false);
     hid_t plistRaw = rawFile.getPropertyListTransferIndependent();
     
     // Spatial grid dimensions
@@ -1316,7 +1316,7 @@ void evaluateSpectralCompressionErrorAxisSliceUnified(std::string rawDBName, std
     MPI_Comm_rank(comm, &comm_rank);
     
     // Open raw database file for reading
-    HDF5MPIHandler rawFile(rawDBName, comm, false);
+    HDF5Handler rawFile(rawDBName, comm, false);
     hid_t plistRaw = rawFile.getPropertyListTransferIndependent();
     
     // Load spectral database

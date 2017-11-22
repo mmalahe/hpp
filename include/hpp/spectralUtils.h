@@ -295,8 +295,8 @@ private:
     unsigned int alignment = HPP_DEFAULT_ALIGNMENT;
 
     // Load dataset
-    void loadDatasetSingleComponent(HDF5MPIHandler& dbfile, std::string dsetBasename, std::vector<unsigned int> componentIdxUint, unsigned int nTerms, unsigned int refineMult=1);
-    void loadDataset(HDF5MPIHandler& dbfile, std::string dsetBasename, unsigned int nTerms, unsigned int refineMult=1);
+    void loadDatasetSingleComponent(HDF5Handler& dbfile, std::string dsetBasename, std::vector<unsigned int> componentIdxUint, unsigned int nTerms, unsigned int refineMult=1);
+    void loadDataset(HDF5Handler& dbfile, std::string dsetBasename, unsigned int nTerms, unsigned int refineMult=1);
     
     // Generate exponential table
     void generateExponentialTable();
@@ -394,7 +394,7 @@ private:
     const unsigned int alignment = HPP_DEFAULT_ALIGNMENT;
 
     // Load dataset
-    void loadDatasets(HDF5MPIHandler& dbfile, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult=1);
+    void loadDatasets(HDF5Handler& dbfile, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult=1);
     
     // Generate exponential table
     //void generateExponentialTable();
@@ -409,7 +409,7 @@ private:
  * @param coeffList the list of coefficients to return
  */
 template <typename U>
-void loadSpectralDatabase(hpp::HDF5MPIHandler& infile, std::string dsetNameCoords, std::string dsetNameCoeffs, std::vector<hsize_t> componentIdx, std::vector<std::vector<unsigned int>>& coordsList, std::vector<std::complex<U>>& coeffList, unsigned int nTerms, unsigned int refineMult=1)
+void loadSpectralDatabase(hpp::HDF5Handler& infile, std::string dsetNameCoords, std::string dsetNameCoeffs, std::vector<hsize_t> componentIdx, std::vector<std::vector<unsigned int>>& coordsList, std::vector<std::complex<U>>& coeffList, unsigned int nTerms, unsigned int refineMult=1)
 {
     // Property list for reading in data
     hid_t plist_in = infile.getPropertyListTransferIndependent();
