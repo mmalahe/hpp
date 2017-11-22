@@ -11,3 +11,6 @@
 
 // Available standard library functions
 #cmakedefine HPP_HAVE_ALIGNED_ALLOC
+
+// Building Python interface
+#cmakedefine HPP_BUILD_PYTHON
