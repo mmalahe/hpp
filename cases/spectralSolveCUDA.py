@@ -21,8 +21,7 @@ def spectralSolve(experiment_name,
     dt = abs(strain_increment/experiment.strainRate)
     
     # Crystal properties and initial conditions
-    props = hpp.defaultCrystalPropertiesF()
-    propsCUDA = hpp.CrystalPropertiesCUDAF12(props)
+    props = hpp.CrystalPropertiesCUDAF12(hpp.defaultCrystalPropertiesF())
     init = hpp.defaultCrystalInitialConditionsF()
     
     # Make the list of crystals with their orientations
@@ -35,6 +34,8 @@ def spectralSolve(experiment_name,
         
     # Choose the dataset IDs for the crystal response database
     dsetIDs = hpp.defaultCrystalSpectralDatasetIDs()
+    
+    print props
     
     # Load the crystal response database
     #~ db = hpp.SpectralDatabaseUnifiedF(database_filename, dsetIDs, nterms, ref_multiplier)

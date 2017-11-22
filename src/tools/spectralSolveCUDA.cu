@@ -22,9 +22,6 @@
 #include <hpp/spectralUtilsCUDA.h>
 #include <hpp/crystalCUDA.h>
 
-namespace mihaila2014
-{
-
 template <typename U>
 void spectralSolve(std::string experimentName, std::string databaseFilename, bool unifiedCoeffOrder, unsigned int refinementMultiplier, unsigned int ncrystalsGlobal, unsigned int nTerms, std::string outputFilename, MPI_Comm comm, bool defaultSeed=false)
 {    
@@ -38,7 +35,7 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
     U dt = std::abs(strainIncrement/experiment.strainRate);
     
     // Crystal properties and initial conditions
-    hpp::CrystalProperties<U> props = hpp::defaultCrystalProperties<U>();
+    hpp::CrystalPropertiesCUDA<U,12> props(hpp::defaultCrystalProperties<U>());
     hpp::CrystalInitialConditions<U> init = hpp::defaultCrystalInitialConditions<U>();
     
     // Divide crystals between processes
@@ -69,20 +66,17 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
         experiment.orientationGenerator->generateNext(crystalList[i].angles);
     }
     
-    // Convert properties and database
-    hpp::CrystalPropertiesCUDA<U,12> crystalPropsCUDA(props);
-    
     // Create polycrystal
     hpp::SpectralPolycrystalCUDA<U,12> polycrystal;
     if (unifiedCoeffOrder) {
         std::vector<hpp::SpectralDatasetID> dsetIDs = hpp::defaultCrystalSpectralDatasetIDs();
         hpp::SpectralDatabaseUnified<U> db(databaseFilename, dsetIDs, nTerms, comm, refinementMultiplier);
-        polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, crystalPropsCUDA, db);
+        polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, props, db);
     }
     else {
         std::vector<std::string> dsetBasenames = {"sigma_prime", "W_p", "gammadot_abs_sum"};
         hpp::SpectralDatabase<U> db(databaseFilename, dsetBasenames, nTerms, comm, refinementMultiplier);
-        polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, crystalPropsCUDA, db);     
+        polycrystal = hpp::SpectralPolycrystalCUDA<U,12>(crystalList, props, db);     
     }        
     
     // Evolve
@@ -99,8 +93,6 @@ void spectralSolve(std::string experimentName, std::string databaseFilename, boo
         hpp::writeVectorToHDF5Array(outfile, "trueStrainHistory", trueStrainHistory);  
     }
 }
-    
-} // END NAMESPACE mihaila2014
 
 int main(int argc, char *argv[])
 {
@@ -199,7 +191,7 @@ int main(int argc, char *argv[])
     }
     
     // Run
-    mihaila2014::spectralSolve<float>(experimentName, databaseFilename, unifiedCoeffOrder, refinementMultiplier, nCrystals, nTerms, resultsFilename, comm, defaultSeed);
+    spectralSolve<float>(experimentName, databaseFilename, unifiedCoeffOrder, refinementMultiplier, nCrystals, nTerms, resultsFilename, comm, defaultSeed);
     
     // MPI finalize
     MPI_Finalize();
