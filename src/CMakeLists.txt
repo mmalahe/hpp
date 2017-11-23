@@ -38,3 +38,22 @@ endif()
 # TOOLS #
 #########
 add_subdirectory(tools)
+
+# INSTALLATION #
+################
+
+# Installation of library
+install(
+    TARGETS hpp
+    LIBRARY
+    DESTINATION "lib"
+)
+
+# Installation of Python interface
+if (${HPP_BUILD_PYTHON})
+    install(
+        TARGETS hpppy
+        LIBRARY
+        DESTINATION "${PYTHON_SITE_PACKAGES}"
+    )
+endif()
