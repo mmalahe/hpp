@@ -518,6 +518,33 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
     }    
 } 
 
+// Reset host function
+///@todo: implement specific random seed for orientations
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::reset(T init_s, unsigned long int seed) {
+    // Create resetted crystals on host
+    std::vector<SpectralCrystalCUDA<T>> crystalList(this->nCrystals);
+    Tensor2<T> R(3,3);
+    for (auto&& crystal : crystalList) {        
+        // Initial slip-system deformation resistance and angles
+        crystal.s = init_s;
+        randomRotationTensorInPlace<T>(3,R);
+        crystal.angles = getEulerZXZAngles(R);
+    }
+    
+    // Copy to device
+    copyVecToDeviceSharedPtr(crystalList, this->crystalsD);
+
+    // Reset other quantities
+    tHistory.clear();
+    TCauchyHistory.clear();
+    poleHistogramHistory111.clear();
+    poleHistogramHistory110.clear();
+    poleHistogramHistory100.clear();
+    poleHistogramHistory001.clear();
+    poleHistogramHistory011.clear();
+}
+
 // Step host function
 template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::step(const hpp::Tensor2<T>& F_next, const hpp::Tensor2<T>& L_next, T dt) 
