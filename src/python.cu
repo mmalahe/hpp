@@ -21,6 +21,7 @@ BOOST_PYTHON_MODULE(hpppy) {
         boost::python::init<const unsigned int, const unsigned int>())
         .def("getn1", &hpp::Tensor2<float>::getn1)
         .def("getn2", &hpp::Tensor2<float>::getn2)
+        .def("setVal", &hpp::Tensor2<float>::setVal)
     ;
     boost::python::class_<hpp::EulerAngles<float>>("EulerAnglesF")
         .add_property("alpha", &hpp::EulerAngles<float>::getAlpha)

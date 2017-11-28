@@ -354,6 +354,7 @@ class Tensor2
         T getValFlat(const unsigned int flatIdx) const;
         
         // Get read/write reference to value
+        void setVal(const unsigned int i, const unsigned int j, T val);
         T &operator()(const unsigned int i, const unsigned int j);
         T &operator()(const unsigned int flatIdx);
         void copyValuesOut(T* outVals) const;
@@ -628,6 +629,12 @@ template <typename T>
 inline T& Tensor2<T>::operator()(const unsigned int flatIdx)
 {
     return vals[flatIdx];
+}
+
+template <typename T>
+void Tensor2<T>::setVal(const unsigned int i, const unsigned int j, T val) {
+    unsigned int flatIdx = this->flat(i,j);
+    vals[flatIdx] = val;
 }
 
 ////
