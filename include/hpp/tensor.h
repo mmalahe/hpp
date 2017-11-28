@@ -1743,7 +1743,7 @@ void randomRotationTensorInPlace(unsigned int dim, Tensor2<T>& A, bool defaultSe
     #ifdef DEBUG_BUILD
         if (!(A.isRotationMatrix())) {
             std::cerr << "Warning: random rotation tensor didn't pass check. Re-generating." << std::endl;
-            randomRotationTensorInPlace<T>(dim, A);
+            randomRotationTensorInPlace<T>(dim, A, defaultSeed);
         }
     #endif
 }
@@ -1802,6 +1802,11 @@ struct EulerAngles {
     T alpha = 0;
     T beta = 0;
     T gamma = 0;
+    
+    // Getters/setters (mainly intended for Python interface)
+    T getAlpha() const {return alpha;}
+    T getBeta() const {return beta;}
+    T getGamma() const {return gamma;}
 };
 
 template <typename T>

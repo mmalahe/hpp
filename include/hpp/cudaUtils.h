@@ -167,8 +167,23 @@ T *makeDeviceCopyVec(const std::vector<T,A>& vec) {
 }
 
 template<typename T, typename A>
+void copyVecToDeviceSharedPtr(const std::vector<T,A>& vec, std::shared_ptr<T>& devPtr) {
+    size_t size = vec.size();
+    size_t memSize = size*sizeof(T);
+    CUDA_CHK(cudaMemcpy(devPtr.get(), vec.data(), memSize, cudaMemcpyHostToDevice));
+}
+
+template<typename T, typename A>
 std::shared_ptr<T> makeDeviceCopyVecSharedPtr(const std::vector<T,A>& vec) {
     return cudaSharedPtr(makeDeviceCopyVec(vec));
+}
+
+template<typename T>
+std::vector<T> makeHostVecFromSharedPtr(std::shared_ptr<T>& devPtr, size_t size) {
+    std::vector<T> vec(size);
+    size_t memSize = size*sizeof(T);
+    CUDA_CHK(cudaMemcpy(vec.data(), devPtr.get(), memSize, cudaMemcpyDeviceToHost));
+    return vec;
 }
 
 template <typename T>
