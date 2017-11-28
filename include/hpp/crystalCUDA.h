@@ -200,6 +200,7 @@ public:
     
     // Simulation
     void reset(T init_s, unsigned long int seed);
+    void step(const hpp::Tensor2<T>& L_next, T dt);
     void step(const hpp::Tensor2<T>& F_next, const hpp::Tensor2<T>& L_next, T dt);
     void evolve(T t_start, T t_end, T dt, std::function<hpp::Tensor2<T>(T t)> F_of_t, std::function<hpp::Tensor2<T>(T t)> L_of_t);
     

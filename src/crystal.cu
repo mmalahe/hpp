@@ -548,6 +548,13 @@ void SpectralPolycrystalCUDA<T,N>::reset(T init_s, unsigned long int seed) {
 // Step host function
 template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::step(const hpp::Tensor2<T>& F_next, const hpp::Tensor2<T>& L_next, T dt) 
+{   
+    this->step(L_next, dt);
+}
+
+// Step host function
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::step(const hpp::Tensor2<T>& L_next, T dt) 
 {        
     // Get stretching tensor decomposition
     StretchingTensorDecomposition<T> stretchingTensorDecomp = getStretchingTensorDecomposition(L_next); 
@@ -664,6 +671,16 @@ template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole) {
     auto histHSharedPtr = this->getPoleHistogram(pole);
     hist = *(histHSharedPtr.get());
+}
+
+template <typename T, unsigned int N>
+std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActive() {
+    auto crystalsH = makeHostVecFromSharedPtr(this->crystalsD, this->nCrystals);
+    std::vector<EulerAngles<T>> anglesVec(crystalsH.size());
+    for (unsigned int i=0; i<crystalsH.size(); i++) {
+        anglesVec[i] = crystalsH[i].angles;
+    }
+    return anglesVec;
 }
 
 /**
