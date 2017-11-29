@@ -270,6 +270,8 @@ __inline__ __device__ double expIntrinsic(double x) {
 }
 
 // Complex number support
+using cuComplexType<T> = typename enable_if<B,T>::type
+
 __inline__ __device__ cuFloatComplex make_cuComplex(float x, float y) {
     return make_cuFloatComplex(x,y);
 }
@@ -305,6 +307,22 @@ __inline__ __device__ cuFloatComplex operator*(cuFloatComplex z, cuFloatComplex 
 __inline__ __device__ cuDoubleComplex operator*(cuDoubleComplex z, cuDoubleComplex w) {
     return cuCmul(z, w);
 }
+
+// Support for CUDA derived types based on underlying scalar type
+template <class T, class Enable=void>
+struct cuTypes {};
+
+template<class T>
+struct cuTypes <T, typename std::enable_if<std::is_same<T, float>::value>::type>
+{
+    typedef cuFloatComplex complex;
+};
+
+template<class T>
+struct cuTypes <T, typename std::enable_if<std::is_same<T, double>::value>::type>
+{
+    typedef cuDoubleComplex complex;
+};
 
 /**
  * @brief Very rudimentary, but faster than intrinsic conversion

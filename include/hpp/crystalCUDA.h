@@ -7,11 +7,13 @@
 #ifndef HPP_CRYSTAL_CUDA_H
 #define HPP_CRYSTAL_CUDA_H
 
+#include <type_traits>
 #include <hpp/config.h>
 #include <hpp/crystal.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/tensorCUDA.h>
 #include <hpp/spectralUtilsCUDA.h>
+#include <hpp/gshCUDA.h>
 
 namespace hpp
 {
@@ -171,6 +173,8 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T eD
 template<typename T>
 __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrystalCUDA<T>* crystals, Tensor2CUDA<T,3,3> *TCauchyGlobal);
 
+
+
 /**
  * @class SpectralPolycrystalCUDA
  * @author Michael Malahe
@@ -206,6 +210,7 @@ public:
     
     // Output
     std::vector<EulerAngles<T>> getEulerAnglesZXZActive();
+    GSHCoeffsCUDA<T> getGSHCoeffs();
     void writeResultHDF5(std::string filename);
     
     // Extras
@@ -253,6 +258,8 @@ private:
     // Working memory
     std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyPerBlockSums;
     std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyLevel0Sums;
+    std::shared_ptr<GSHCoeffsCUDA<T>> gshPerBlockSums;
+    std::shared_ptr<GSHCoeffsCUDA<T>> gshPerLevel0Sums;
     
     // Stress-strain history
     std::vector<T> tHistory;

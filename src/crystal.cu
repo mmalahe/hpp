@@ -117,8 +117,37 @@ void SpectralPolycrystalCUDA<T,N>::doGPUSetup() {
         reduceKernelLevel1Cfg.dB.z = 0;
     }
 
-    // Working memory
+    // Working memory for cauchy stress sum
     TCauchyPerBlockSums = allocDeviceMemorySharedPtr<Tensor2CUDA<T,3,3>>(nBlocks);
+    
+    /////////
+    // GSH //
+    /////////
+    
+    // Get parallel layout for GSH reduce kernel
+    unsigned int nGSHBlocks = gshKernelCfg.x;
+    gshReduceKernelLevel0Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_GSH_COEFFS<T>, nGSHBlocks);
+    std::cout << "GSH Reduce kernel level 0:" << std::endl;
+    std::cout << gshReduceKernelLevel0Cfg;
+    
+    // Check if we need a second level of reduction
+    if (gshReduceKernelLevel0Cfg.dG.x > 1) {        
+        gshReduceKernelLevel1Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_GSH_COEFFS<T>, gshReduceKernelLevel0Cfg.dG.x);
+        gshLevel0Sums = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>(gshReduceKernelLevel0Cfg.dG.x);
+        std::cout << "GSH Reduce kernel level 1:" << std::endl;
+        std::cout << gshReduceKernelLevel1Cfg;
+    }
+    else {
+        gshReduceKernelLevel1Cfg.dG.x = 0;
+        gshReduceKernelLevel1Cfg.dG.y = 0;
+        gshReduceKernelLevel1Cfg.dG.z = 0;
+        gshReduceKernelLevel1Cfg.dB.x = 0;
+        gshReduceKernelLevel1Cfg.dB.y = 0;
+        gshReduceKernelLevel1Cfg.dB.z = 0;
+    }
+    
+    // Working memory for GSH coefficient calculation    
+    gshPerBlockSums = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>(nGSHBlocks);
 }
 
 // WARNING: will modify the list of crystals to add padding crystals
@@ -470,6 +499,52 @@ __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrysta
     *TCauchyGlobal /= (T)nCrystals;    
 }
 
+/**
+ * @brief Get the generalized spherical harmonic coefficients from crystal orientations
+ * @param crystals Active extrinsic ZXZ Euler Angles
+ * @param coeffs The GSH coefficients
+ */
+template<typename T, typename U>
+__global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<U>* coeffsPerBlockSums) {
+    // Get absolute crystal/thread index
+    unsigned int idx = blockDim.x*blockIdx.x + threadIdx.x;
+    bool doAddContribution = true;
+    if (idx > ncrystals-1) {
+        idx = ncrystals-1;
+        doAddContribution = false;
+    }
+    
+    // Crystal orientation
+    EulerAngles<T> angles = crystals[idx].angles;
+    T phi1 = angles.alpha;
+    T Phi = angles.beta;
+    T phi2 = angles.gamma;
+    
+    
+    // Calculate the coefficients
+    GSHCoeffsCUDA<U> coeffs;
+    
+    // l=0
+    coeffs.set(0, 0, 0, make_cuComplex((T)1.0, (T)0.0));
+    
+    // l=1
+    int l=1, m=-1, n=-1;
+    U expMult = expIntrinsic(make_cuComplex((T)0.0, n*phi1))*expIntrinsic(make_cuComplex((T)0.0, m*phi2));
+    U P = make_cuComplex((T)0.5*(1+cosIntrinsic(Phi)), (T)0.0);
+    coeffs.set(l, m, n, P*expMult)
+    
+    // Add up coefficients
+    __syncthreads();
+    GSHCoeffsCUDA<U> coeffsBlockSum;
+    if (doAddContribution) {
+        coeffsBlockSum = coeffs;
+    }
+    coeffsBlockSum = blockReduceSumGSHCoeffs(coeffsBlockSum);
+    if (threadIdx.x==0) {
+        coeffsPerBlockSums[blockIdx.x] = coeffsBlockSum;
+    }
+}
+
 template<typename T, unsigned int N>
 __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const SpectralCrystalCUDA<T>* crystals, VecCUDA<T,3>* planeNormalG, Tensor2CUDA<T,N,N>* histG) {
     // Get absolute thread index
@@ -667,12 +742,9 @@ std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> Spec
     return histHSharedPtr;
 }
 
-template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole) {
-    auto histHSharedPtr = this->getPoleHistogram(pole);
-    hist = *(histHSharedPtr.get());
-}
-
+/**
+ * @brief Get the Euler angles of the crystals
+ */
 template <typename T, unsigned int N>
 std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActive() {
     auto crystalsH = makeHostVecFromSharedPtr(this->crystalsD, this->nCrystals);
@@ -682,6 +754,47 @@ std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActiv
     }
     return anglesVec;
 }
+
+template <typename T, unsigned int N>
+GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
+    GSHCoeffsCUDA<T> coeffsH;
+    auto coeffsPerBlockSumsD = makeDeviceCopySharedPtr(coeffsH);
+    auto coeffsSumD = makeDeviceCopySharedPtr(coeffsH);
+    
+    // Compute coefficients
+    dim3 dG = gshKernelCfg.dG;
+    dim3 dB = gshKernelCfg.dB;
+    GET_GSH_COEFFS<<<dG,dB>>>(crystalsD.get(), nCrystals, coeffsPerBlockSumsD.get());
+    
+    // Single level reduction
+    unsigned int nBlocksGSH = gshKernelCfg.dG.x;
+    if (gshReduceKernelLevel0Cfg.dG.x <= 1) {
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.get(), coeffsSumD.get(), nBlocksGSH);
+    }
+    // Two level reduction
+    else{        
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.get(), gshPerLevel0Sums.get(), nBlocksGSH);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(gshPerLevel0Sums.get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
+    }
+    
+    // Sum->integral
+    auto coeffsH = getHostValue(coeffsSumD)/(T)nCrystals;
+    
+    // Return
+    return coeffsH;
+}
+
+
+/**
+ * @brief Generate a pole histogram
+ * @param hist
+ */
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole) {
+    auto histHSharedPtr = this->getPoleHistogram(pole);
+    hist = *(histHSharedPtr.get());
+}
+
 
 /**
  * @brief Writes out pole histograms to HDF5.

@@ -25,7 +25,7 @@ namespace hpp
  * C[l,-m,-n] = (-1)^{(m+n)} C[l,m,n]*. So, we only store the upper triangular
  * values for m and n, such that n>=m. These values are then flattened in
  * row major order.
- * @tparam The complex type. Either cuFloatComplex or cuDoubleComplex.
+ * @tparam The real scalar type
  */
 template <typename T>
 class GSHCoeffsCUDA {
@@ -75,11 +75,11 @@ class GSHCoeffsCUDA {
         }
         
         ///@todo a way of indicating failure on l too large
-        __host__ __device__ T get(int l, int m, int n) {
+        __host__ __device__ cuTypes<T>::complex get(int l, int m, int n) {
             unsigned int flatIdx = this->getFlatIdx(l,m,n);
             
             // Fetch the value
-            T val;
+            cuTypes<T>::complex val;
             switch (l) {
                 case 0:
                     val = l0[flatIdx];
@@ -96,7 +96,7 @@ class GSHCoeffsCUDA {
             
             // Modify for symmetry if in symmetrized section
             if (this->isInSymmetrizedSection(l,m,n)) {
-                T mult;
+                cuTypes<T>::complex mult;
                 mult.x = powIntrinsic(-1.0, m+n);
                 mult.y = 0.0;
                 val = mult*cuConj(val);
@@ -108,12 +108,12 @@ class GSHCoeffsCUDA {
         }
         
         ///@todo a way of indicating failure on l too large
-        __host__ __device__ void set(int l, int m, int n, T val) {
+        __host__ __device__ void set(int l, int m, int n, cuTypes<T>::complex val) {
             unsigned int flatIdx = this->getFlatIdx(l,m,n);
             
             // Modify for symmetry if in symmetrized section
             if (this->isInSymmetrizedSection(l,m,n)) {
-                T mult;
+                cuTypes<T>::complex mult;
                 mult.x = powIntrinsic(-1.0, m+n);
                 mult.y = 0.0;
                 val = mult*cuConj(val);
@@ -135,9 +135,9 @@ class GSHCoeffsCUDA {
             }
         }
     
-        T l0[1];
-        T l1[5];
-        T l2[13];        
+        cuTypes<T>::complex l0[1];
+        cuTypes<T>::complex l1[5];
+        cuTypes<T>::complex l2[13];        
 }
 
 // PARALLEL REDUCTION //
