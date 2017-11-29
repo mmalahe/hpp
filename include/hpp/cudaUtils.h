@@ -269,9 +269,27 @@ __inline__ __device__ double expIntrinsic(double x) {
     return exp(x);
 }
 
-// Complex number support
-using cuComplexType<T> = typename enable_if<B,T>::type
+// Support for CUDA derived types based on underlying scalar type
+template <typename T>
+class cuTypes {
+    typedef int complex;
+};
 
+template <>
+class cuTypes<float>
+{
+    public:
+        typedef cuFloatComplex complex;
+};
+
+template <>
+class cuTypes<double>
+{
+    public:
+        typedef cuDoubleComplex complex;
+};
+
+// Complex number support
 __inline__ __device__ cuFloatComplex make_cuComplex(float x, float y) {
     return make_cuFloatComplex(x,y);
 }
@@ -285,7 +303,6 @@ __inline__ __device__ cuFloatComplex cuConj(cuFloatComplex z) {
 }
 
 __inline__ __device__ cuFloatComplex expIntrinsic(cuFloatComplex z) {
-    cuFloatComplex res;
     float expx = expf(z.x);
     float cy, sy;
     sincosIntrinsic(z.y, &sy, &cy);
@@ -293,7 +310,6 @@ __inline__ __device__ cuFloatComplex expIntrinsic(cuFloatComplex z) {
 }
 
 __inline__ __device__ cuDoubleComplex expIntrinsic(cuDoubleComplex z) {
-    cuDoubleComplex res;
     double expx = exp(z.x);
     double cy, sy;
     sincosIntrinsic(z.y, &sy, &cy);
@@ -308,21 +324,18 @@ __inline__ __device__ cuDoubleComplex operator*(cuDoubleComplex z, cuDoubleCompl
     return cuCmul(z, w);
 }
 
-// Support for CUDA derived types based on underlying scalar type
-template <class T, class Enable=void>
-struct cuTypes {};
+__inline__ __device__ cuFloatComplex operator+(cuFloatComplex z, cuFloatComplex w) {
+    return cuCaddf(z, w);
+}
 
-template<class T>
-struct cuTypes <T, typename std::enable_if<std::is_same<T, float>::value>::type>
-{
-    typedef cuFloatComplex complex;
-};
+__inline__ __device__ cuDoubleComplex operator+(cuDoubleComplex z, cuDoubleComplex w) {
+    return cuCadd(z, w);
+}
 
-template<class T>
-struct cuTypes <T, typename std::enable_if<std::is_same<T, double>::value>::type>
-{
-    typedef cuDoubleComplex complex;
-};
+template<typename T>
+__inline__ __device__ typename cuTypes<T>::complex operator/(typename cuTypes<T>::complex z, T a) {
+    return make_cuComplex(z.x/a, z.y/a);
+}
 
 /**
  * @brief Very rudimentary, but faster than intrinsic conversion

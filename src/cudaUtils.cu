@@ -107,7 +107,5 @@ __global__ void TEST_I2F(int *a, float *b) {
     b[threadIdx.x] = (float)a[threadIdx.x];
 }
 
-
-
 #endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP

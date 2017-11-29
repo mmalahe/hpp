@@ -169,11 +169,13 @@ template<typename T, unsigned int N, unsigned int P>
 __global__ void SPECTRAL_POLYCRYSTAL_STEP_UNIFIED(unsigned int nCrystals, SpectralCrystalCUDA<T>* crystals, CrystalPropertiesCUDA<T,N>* props, 
 Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T eDot,  T dt, SpectralDatabaseUnifiedCUDA<T,4,P>* db, Tensor2CUDA<T,3,3> *TCauchyPerBlockSums);
 
+// GSH kernel
+template<typename T>
+__global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
+
 // Average kernel
 template<typename T>
 __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrystalCUDA<T>* crystals, Tensor2CUDA<T,3,3> *TCauchyGlobal);
-
-
 
 /**
  * @class SpectralPolycrystalCUDA
@@ -254,12 +256,15 @@ private:
     CudaKernelConfig stepKernelCfg;
     CudaKernelConfig reduceKernelLevel0Cfg;
     CudaKernelConfig reduceKernelLevel1Cfg;
+    CudaKernelConfig gshKernelCfg;
+    CudaKernelConfig gshReduceKernelLevel0Cfg;
+    CudaKernelConfig gshReduceKernelLevel1Cfg;
     
     // Working memory
     std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyPerBlockSums;
     std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyLevel0Sums;
     std::shared_ptr<GSHCoeffsCUDA<T>> gshPerBlockSums;
-    std::shared_ptr<GSHCoeffsCUDA<T>> gshPerLevel0Sums;
+    std::shared_ptr<GSHCoeffsCUDA<T>> gshLevel0Sums;
     
     // Stress-strain history
     std::vector<T> tHistory;

@@ -8,7 +8,7 @@
 
 #ifdef HPP_USE_CUDA
     #include <cuComplex.h>
-    #include <cudaUtils.h>
+    #include <hpp/cudaUtils.h>
 #endif
 
 namespace hpp
@@ -75,11 +75,11 @@ class GSHCoeffsCUDA {
         }
         
         ///@todo a way of indicating failure on l too large
-        __host__ __device__ cuTypes<T>::complex get(int l, int m, int n) {
+        __host__ __device__ typename cuTypes<T>::complex get(int l, int m, int n) {
             unsigned int flatIdx = this->getFlatIdx(l,m,n);
             
             // Fetch the value
-            cuTypes<T>::complex val;
+            typename cuTypes<T>::complex val;
             switch (l) {
                 case 0:
                     val = l0[flatIdx];
@@ -91,13 +91,13 @@ class GSHCoeffsCUDA {
                     val = l2[flatIdx];
                     break;
                 default:
-                    return 
+                    return;
             }
             
             // Modify for symmetry if in symmetrized section
             if (this->isInSymmetrizedSection(l,m,n)) {
-                cuTypes<T>::complex mult;
-                mult.x = powIntrinsic(-1.0, m+n);
+                typename cuTypes<T>::complex mult;
+                mult.x = pow(-1.0, m+n);
                 mult.y = 0.0;
                 val = mult*cuConj(val);
             }
@@ -108,13 +108,13 @@ class GSHCoeffsCUDA {
         }
         
         ///@todo a way of indicating failure on l too large
-        __host__ __device__ void set(int l, int m, int n, cuTypes<T>::complex val) {
+        __host__ __device__ void set(int l, int m, int n, typename cuTypes<T>::complex val) {
             unsigned int flatIdx = this->getFlatIdx(l,m,n);
             
             // Modify for symmetry if in symmetrized section
             if (this->isInSymmetrizedSection(l,m,n)) {
-                cuTypes<T>::complex mult;
-                mult.x = powIntrinsic(-1.0, m+n);
+                typename cuTypes<T>::complex mult;
+                mult.x = pow(-1.0, m+n);
                 mult.y = 0.0;
                 val = mult*cuConj(val);
             }
@@ -131,13 +131,48 @@ class GSHCoeffsCUDA {
                     l2[flatIdx] = val;
                     break;
                 default:
-                    return 
+                    return;
             }
         }
-    
-        cuTypes<T>::complex l0[1];
-        cuTypes<T>::complex l1[5];
-        cuTypes<T>::complex l2[13];        
+        
+        typename cuTypes<T>::complex l0[1];
+        typename cuTypes<T>::complex l1[5];
+        typename cuTypes<T>::complex l2[13];        
+};
+
+template <typename T>
+__host__ __device__ GSHCoeffsCUDA<T> operator+(const GSHCoeffsCUDA<T>& coeffs1, const GSHCoeffsCUDA<T>& coeffs2) {
+    GSHCoeffsCUDA<T> res;
+    for (unsigned int i=0; i<1; i++) {
+        res.l0[i] = coeffs1.l0[i]+coeffs2.l0[i];
+    }
+    for (unsigned int i=0; i<5; i++) {
+        res.l1[i] = coeffs1.l1[i]+coeffs2.l1[i];
+    }
+    for (unsigned int i=0; i<13; i++) {
+        res.l2[i] = coeffs1.l2[i]+coeffs2.l2[i];
+    }
+    return res;
+}
+
+template <typename T>
+__host__ __device__ void operator+=(GSHCoeffsCUDA<T>& A, const GSHCoeffsCUDA<T>& B) {
+    A = A+B;
+}
+
+template <typename T>
+__host__ __device__ GSHCoeffsCUDA<T> operator/(const GSHCoeffsCUDA<T>& coeffs, T val) {
+    GSHCoeffsCUDA<T> res;
+    for (unsigned int i=0; i<1; i++) {
+        res.l0[i] = coeffs.l0[i]/val;
+    }
+    for (unsigned int i=0; i<5; i++) {
+        res.l1[i] = coeffs.l1[i]/val;
+    }
+    for (unsigned int i=0; i<13; i++) {
+        res.l2[i] = coeffs.l2[i]/val;
+    }
+    return res;
 }
 
 // PARALLEL REDUCTION //
@@ -154,18 +189,24 @@ inline __device__ GSHCoeffsCUDA<T> warpReduceSumGSHCoeffs(GSHCoeffsCUDA<T> coeff
     for (unsigned int i=0; i<1; i++) {
         for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l0[i].x += __shfl_down(coeffs.l0[i].x, offset);
+        }
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l0[i].y += __shfl_down(coeffs.l0[i].y, offset);
         }
     }
     for (unsigned int i=0; i<5; i++) {
         for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l1[i].x += __shfl_down(coeffs.l1[i].x, offset);
+        }
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l1[i].y += __shfl_down(coeffs.l1[i].y, offset);
         }
     }
     for (unsigned int i=0; i<13; i++) {
         for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l2[i].x += __shfl_down(coeffs.l2[i].x, offset);
+        }
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l2[i].y += __shfl_down(coeffs.l2[i].y, offset);
         }
     }
@@ -202,6 +243,19 @@ inline __device__ GSHCoeffsCUDA<T> blockReduceSumGSHCoeffs(GSHCoeffsCUDA<T> val)
     if (wid==0) val = warpReduceSumGSHCoeffs(val); //Final reduce within first warp
 
     return val;
+}
+
+template <typename T>
+__global__ void BLOCK_REDUCE_KEPLER_GSH_COEFFS(GSHCoeffsCUDA<T> *in, GSHCoeffsCUDA<T> *out, int nTerms) {
+    GSHCoeffsCUDA<T> sum;
+    //reduce multiple elements per thread
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i<nTerms; i += blockDim.x * gridDim.x) {
+        sum += in[i];
+    }
+    sum = blockReduceSumGSHCoeffs(sum);
+    if (threadIdx.x==0) {
+        out[blockIdx.x]=sum;
+    }
 }
 
 #endif /* HPP_USE_CUDA*/

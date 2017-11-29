@@ -124,15 +124,18 @@ void SpectralPolycrystalCUDA<T,N>::doGPUSetup() {
     // GSH //
     /////////
     
+    // Layout for GSH calculation kernel
+    gshKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)GET_GSH_COEFFS<T>, nCrystals);
+    
     // Get parallel layout for GSH reduce kernel
-    unsigned int nGSHBlocks = gshKernelCfg.x;
-    gshReduceKernelLevel0Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_GSH_COEFFS<T>, nGSHBlocks);
+    unsigned int nGSHBlocks = gshKernelCfg.dG.x;
+    gshReduceKernelLevel0Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_KEPLER_GSH_COEFFS<T>, nGSHBlocks);
     std::cout << "GSH Reduce kernel level 0:" << std::endl;
     std::cout << gshReduceKernelLevel0Cfg;
     
     // Check if we need a second level of reduction
     if (gshReduceKernelLevel0Cfg.dG.x > 1) {        
-        gshReduceKernelLevel1Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_GSH_COEFFS<T>, gshReduceKernelLevel0Cfg.dG.x);
+        gshReduceKernelLevel1Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_KEPLER_GSH_COEFFS<T>, gshReduceKernelLevel0Cfg.dG.x);
         gshLevel0Sums = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>(gshReduceKernelLevel0Cfg.dG.x);
         std::cout << "GSH Reduce kernel level 1:" << std::endl;
         std::cout << gshReduceKernelLevel1Cfg;
@@ -473,6 +476,8 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
 // Average kernel
 /**
  * @brief Get the average Cauchy stress.
+ * @detail Deprecated in favour of the fast reduction kernels.
+ * @todo remove
  * @param F_next
  * @param L_next
  * @param dt
@@ -504,8 +509,8 @@ __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrysta
  * @param crystals Active extrinsic ZXZ Euler Angles
  * @param coeffs The GSH coefficients
  */
-template<typename T, typename U>
-__global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<U>* coeffsPerBlockSums) {
+template<typename T>
+__global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums) {
     // Get absolute crystal/thread index
     unsigned int idx = blockDim.x*blockIdx.x + threadIdx.x;
     bool doAddContribution = true;
@@ -522,20 +527,22 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     
     
     // Calculate the coefficients
-    GSHCoeffsCUDA<U> coeffs;
+    GSHCoeffsCUDA<T> coeffs;
     
     // l=0
     coeffs.set(0, 0, 0, make_cuComplex((T)1.0, (T)0.0));
     
     // l=1
-    int l=1, m=-1, n=-1;
-    U expMult = expIntrinsic(make_cuComplex((T)0.0, n*phi1))*expIntrinsic(make_cuComplex((T)0.0, m*phi2));
-    U P = make_cuComplex((T)0.5*(1+cosIntrinsic(Phi)), (T)0.0);
-    coeffs.set(l, m, n, P*expMult)
+    int l=1; 
+    int m=-1; 
+    int n=-1;
+    typename cuTypes<T>::complex expMult = expIntrinsic(make_cuComplex((T)0.0, n*phi1))*expIntrinsic(make_cuComplex((T)0.0, m*phi2));
+    typename cuTypes<T>::complex P = make_cuComplex((T)0.5*(1+cosIntrinsic(Phi)), (T)0.0);
+    coeffs.set(l, m, n, P*expMult);
     
     // Add up coefficients
     __syncthreads();
-    GSHCoeffsCUDA<U> coeffsBlockSum;
+    GSHCoeffsCUDA<T> coeffsBlockSum;
     if (doAddContribution) {
         coeffsBlockSum = coeffs;
     }
@@ -758,13 +765,12 @@ std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActiv
 template <typename T, unsigned int N>
 GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
     GSHCoeffsCUDA<T> coeffsH;
-    auto coeffsPerBlockSumsD = makeDeviceCopySharedPtr(coeffsH);
     auto coeffsSumD = makeDeviceCopySharedPtr(coeffsH);
     
     // Compute coefficients
     dim3 dG = gshKernelCfg.dG;
     dim3 dB = gshKernelCfg.dB;
-    GET_GSH_COEFFS<<<dG,dB>>>(crystalsD.get(), nCrystals, coeffsPerBlockSumsD.get());
+    GET_GSH_COEFFS<<<dG,dB>>>(crystalsD.get(), nCrystals, gshPerBlockSums.get());
     
     // Single level reduction
     unsigned int nBlocksGSH = gshKernelCfg.dG.x;
@@ -773,12 +779,12 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
     }
     // Two level reduction
     else{        
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.get(), gshPerLevel0Sums.get(), nBlocksGSH);
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(gshPerLevel0Sums.get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.get(), gshLevel0Sums.get(), nBlocksGSH);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(gshLevel0Sums.get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
     }
     
     // Sum->integral
-    auto coeffsH = getHostValue(coeffsSumD)/(T)nCrystals;
+    coeffsH = getHostValue(coeffsSumD)/(T)nCrystals;
     
     // Return
     return coeffsH;
