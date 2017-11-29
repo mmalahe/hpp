@@ -219,6 +219,13 @@ __inline__ __device__ double sinIntrinsic(double x) {
     return sin(x);
 }
 
+__inline__ __device__ float cosIntrinsic(float x) {
+    return __cosf(x);
+}
+__inline__ __device__ double cosIntrinsic(double x) {
+    return cos(x);
+}
+
 __inline__ __device__ void sincosIntrinsic(float a, float *b, float *c) {
     __sincosf(a,b,c);
 }
@@ -254,11 +261,20 @@ __inline__ __device__ double sqrtIntrinsic(double x) {
     return sqrt(x);
 }
 
-__inline__ __device__ make_cuComplex(float x, float y) {
+__inline__ __device__ float expIntrinsic(float x) {
+    return __expf(x);
+}
+
+__inline__ __device__ double expIntrinsic(double x) {
+    return exp(x);
+}
+
+// Complex number support
+__inline__ __device__ cuFloatComplex make_cuComplex(float x, float y) {
     return make_cuFloatComplex(x,y);
 }
 
-__inline__ __device__ make_cuComplex(double x, double y) {
+__inline__ __device__ cuDoubleComplex make_cuComplex(double x, double y) {
     return make_cuDoubleComplex(x,y);
 }
 
@@ -266,6 +282,29 @@ __inline__ __device__ cuFloatComplex cuConj(cuFloatComplex z) {
     return cuConjf(z);
 }
 
+__inline__ __device__ cuFloatComplex expIntrinsic(cuFloatComplex z) {
+    cuFloatComplex res;
+    float expx = expf(z.x);
+    float cy, sy;
+    sincosIntrinsic(z.y, &sy, &cy);
+    return make_cuComplex(expx*cy, expx*sy);
+}
+
+__inline__ __device__ cuDoubleComplex expIntrinsic(cuDoubleComplex z) {
+    cuDoubleComplex res;
+    double expx = exp(z.x);
+    double cy, sy;
+    sincosIntrinsic(z.y, &sy, &cy);
+    return make_cuComplex(expx*cy, expx*sy);
+}
+
+__inline__ __device__ cuFloatComplex operator*(cuFloatComplex z, cuFloatComplex w) {
+    return cuCmulf(z, w);
+}
+
+__inline__ __device__ cuDoubleComplex operator*(cuDoubleComplex z, cuDoubleComplex w) {
+    return cuCmul(z, w);
+}
 
 /**
  * @brief Very rudimentary, but faster than intrinsic conversion

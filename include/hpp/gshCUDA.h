@@ -30,32 +30,48 @@ namespace hpp
 template <typename T>
 class GSHCoeffsCUDA {
     public:
-        __host__ __device__ GSHCoeffsCUDA(){;}
+        __host__ __device__ GSHCoeffsCUDA(){
+            for (unsigned int i=0; i<1; i++) {
+                l0[i].x = 0.0;
+                l0[i].y = 0.0;
+            }
+            for (unsigned int i=0; i<5; i++) {
+                l1[i].x = 0.0;
+                l1[i].y = 0.0;
+            }
+            for (unsigned int i=0; i<13; i++) {
+                l2[i].x = 0.0;
+                l2[i].y = 0.0;
+            }
+        }
+        
+        __host__ __device__ bool isInSymmetrizedSection(int l, int m, int n) {
+            int L = 2*l+1;
+            int nElements = (L*L+1)/2;
+            int mIdx = m+l;
+            int nIdx = n+l;
+            if (mIdx*L + nIdx > nElements-1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
         
         __host__ __device__ unsigned int getFlatIdx(int l, int m, int n) {
             // If lower triangular, switch to upper triangular section
-            if (n<m) {
+            if (this->isInSymmetrizedSection(l,m,n)) {
                 n = -n;
                 m = -m;
             }            
-            unsigned int mIdx = m-l;
-            unsigned int nIdx = n-l;           
+            unsigned int mIdx = m+l;
+            unsigned int nIdx = n+l;           
             
             // mIdx and nIdx are indices in an LxL matrix
             unsigned int L = 2*l+1;
             
-            // Start with the index of the final element
-            unsigned int nElements = (L*(L+1))/2;            
-            unsigned int idx = nElements-1;
-            
-            // Subtract the triangular numbers below and including our row
-            idx -= ((L-mIdx)*(L-mIdx+1))/2;
-            
-            // Add our column offset
-            idx += (L-nIdx+1);
-            
             // Return
-            return idx;
+            return mIdx*L + nIdx;
         }
         
         ///@todo a way of indicating failure on l too large
@@ -78,8 +94,8 @@ class GSHCoeffsCUDA {
                     return 
             }
             
-            // Modify for symmetry if lower triangular
-            if (n<m) {
+            // Modify for symmetry if in symmetrized section
+            if (this->isInSymmetrizedSection(l,m,n)) {
                 T mult;
                 mult.x = powIntrinsic(-1.0, m+n);
                 mult.y = 0.0;
@@ -95,8 +111,8 @@ class GSHCoeffsCUDA {
         __host__ __device__ void set(int l, int m, int n, T val) {
             unsigned int flatIdx = this->getFlatIdx(l,m,n);
             
-            // Modify for symmetry if lower triangular
-            if (n<m) {
+            // Modify for symmetry if in symmetrized section
+            if (this->isInSymmetrizedSection(l,m,n)) {
                 T mult;
                 mult.x = powIntrinsic(-1.0, m+n);
                 mult.y = 0.0;
@@ -120,11 +136,8 @@ class GSHCoeffsCUDA {
         }
     
         T l0[1];
-        T l1[6];
-        T l2[15];
-    
-    private:
-        
+        T l1[5];
+        T l2[13];        
 }
 
 // PARALLEL REDUCTION //
@@ -144,13 +157,13 @@ inline __device__ GSHCoeffsCUDA<T> warpReduceSumGSHCoeffs(GSHCoeffsCUDA<T> coeff
             coeffs.l0[i].y += __shfl_down(coeffs.l0[i].y, offset);
         }
     }
-    for (unsigned int i=0; i<6; i++) {
+    for (unsigned int i=0; i<5; i++) {
         for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l1[i].x += __shfl_down(coeffs.l1[i].x, offset);
             coeffs.l1[i].y += __shfl_down(coeffs.l1[i].y, offset);
         }
     }
-    for (unsigned int i=0; i<15; i++) {
+    for (unsigned int i=0; i<13; i++) {
         for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l2[i].x += __shfl_down(coeffs.l2[i].x, offset);
             coeffs.l2[i].y += __shfl_down(coeffs.l2[i].y, offset);
@@ -190,7 +203,6 @@ inline __device__ GSHCoeffsCUDA<T> blockReduceSumGSHCoeffs(GSHCoeffsCUDA<T> val)
 
     return val;
 }
-
 
 #endif /* HPP_USE_CUDA*/
     
