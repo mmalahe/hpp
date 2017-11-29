@@ -74,9 +74,6 @@ class GSHCoeffsCUDA {
                 case 2:
                     val = l2[flatIdx];
                     break;
-                case 3:
-                    val = l3[flatIdx];
-                    break;
                 default:
                     return 
             }
@@ -117,20 +114,84 @@ class GSHCoeffsCUDA {
                 case 2:
                     l2[flatIdx] = val;
                     break;
-                case 3:
-                    l3[flatIdx] = val;
-                    break;
                 default:
                     return 
             }
         }
-
-    private:
+    
         T l0[1];
         T l1[6];
         T l2[15];
-        T l3[40];
+    
+    private:
+        
 }
+
+// PARALLEL REDUCTION //
+/**
+ * @brief 
+ * @details Note that this is valid only on CC 3.0 and above. 
+ * Adapted from https://devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
+ * @param val
+ * @return 
+ */
+template <typename T>
+inline __device__ GSHCoeffsCUDA<T> warpReduceSumGSHCoeffs(GSHCoeffsCUDA<T> coeffs) {
+    const int warpSize = 32;
+    for (unsigned int i=0; i<1; i++) {
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
+            coeffs.l0[i].x += __shfl_down(coeffs.l0[i].x, offset);
+            coeffs.l0[i].y += __shfl_down(coeffs.l0[i].y, offset);
+        }
+    }
+    for (unsigned int i=0; i<6; i++) {
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
+            coeffs.l1[i].x += __shfl_down(coeffs.l1[i].x, offset);
+            coeffs.l1[i].y += __shfl_down(coeffs.l1[i].y, offset);
+        }
+    }
+    for (unsigned int i=0; i<15; i++) {
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
+            coeffs.l2[i].x += __shfl_down(coeffs.l2[i].x, offset);
+            coeffs.l2[i].y += __shfl_down(coeffs.l2[i].y, offset);
+        }
+    }
+    return coeffs;
+}
+
+/**
+ * @brief
+ * @details Adapted from https://devblogs.nvidia.com/parallelforall/faster-parallel-reductions-kepler/
+ * @param val
+ */
+template <typename T>
+inline __device__ GSHCoeffsCUDA<T> blockReduceSumGSHCoeffs(GSHCoeffsCUDA<T> val) {
+    const int warpSize = 32;
+    static __shared__ GSHCoeffsCUDA<T> shared[warpSize]; // Shared mem for 32 partial sums
+    __syncthreads();
+    int lane = threadIdx.x % warpSize;
+    int wid = threadIdx.x / warpSize;
+
+    val = warpReduceSumGSHCoeffs(val);     // Each warp performs partial reduction
+
+    if (lane==0) shared[wid]=val; // Write reduced value to shared memory
+
+    __syncthreads();              // Wait for all partial reductions
+
+    //read from shared memory only if that warp existed
+    if (threadIdx.x < blockDim.x / warpSize) {
+        val = shared[lane];
+    }
+    else {
+        val = GSHCoeffsCUDA<T>();
+    }
+
+    if (wid==0) val = warpReduceSumGSHCoeffs(val); //Final reduce within first warp
+
+    return val;
+}
+
+
 #endif /* HPP_USE_CUDA*/
     
 } //END NAMESPACE HPP
