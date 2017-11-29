@@ -7,6 +7,7 @@
 #include <hpp/casesUtils.h>
 #include <hpp/spectralUtils.h>
 #include <hpp/crystal.h>
+#include <hpp/gshCUDA.h>
 #include <hpp/crystalCUDA.h>
 #include <hpp/continuum.h>
 #include <hpp/python.h>
@@ -61,6 +62,11 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
     boost::python::def("defaultCrystalSpectralDatasetIDs", hpp::defaultCrystalSpectralDatasetIDs);
     
+    // gshCUDA.h
+    boost::python::class_<hpp::GSHCoeffsCUDA<float>>("GSHCoeffsCUDAF", 
+        boost::python::init<>())
+    ;    
+    
     // crystalCUDA.h
     boost::python::class_<hpp::CrystalPropertiesCUDA<float,12>>("CrystalPropertiesCUDAF12", 
         boost::python::init<const hpp::CrystalProperties<float>&>())
@@ -80,5 +86,6 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("reset", &hpp::SpectralPolycrystalCUDA<float,12>::reset)
         .def("getEulerAnglesZXZActive", &hpp::SpectralPolycrystalCUDA<float,12>::getEulerAnglesZXZActive)
         .def("step", step)
+        .def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)
     ;
 }
