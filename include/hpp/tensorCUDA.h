@@ -547,7 +547,7 @@ __device__ EulerAngles<T> getEulerZXZAngles(const Tensor2CUDA<T, M, N>& R)
  * @author Michael Malahe
  * @date 04/05/17
  * @file tensorCUDA.h
- * @brief An anti-symmetric second order tensor
+ * @brief A symmetric second order tensor
  * @details The underlying storage is row major. For example, for
  * a 4x4 symmetric tensor there will be a total of (4*(4+1))/2 = 10 elements
  * stored. Those elements are ordered in memory as:
