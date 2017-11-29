@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdexcept>
 #include <vector>
+#include <cuComplex.h>
 #include <hpp/config.h>
 
 // Aligned memory
@@ -251,6 +252,18 @@ __inline__ __device__ float sqrtIntrinsic(float x) {
 }
 __inline__ __device__ double sqrtIntrinsic(double x) {
     return sqrt(x);
+}
+
+__inline__ __device__ make_cuComplex(float x, float y) {
+    return make_cuFloatComplex(x,y);
+}
+
+__inline__ __device__ make_cuComplex(double x, double y) {
+    return make_cuDoubleComplex(x,y);
+}
+
+__inline__ __device__ cuFloatComplex cuConj(cuFloatComplex z) {
+    return cuConjf(z);
 }
 
 
