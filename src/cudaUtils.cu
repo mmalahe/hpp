@@ -100,7 +100,7 @@ __global__ void TEST_I_TIMES_F(int *a, float *b, float *c)
 }
 
 __global__ void TEST_DSIN(double *x, double *s) {
-    s[threadIdx.x] = sinIntrinsic(x[threadIdx.x]);
+    s[threadIdx.x] = sinIntr(x[threadIdx.x]);
 }
 
 __global__ void TEST_I2F(int *a, float *b) {

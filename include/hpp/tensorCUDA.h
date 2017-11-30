@@ -72,7 +72,7 @@ public:
         for (unsigned int i=0; i<N; i++) {
             sumOfSquares += vals[i]*vals[i];
         }
-        return sqrtIntrinsic(sumOfSquares);
+        return sqrtIntr(sumOfSquares);
     }
 protected:
     T vals[N];
@@ -380,9 +380,9 @@ template <typename T>
 __device__ Tensor2CUDA<T,3,3> EulerZXZRotationMatrixCUDA(T alpha, T beta, T gamma) {
     Tensor2CUDA<T,3,3> R;
     T c1, c2, c3, s1, s2, s3;
-    sincosIntrinsic(alpha, &s1, &c1);
-    sincosIntrinsic(beta, &s2, &c2);
-    sincosIntrinsic(gamma, &s3, &c3);
+    sincosIntr(alpha, &s1, &c1);
+    sincosIntr(beta, &s2, &c2);
+    sincosIntr(gamma, &s3, &c3);
     R(0,0) = c1*c3 - c2*s1*s3;
     R(0,1) = -c1*s3 - c2*c3*s1;
     R(0,2) = s1*s2;

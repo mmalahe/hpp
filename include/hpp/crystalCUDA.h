@@ -132,7 +132,7 @@ __device__ T slipDeformationResistanceStepSpectralSolver(const CrystalProperties
 const T s_alpha, const T gammaSum, const T dt) 
 { 
     // Return
-    T sDot = (props->h_0)*powIntrinsic((T)1.0 - s_alpha/(props->s_s), (props->a))*gammaSum;
+    T sDot = (props->h_0)*powIntr((T)1.0 - s_alpha/(props->s_s), (props->a))*gammaSum;
     return s_alpha + sDot*dt;
 }
 

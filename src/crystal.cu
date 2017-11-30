@@ -314,7 +314,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     crystal.s = slipDeformationResistanceStepSpectralSolver(props, crystal.s, gammaNext, dt);
     
     // Sigma
-    T sigmaScaling = (crystal.s*powIntrinsic(fabs(strainRate), props->m));
+    T sigmaScaling = (crystal.s*powIntr(fabs(strainRate), props->m));
     
     // Only the upper triangular terms of sigmaPrime
     sigmaPrimeNext(0,0) = sigmaScaling*db->getIDFTRealDShared(SIGMA00, spatialCoord, nSharedSpectral, sharedCoords, sharedCoeffs);
@@ -422,8 +422,8 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     crystal1.s = slipDeformationResistanceStepSpectralSolver(props, crystal1.s, gammaNext1, dt);
     
     // Sigma
-    T sigmaScaling0 = (crystal0.s*powIntrinsic(fabs(strainRate), props->m));
-    T sigmaScaling1 = (crystal1.s*powIntrinsic(fabs(strainRate), props->m));
+    T sigmaScaling0 = (crystal0.s*powIntr(fabs(strainRate), props->m));
+    T sigmaScaling1 = (crystal1.s*powIntr(fabs(strainRate), props->m));
     Tensor2CUDA<T,3,3> sigmaPrimeNext0 = transformOutOfFrame(getSigmaPrime(sigmaScaling0, dbVars0), RStretchingTensor);
     Tensor2CUDA<T,3,3> sigmaPrimeNext1 = transformOutOfFrame(getSigmaPrime(sigmaScaling1, dbVars1), RStretchingTensor);
  
@@ -539,28 +539,28 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     T normFactor = (T)2.*l+(T)1.;
     
     int m=-1, n=-1;   
-    typename cuTypes<T>::complex expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    typename cuTypes<T>::complex P = make_cuComplex((T)0.5*((T)1.+cosIntrinsic(Phi)), (T)0.);
+    typename cuTypes<T>::complex expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    typename cuTypes<T>::complex P = make_cuComplex((T)0.5*((T)1.+cosIntr(Phi)), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-1, n=0;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., ((T)1./sqrtIntrinsic((T)2.))*sinIntrinsic(Phi));
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., ((T)1./sqrtIntr((T)2.))*sinIntr(Phi));
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-1, n=1;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.5*(cosIntrinsic(Phi)-1), (T)0.);
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.5*(cosIntr(Phi)-1), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=0, n=-1;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., ((T)1./sqrtIntrinsic((T)2.))*sinIntrinsic(Phi));
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., ((T)1./sqrtIntr((T)2.))*sinIntr(Phi));
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=0, n=0;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex(cosIntrinsic(Phi), (T)0.);
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex(cosIntr(Phi), (T)0.);
     
     /////////
     // l=2 //
@@ -569,18 +569,18 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     normFactor = (T)2.*l+(T)1.;
     
     m=-2, n=-2;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.25*powFull(cosIntrinsic(Phi)+(T)1., (T)2.), (T)0.);
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.25*powFull(cosIntr(Phi)+(T)1., (T)2.), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-2, n=-1;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., -(T)0.5*sinIntrinsic(Phi)*(cosIntrinsic(Phi)+(T)1.));
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., -(T)0.5*sinIntr(Phi)*(cosIntr(Phi)+(T)1.));
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-2, n=0;   
-    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex(-sqrtIntrinsic((T)3./(T)8.)*((T)1.-powFull(cosIntrinsic(Phi),(T)2.)), (T)0.);
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex(-sqrtIntr((T)3./(T)8.)*((T)1.-powFull(cosIntr(Phi),(T)2.)), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     // Add up coefficients
@@ -604,7 +604,7 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
     VecCUDA<T,3> planeNormal = *planeNormalG;
 
     // Maximum R value from northern hemisphere projection
-    T maxR = (1.00001)*2*sinIntrinsic(M_PI/4);
+    T maxR = (1.00001)*2*sinIntr(M_PI/4);
     
     // Grid stride loop over crystals
     for (unsigned int idx=baseIdx; idx<nCrystals; idx+=blockDim.x*gridDim.x) {
@@ -619,9 +619,9 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
         T phi = poleSpherical(2);
         
         // Equal-area projection
-        T R = 2*sinIntrinsic(phi/2);
+        T R = 2*sinIntr(phi/2);
         T x, y;
-        sincosIntrinsic(theta, &y, &x);
+        sincosIntr(theta, &y, &x);
         x *= R;
         y *= R;
         

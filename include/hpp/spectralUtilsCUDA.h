@@ -159,11 +159,11 @@ __device__ T SpectralDatabaseCUDA<T,N>::getIDFTRealD(unsigned int dsetIdx, unsig
         // Get complex exponential
         T expArg = expInd*expArgFactor;
         T expVal[2];
-        sincosIntrinsic(expArg, &(expVal[1]), &(expVal[0]));
+        sincosIntr(expArg, &(expVal[1]), &(expVal[0]));
         
         // Add real part of term
-        val = fmaIntrinsic(dset.coeffs[i].re, expVal[0], val);
-        val = fmaIntrinsic(dset.coeffs[i].im, expVal[1], val);
+        val = fmaIntr(dset.coeffs[i].re, expVal[0], val);
+        val = fmaIntr(dset.coeffs[i].im, expVal[1], val);
     }
     
     // Return
@@ -246,11 +246,11 @@ __device__ T SpectralDatabaseCUDA<T,N>::getIDFTRealDShared(unsigned int dsetIdx,
             // Get complex exponential
             T expArg = expInd*expArgFactor;
             T expVal[2];
-            sincosIntrinsic(expArg, &(expVal[1]), &(expVal[0]));
+            sincosIntr(expArg, &(expVal[1]), &(expVal[0]));
             
             // Add real part of term
-            val = fmaIntrinsic(sharedCoeffs[i].re, expVal[0], val);
-            val = fmaIntrinsic(sharedCoeffs[i].im, expVal[1], val);
+            val = fmaIntr(sharedCoeffs[i].re, expVal[0], val);
+            val = fmaIntr(sharedCoeffs[i].im, expVal[1], val);
         }
 
         // Sync after compute
@@ -355,7 +355,7 @@ __device__ void getExpVal(unsigned int *spatialCoord, SpectralCoordCUDA<N>& coor
     
     // Get complex exponential
     T expArg = expInd*expArgFactor;
-    sincosIntrinsic(expArg, expValIm, expValRe);
+    sincosIntr(expArg, expValIm, expValRe);
 }
 
 /**
@@ -435,12 +435,12 @@ __device__ void SpectralDatabaseUnifiedCUDA<T,N,P>::getIDFTRealDShared(unsigned 
             // Get complex exponential
             T expArg = expInd*expArgFactor;
             T expVal[2];
-            sincosIntrinsic(expArg, &(expVal[1]), &(expVal[0]));
+            sincosIntr(expArg, &(expVal[1]), &(expVal[0]));
             
             // Update values
             for (unsigned int iDset = 0; iDset<P; iDset++) {
-                outputs[iDset] = fmaIntrinsic(sharedData[i].coeffs[iDset].re, expVal[0], outputs[iDset]);
-                outputs[iDset] = fmaIntrinsic(sharedData[i].coeffs[iDset].im, expVal[1], outputs[iDset]);
+                outputs[iDset] = fmaIntr(sharedData[i].coeffs[iDset].re, expVal[0], outputs[iDset]);
+                outputs[iDset] = fmaIntr(sharedData[i].coeffs[iDset].im, expVal[1], outputs[iDset]);
             }
         }
 
@@ -523,15 +523,15 @@ __device__ void SpectralDatabaseUnifiedCUDA<T,N,P>::getIDFTRealDSharedPair(unsig
             T expValRe, expValIm;
             getExpVal(spatialCoord0, unifiedData.coord, gridDimReg, expArgFactor, &expValRe, &expValIm);
             for (unsigned int iDset = 0; iDset<P; iDset++) {
-                outputs0[iDset] = fmaIntrinsic(unifiedData.coeffs[iDset].re, expValRe, outputs0[iDset]);
-                outputs0[iDset] = fmaIntrinsic(unifiedData.coeffs[iDset].im, expValIm, outputs0[iDset]);
+                outputs0[iDset] = fmaIntr(unifiedData.coeffs[iDset].re, expValRe, outputs0[iDset]);
+                outputs0[iDset] = fmaIntr(unifiedData.coeffs[iDset].im, expValIm, outputs0[iDset]);
             }
             
             // SECOND SPATIAL COORDINATE
             getExpVal(spatialCoord1, unifiedData.coord, gridDimReg, expArgFactor, &expValRe, &expValIm);
             for (unsigned int iDset = 0; iDset<P; iDset++) {
-                outputs1[iDset] = fmaIntrinsic(unifiedData.coeffs[iDset].re, expValRe, outputs1[iDset]);
-                outputs1[iDset] = fmaIntrinsic(unifiedData.coeffs[iDset].im, expValIm, outputs1[iDset]);
+                outputs1[iDset] = fmaIntr(unifiedData.coeffs[iDset].re, expValRe, outputs1[iDset]);
+                outputs1[iDset] = fmaIntr(unifiedData.coeffs[iDset].im, expValIm, outputs1[iDset]);
             }            
         }
 

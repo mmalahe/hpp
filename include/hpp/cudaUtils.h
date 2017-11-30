@@ -209,27 +209,27 @@ CudaKernelConfig getKernelConfigMaxOccupancy(const cudaDeviceProp& devProp, cons
 std::ostream& operator<<(std::ostream& out, const CudaKernelConfig& cfg);
 
 // Mathematical function wrappers
-// For functionIntrinsic, only calls it if it exists, otherwise defaults
+// For functionIntr, only calls it if it exists, otherwise defaults
 // to non-intrinsic version
 
-__inline__ __device__ float sinIntrinsic(float x) {
+__inline__ __device__ float sinIntr(float x) {
     return __sinf(x);
 }
-__inline__ __device__ double sinIntrinsic(double x) {
+__inline__ __device__ double sinIntr(double x) {
     return sin(x);
 }
 
-__inline__ __device__ float cosIntrinsic(float x) {
+__inline__ __device__ float cosIntr(float x) {
     return __cosf(x);
 }
-__inline__ __device__ double cosIntrinsic(double x) {
+__inline__ __device__ double cosIntr(double x) {
     return cos(x);
 }
 
-__inline__ __device__ void sincosIntrinsic(float a, float *b, float *c) {
+__inline__ __device__ void sincosIntr(float a, float *b, float *c) {
     __sincosf(a,b,c);
 }
-__inline__ __device__ void sincosIntrinsic(double a, double *b, double *c) {
+__inline__ __device__ void sincosIntr(double a, double *b, double *c) {
     sincos(a,b,c);
 }
 
@@ -240,10 +240,10 @@ __inline__ __device__ void sincosFull(double a, double *b, double *c) {
     sincos(a,b,c);
 }
 
-__inline__ __device__ float powIntrinsic(float a, float b) {
+__inline__ __device__ float powIntr(float a, float b) {
     return __powf(a,b);
 }
-__inline__ __device__ double powIntrinsic(double a, double b) {
+__inline__ __device__ double powIntr(double a, double b) {
     return pow(a,b);
 }
 
@@ -254,25 +254,25 @@ __inline__ __device__ double powFull(double a, double b) {
     return pow(a,b);
 }
 
-__inline__ __device__ float fmaIntrinsic(float x, float y, float z) {
+__inline__ __device__ float fmaIntr(float x, float y, float z) {
     return __fmaf_rd(x,y,z);
 }
-__inline__ __device__ double fmaIntrinsic(double x, double y, double z) {
+__inline__ __device__ double fmaIntr(double x, double y, double z) {
     return __fma_rd(x,y,z);
 }
 
-__inline__ __device__ float sqrtIntrinsic(float x) {
+__inline__ __device__ float sqrtIntr(float x) {
     return sqrtf(x);
 }
-__inline__ __device__ double sqrtIntrinsic(double x) {
+__inline__ __device__ double sqrtIntr(double x) {
     return sqrt(x);
 }
 
-__inline__ __device__ float expIntrinsic(float x) {
+__inline__ __device__ float expIntr(float x) {
     return __expf(x);
 }
 
-__inline__ __device__ double expIntrinsic(double x) {
+__inline__ __device__ double expIntr(double x) {
     return exp(x);
 }
 
@@ -309,17 +309,17 @@ __inline__ __host__ __device__ cuFloatComplex cuConj(cuFloatComplex z) {
     return cuConjf(z);
 }
 
-__inline__ __device__ cuFloatComplex expIntrinsic(cuFloatComplex z) {
+__inline__ __device__ cuFloatComplex expIntr(cuFloatComplex z) {
     float expx = expf(z.x);
     float cy, sy;
-    sincosIntrinsic(z.y, &sy, &cy);
+    sincosIntr(z.y, &sy, &cy);
     return make_cuComplex(expx*cy, expx*sy);
 }
 
-__inline__ __device__ cuDoubleComplex expIntrinsic(cuDoubleComplex z) {
+__inline__ __device__ cuDoubleComplex expIntr(cuDoubleComplex z) {
     double expx = exp(z.x);
     double cy, sy;
-    sincosIntrinsic(z.y, &sy, &cy);
+    sincosIntr(z.y, &sy, &cy);
     return make_cuComplex(expx*cy, expx*sy);
 }
 
