@@ -858,15 +858,7 @@ std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActiv
 }
 
 template <typename T, unsigned int N>
-GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
-    // DEBUG
-    auto crystalsH = makeHostVecFromSharedPtr(crystalsD, nCrystals);
-    for (auto&& crystal : crystalsH) {
-        std::cout << crystal.angles.alpha << " ";
-        std::cout << crystal.angles.beta << " ";
-        std::cout << crystal.angles.gamma << std::endl;
-    }    
-    
+GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() { 
     GSHCoeffsCUDA<T> coeffsH;
     auto coeffsSumD = makeDeviceCopySharedPtr(coeffsH);
     
