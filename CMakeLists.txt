@@ -189,7 +189,8 @@ if (${HPP_USE_CUDA})
 
     # NVCC build-specific flags
     set(CUDA_NVCC_FLAGS_DEBUG "${CUDA_NVCC_FLAGS_DEBUG} -g -G")
-    set(CUDA_NVCC_FLAGS_RELEASE "${CUDA_NVCC_FLAGS_RELEASE} -O3 -use_fast_math")
+    # set(CUDA_NVCC_FLAGS_RELEASE "${CUDA_NVCC_FLAGS_RELEASE} -O3 -use_fast_math")
+    set(CUDA_NVCC_FLAGS_RELEASE "${CUDA_NVCC_FLAGS_RELEASE} -O3")
 endif(${HPP_USE_CUDA})
 
 # Testing
