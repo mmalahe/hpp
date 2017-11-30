@@ -290,15 +290,15 @@ class cuTypes<double>
 };
 
 // Complex number support
-__inline__ __device__ cuFloatComplex make_cuComplex(float x, float y) {
+__inline__ __host__ __device__ cuFloatComplex make_cuComplex(float x, float y) {
     return make_cuFloatComplex(x,y);
 }
 
-__inline__ __device__ cuDoubleComplex make_cuComplex(double x, double y) {
+__inline__ __host__ __device__ cuDoubleComplex make_cuComplex(double x, double y) {
     return make_cuDoubleComplex(x,y);
 }
 
-__inline__ __device__ cuFloatComplex cuConj(cuFloatComplex z) {
+__inline__ __host__ __device__ cuFloatComplex cuConj(cuFloatComplex z) {
     return cuConjf(z);
 }
 
@@ -316,24 +316,24 @@ __inline__ __device__ cuDoubleComplex expIntrinsic(cuDoubleComplex z) {
     return make_cuComplex(expx*cy, expx*sy);
 }
 
-__inline__ __device__ cuFloatComplex operator*(cuFloatComplex z, cuFloatComplex w) {
+__inline__ __host__ __device__ cuFloatComplex operator*(cuFloatComplex z, cuFloatComplex w) {
     return cuCmulf(z, w);
 }
 
-__inline__ __device__ cuDoubleComplex operator*(cuDoubleComplex z, cuDoubleComplex w) {
+__inline__ __host__ __device__ cuDoubleComplex operator*(cuDoubleComplex z, cuDoubleComplex w) {
     return cuCmul(z, w);
 }
 
-__inline__ __device__ cuFloatComplex operator+(cuFloatComplex z, cuFloatComplex w) {
+__inline__ __host__ __device__ cuFloatComplex operator+(cuFloatComplex z, cuFloatComplex w) {
     return cuCaddf(z, w);
 }
 
-__inline__ __device__ cuDoubleComplex operator+(cuDoubleComplex z, cuDoubleComplex w) {
+__inline__ __host__ __device__ cuDoubleComplex operator+(cuDoubleComplex z, cuDoubleComplex w) {
     return cuCadd(z, w);
 }
 
 template<typename T>
-__inline__ __device__ typename cuTypes<T>::complex operator/(typename cuTypes<T>::complex z, T a) {
+__inline__ __host__ __device__ typename cuTypes<T>::complex operator/(const typename cuTypes<T>::complex z, T a) {
     return make_cuComplex(z.x/a, z.y/a);
 }
 
