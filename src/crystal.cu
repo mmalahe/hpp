@@ -631,7 +631,7 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     
     m=0, n=0;
     expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.5*((T)3.*powFull(cosIntr(Phi),(T)3.)-(T)1.), (T)0.);
+    P = make_cuComplex((T)0.5*((T)3.*powFull(cosIntr(Phi),(T)2.)-(T)1.), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);    
     
     // Add up coefficients
