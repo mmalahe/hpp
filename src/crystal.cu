@@ -625,6 +625,7 @@ void SpectralPolycrystalCUDA<T,N>::reset(T init_s, unsigned long int seed) {
     poleHistogramHistory100.clear();
     poleHistogramHistory001.clear();
     poleHistogramHistory011.clear();
+    
 }
 
 // Step host function
@@ -783,6 +784,8 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
         BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(gshLevel0Sums.get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
     }
     
+    // Sync before transfers
+    cudaDeviceSynchronize();
     // Sum->integral
     coeffsH = getHostValue(coeffsSumD)/(T)nCrystals;
     
