@@ -594,6 +594,46 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     P = make_cuComplex((T)0.25*powFull(cosIntr(Phi)-(T)1., (T)2.), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
+    m=-1, n=-2;   
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)+(T)1.));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-1, n=-1;  
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.5*((T)2.*powFull(cosIntr(Phi),(T)2.)+cosIntr(Phi)-(T)1.), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-1, n=0;  
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., sqrtIntr((T)3./(T)2.)*sinIntr(Phi)*cosIntr(Phi));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-1, n=1;  
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.5*((T)2.*powFull(cosIntr(Phi),(T)2.)-cosIntr(Phi)-(T)1.), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-1, n=2;   
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)-(T)1.));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=0, n=-2;   
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex(-sqrtIntr((T)3./(T)8.)*((T)1.-powFull(cosIntr(Phi),(T)2.)), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=0, n=-1;
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., sqrtIntr((T)3./(T)2.)*sinIntr(Phi)*cosIntr(Phi));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=0, n=0;
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.5*((T)3.*powFull(cosIntr(Phi),(T)3.)-(T)1.), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);    
+    
     // Add up coefficients
     __syncthreads();
     GSHCoeffsCUDA<T> coeffsBlockSum;
