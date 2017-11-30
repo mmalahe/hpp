@@ -247,6 +247,13 @@ __inline__ __device__ double powIntrinsic(double a, double b) {
     return pow(a,b);
 }
 
+__inline__ __device__ float powFull(float a, float b) {
+    return powf(a,b);
+}
+__inline__ __device__ double powFull(double a, double b) {
+    return pow(a,b);
+}
+
 __inline__ __device__ float fmaIntrinsic(float x, float y, float z) {
     return __fmaf_rd(x,y,z);
 }

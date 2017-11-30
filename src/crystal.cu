@@ -536,31 +536,51 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     // l=1 //
     /////////
     int l=1; 
-    T normFactor = 2.0*l+1;
+    T normFactor = (T)2.*l+(T)1.;
     
     int m=-1, n=-1;   
-    typename cuTypes<T>::complex expMult = expIntrinsic(make_cuComplex((T)0.0, -n*phi1-m*phi2));
-    typename cuTypes<T>::complex P = make_cuComplex((T)0.5*(1+cosIntrinsic(Phi)), (T)0.0);
+    typename cuTypes<T>::complex expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    typename cuTypes<T>::complex P = make_cuComplex((T)0.5*((T)1.+cosIntrinsic(Phi)), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-1, n=0;   
-    expMult = expIntrinsic(make_cuComplex((T)0.0, -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.0, ((T)1.0/sqrtIntrinsic((T)2.0))*sinIntrinsic(Phi));
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., ((T)1./sqrtIntrinsic((T)2.))*sinIntrinsic(Phi));
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-1, n=1;   
-    expMult = expIntrinsic(make_cuComplex((T)0.0, -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.5*(cosIntrinsic(Phi)-1), (T)0.0);
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.5*(cosIntrinsic(Phi)-1), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=0, n=-1;   
-    expMult = expIntrinsic(make_cuComplex((T)0.0, -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.0, ((T)1.0/sqrtIntrinsic((T)2.0))*sinIntrinsic(Phi));
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., ((T)1./sqrtIntrinsic((T)2.))*sinIntrinsic(Phi));
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=0, n=0;   
-    expMult = expIntrinsic(make_cuComplex((T)0.0, -n*phi1-m*phi2));
-    P = make_cuComplex(cosIntrinsic(Phi), (T)0.0);
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex(cosIntrinsic(Phi), (T)0.);
+    
+    /////////
+    // l=2 //
+    /////////
+    l=2; 
+    normFactor = (T)2.*l+(T)1.;
+    
+    m=-2, n=-2;   
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.25*powFull(cosIntrinsic(Phi)+(T)1., (T)2.), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-2, n=-1;   
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., -(T)0.5*sinIntrinsic(Phi)*(cosIntrinsic(Phi)+(T)1.));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-2, n=0;   
+    expMult = expIntrinsic(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex(-sqrtIntrinsic((T)3./(T)8.)*((T)1.-powFull(cosIntrinsic(Phi),(T)2.)), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     // Add up coefficients
