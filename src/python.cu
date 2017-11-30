@@ -11,10 +11,14 @@
 #include <hpp/crystalCUDA.h>
 #include <hpp/continuum.h>
 #include <hpp/python.h>
+#include <hpp/cudaUtils.h>
 
 // The module
 BOOST_PYTHON_MODULE(hpppy) {    
     // General
+    boost::python::class_<std::vector<float> >("FVec")
+        .def(boost::python::vector_indexing_suite<std::vector<float>>())
+    ;
     boost::python::class_<std::function<hpp::Tensor2<float>(float)>>("Tensor2FunctionOfScalarF");
     
     // tensor.h
@@ -65,6 +69,9 @@ BOOST_PYTHON_MODULE(hpppy) {
     // gshCUDA.h
     boost::python::class_<hpp::GSHCoeffsCUDA<float>>("GSHCoeffsCUDAF", 
         boost::python::init<>())
+        .def("getl0Reals", &hpp::GSHCoeffsCUDA<float>::getl0Reals)
+        .def("getl1Reals", &hpp::GSHCoeffsCUDA<float>::getl1Reals)
+        .def("getl2Reals", &hpp::GSHCoeffsCUDA<float>::getl2Reals)
     ;    
     
     // crystalCUDA.h

@@ -536,9 +536,10 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     int l=1; 
     int m=-1; 
     int n=-1;
-    typename cuTypes<T>::complex expMult = expIntrinsic(make_cuComplex((T)0.0, n*phi1))*expIntrinsic(make_cuComplex((T)0.0, m*phi2));
+    T normFactor = 2.0*l+1;
+    typename cuTypes<T>::complex expMult = expIntrinsic(make_cuComplex((T)0.0, -n*phi1-m*phi2));
     typename cuTypes<T>::complex P = make_cuComplex((T)0.5*(1+cosIntrinsic(Phi)), (T)0.0);
-    coeffs.set(l, m, n, P*expMult);
+    coeffs.set(l, m, n, normFactor*P*expMult);
     
     // Add up coefficients
     __syncthreads();
@@ -765,6 +766,14 @@ std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActiv
 
 template <typename T, unsigned int N>
 GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
+    // DEBUG
+    auto crystalsH = makeHostVecFromSharedPtr(crystalsD, nCrystals);
+    for (auto&& crystal : crystalsH) {
+        std::cout << crystal.angles.alpha << " ";
+        std::cout << crystal.angles.beta << " ";
+        std::cout << crystal.angles.gamma << std::endl;
+    }    
+    
     GSHCoeffsCUDA<T> coeffsH;
     auto coeffsSumD = makeDeviceCopySharedPtr(coeffsH);
     

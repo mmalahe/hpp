@@ -337,6 +337,11 @@ __inline__ __host__ __device__ typename cuTypes<T>::complex operator/(const type
     return make_cuComplex(z.x/a, z.y/a);
 }
 
+template<typename T>
+__inline__ __host__ __device__ typename cuTypes<T>::complex operator*(T a, const typename cuTypes<T>::complex z) {
+    return make_cuComplex(a*z.x, a*z.y);
+}
+
 /**
  * @brief Very rudimentary, but faster than intrinsic conversion
  * @param x
