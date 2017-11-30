@@ -1,8 +1,7 @@
 Mandatory dependencies:
 -----------------------
 C/C++ dependencies:
-- Should all be encoded in the CMakeLists.txt
-- FFTW 3.3.5 or greater
+- [FFTW](http://www.fftw.org/download.html) 3.3.5 or greater
 
 CUDA:
 - Toolkit version 7.5 or higher.
