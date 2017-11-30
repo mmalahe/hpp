@@ -51,6 +51,8 @@ spectralErrorExecutable = os.path.join(bin_dir,"evaluateCompressionError")
 
 # File paths
 db_dir = "databases"
+if not os.path.exists(db_dir):
+    os.makedirs(db_dir)
 raw_database_filename = os.path.join(db_dir, "databaseRaw%d.hdf5" % (raw_dim))
 if use_unified_coeff_order:
     spectral_database_ordered_basename = os.path.join(db_dir, "databaseSpectralOrderedUnified")
