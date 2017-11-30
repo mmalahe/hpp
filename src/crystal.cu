@@ -561,6 +561,7 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     m=0, n=0;   
     expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
     P = make_cuComplex(cosIntr(Phi), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);
     
     /////////
     // l=2 //
@@ -575,12 +576,22 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     
     m=-2, n=-1;   
     expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., -(T)0.5*sinIntr(Phi)*(cosIntr(Phi)+(T)1.));
+    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)+(T)1.));
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     m=-2, n=0;   
     expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
     P = make_cuComplex(-sqrtIntr((T)3./(T)8.)*((T)1.-powFull(cosIntr(Phi),(T)2.)), (T)0.);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-2, n=1;   
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)-(T)1.));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-2, n=2;   
+    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
+    P = make_cuComplex((T)0.25*powFull(cosIntr(Phi)-(T)1., (T)2.), (T)0.);
     coeffs.set(l, m, n, normFactor*P*expMult);
     
     // Add up coefficients
