@@ -844,6 +844,23 @@ std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> Spec
     return histHSharedPtr;
 }
 
+template <typename T, unsigned int N>
+Tensor2<T> SpectralPolycrystalCUDA<T,N>::getPoleHistogram(int p0, int p1, int p2) {
+    VecCUDA<T,3> pole;
+    pole(0) = (T)p0;
+    pole(1) = (T)p1;
+    pole(2) = (T)p2;
+    auto histHSharedPtr = this->getPoleHistogram(pole);
+    Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM> *histHPtr = histHSharedPtr.get();
+    Tensor2<T> hist(HPP_POLE_FIG_HIST_DIM, HPP_POLE_FIG_HIST_DIM);
+    for (unsigned int i=0; i<HPP_POLE_FIG_HIST_DIM; i++) {
+        for (unsigned int j=0; j<HPP_POLE_FIG_HIST_DIM; j++) {
+            hist.setVal(i, j, histHPtr->getVal(i,j));
+        }
+    }
+    return hist;
+}
+
 /**
  * @brief Get the Euler angles of the crystals
  */

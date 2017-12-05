@@ -27,6 +27,7 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getn1", &hpp::Tensor2<float>::getn1)
         .def("getn2", &hpp::Tensor2<float>::getn2)
         .def("setVal", &hpp::Tensor2<float>::setVal)
+        .def("getVal", &hpp::Tensor2<float>::getVal)
     ;
     boost::python::class_<hpp::EulerAngles<float>>("EulerAnglesF")
         .add_property("alpha", &hpp::EulerAngles<float>::getAlpha)
@@ -86,7 +87,10 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def(boost::python::vector_indexing_suite<std::vector<hpp::SpectralCrystalCUDA<float>>>())
     ;
     
+    // Selection of overloaded methods
     void (hpp::SpectralPolycrystalCUDA<float,12>::*step)(const hpp::Tensor2<float>&, float) = &hpp::SpectralPolycrystalCUDA<float,12>::step;
+    hpp::Tensor2<float> (hpp::SpectralPolycrystalCUDA<float,12>::*getPoleHistogram)(int, int, int) = &hpp::SpectralPolycrystalCUDA<float,12>::getPoleHistogram;
+    
     boost::python::class_<hpp::SpectralPolycrystalCUDA<float,12>>("SpectralPolycrystalCUDAF12", 
         boost::python::init<std::vector<hpp::SpectralCrystalCUDA<float>>&, const hpp::CrystalPropertiesCUDA<float, 12>&, const hpp::SpectralDatabaseUnified<float>&>())
         .def("evolve", &hpp::SpectralPolycrystalCUDA<float,12>::evolve)
@@ -94,5 +98,6 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getEulerAnglesZXZActive", &hpp::SpectralPolycrystalCUDA<float,12>::getEulerAnglesZXZActive)
         .def("step", step)
         .def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)
+        .def("getPoleHistogram", getPoleHistogram)
     ;
 }

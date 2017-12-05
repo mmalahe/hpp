@@ -213,6 +213,7 @@ public:
     // Output
     std::vector<EulerAngles<T>> getEulerAnglesZXZActive();
     GSHCoeffsCUDA<T> getGSHCoeffs();
+    Tensor2<T> getPoleHistogram(int p0, int p1, int p2);
     void writeResultHDF5(std::string filename);
     
     // Extras
