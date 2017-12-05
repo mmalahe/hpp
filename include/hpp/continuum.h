@@ -78,6 +78,8 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const Tensor2<
         }
     }
     if (!RTest.isRotationMatrix()) {
+        Tensor2<T> product = RTest*RTest.trans();
+        std::cerr << "R*R^T = " << product << std::endl;
         throw std::runtime_error("The transformation to the stretching tensor frame is not a rotation.");
     }
 

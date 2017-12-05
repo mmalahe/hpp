@@ -339,7 +339,7 @@ bool Tensor2<T>::isRotationMatrix() const{
     this->assertSquare();
     Tensor2<T> product = (*this)*(*this).trans();
     T error = (product - identityTensor2<T>(n1)).frobeniusNorm();
-    if (error < 100*std::numeric_limits<T>::epsilon()) {
+    if (error < 1000*std::numeric_limits<T>::epsilon()) {
         return true;
     }
     else {
