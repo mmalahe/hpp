@@ -359,6 +359,11 @@ __inline__ __host__ __device__ typename cuTypes<T>::complex operator-(const type
     return make_cuComplex(z.x-a, z.y);
 }
 
+template<typename T>
+__inline__ __host__ __device__ typename cuTypes<T>::complex operator+(const typename cuTypes<T>::complex& z, T a) {
+    return make_cuComplex(z.x+a, z.y);
+}
+
 __inline__ __host__ __device__ cuFloatComplex operator-(const cuFloatComplex& z) {
     return make_cuComplex(-z.x, -z.y);
 }
