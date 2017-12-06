@@ -47,6 +47,10 @@ class GSHCoeffsCUDA {
                 l3[i].x = 0.0;
                 l3[i].y = 0.0;
             }
+            for (unsigned int i=0; i<nl4; i++) {
+                l4[i].x = 0.0;
+                l4[i].y = 0.0;
+            }
         }
         
         __host__ __device__ bool isInSymmetrizedSection(int l, int m, int n) {
@@ -97,6 +101,9 @@ class GSHCoeffsCUDA {
                 case 3:
                     val = l3[flatIdx];
                     break;
+                case 4:
+                    val = l4[flatIdx];
+                    break;
                 default:
                     return;
             }
@@ -140,6 +147,9 @@ class GSHCoeffsCUDA {
                 case 3:
                     l3[flatIdx] = val;
                     break;
+                case 4:
+                    l4[flatIdx] = val;
+                    break;
                 default:
                     return;
             }
@@ -181,14 +191,25 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
+        __host__ std::vector<T> getl4Reals() {
+            std::vector<T> vals(2*nl4);
+            for (unsigned int i=0; i<nl4; i++) {
+                vals[2*i] = l4[i].x;
+                vals[2*i+1] = l4[i].y;
+            }
+            return vals;
+        }
+        
         int nl0 = 2*0*(0+1)+1;
         int nl1 = 2*1*(1+1)+1;
         int nl2 = 2*2*(2+1)+1;
         int nl3 = 2*3*(3+1)+1;
+        int nl4 = 2*4*(4+1)+1;
         typename cuTypes<T>::complex l0[2*0*(0+1)+1];
         typename cuTypes<T>::complex l1[2*1*(1+1)+1];
         typename cuTypes<T>::complex l2[2*2*(2+1)+1];
-        typename cuTypes<T>::complex l3[2*3*(3+1)+1];     
+        typename cuTypes<T>::complex l3[2*3*(3+1)+1];
+        typename cuTypes<T>::complex l4[2*4*(4+1)+1];
 };
 
 template <typename T>
@@ -205,6 +226,9 @@ __host__ __device__ GSHCoeffsCUDA<T> operator+(const GSHCoeffsCUDA<T>& coeffs1, 
     }
     for (unsigned int i=0; i<res.nl3; i++) {
         res.l3[i] = coeffs1.l3[i]+coeffs2.l3[i];
+    }
+    for (unsigned int i=0; i<res.nl4; i++) {
+        res.l4[i] = coeffs1.l4[i]+coeffs2.l4[i];
     }
     return res;
 }
@@ -228,6 +252,9 @@ __host__ __device__ GSHCoeffsCUDA<T> operator/(const GSHCoeffsCUDA<T>& coeffs, T
     }
     for (unsigned int i=0; i<res.nl3; i++) {
         res.l3[i] = coeffs.l3[i]/val;
+    }
+    for (unsigned int i=0; i<res.nl4; i++) {
+        res.l4[i] = coeffs.l4[i]/val;
     }
     return res;
 }
@@ -273,6 +300,14 @@ inline __device__ GSHCoeffsCUDA<T> warpReduceSumGSHCoeffs(GSHCoeffsCUDA<T> coeff
         }
         for (int offset = warpSize/2; offset > 0; offset /= 2) {
             coeffs.l3[i].y += __shfl_down(coeffs.l3[i].y, offset);
+        }
+    }
+    for (unsigned int i=0; i<coeffs.nl4; i++) {
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
+            coeffs.l4[i].x += __shfl_down(coeffs.l4[i].x, offset);
+        }
+        for (int offset = warpSize/2; offset > 0; offset /= 2) {
+            coeffs.l4[i].y += __shfl_down(coeffs.l4[i].y, offset);
         }
     }
     return coeffs;

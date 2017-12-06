@@ -74,6 +74,7 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getl1Reals", &hpp::GSHCoeffsCUDA<float>::getl1Reals)
         .def("getl2Reals", &hpp::GSHCoeffsCUDA<float>::getl2Reals)
         .def("getl3Reals", &hpp::GSHCoeffsCUDA<float>::getl3Reals)
+        .def("getl4Reals", &hpp::GSHCoeffsCUDA<float>::getl4Reals)
     ;
     
     // crystalCUDA.h
