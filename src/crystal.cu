@@ -5,6 +5,8 @@
 
 #include <hpp/hdfUtilsCpp.h>
 
+#include <hpp/cudaUtils.h>
+
 namespace hpp
 {
 #ifdef HPP_USE_CUDA
@@ -528,6 +530,8 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     
     // Calculate the coefficients
     GSHCoeffsCUDA<T> coeffs;
+    typename cuTypes<T>::complex one = make_cuComplex((T)1.0,(T)0.0);
+    typename cuTypes<T>::complex Iim = make_cuComplex((T)0.0,(T)1.0);
     
     // l=0
     coeffs.set(0, 0, 0, make_cuComplex((T)1.0, (T)0.0));
@@ -569,70 +573,86 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     l=2; 
     normFactor = (T)2.*l+(T)1.;
     
-    m=-2, n=-2;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.25*powFull(cosIntr(Phi)+(T)1., (T)2.), (T)0.);
+    m=-2, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.25*powFull(cosIntr(Phi) + (T)1, (T)2.0);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-2, n=-1;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)+(T)1.));
+
+    m=-2, n=-1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.5*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-2, n=0;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex(-sqrtIntr((T)3./(T)8.)*((T)1.-powFull(cosIntr(Phi),(T)2.)), (T)0.);
+
+    m=-2, n=0;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.612372435695794*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-2, n=1;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)-(T)1.));
+
+    m=-2, n=1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.5*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-2, n=2;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.25*powFull(cosIntr(Phi)-(T)1., (T)2.), (T)0.);
+
+    m=-2, n=2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.25*powFull(-cosIntr(Phi) + (T)1, (T)2.0);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-1, n=-2;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)+(T)1.));
+
+    m=-1, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.5*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-1, n=-1;  
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.5*((T)2.*powFull(cosIntr(Phi),(T)2.)+cosIntr(Phi)-(T)1.), (T)0.);
+
+    m=-1, n=-1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*((T)1.0*cosIntr(Phi) - (T)0.5)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-1, n=0;  
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., sqrtIntr((T)3./(T)2.)*sinIntr(Phi)*cosIntr(Phi));
+
+    m=-1, n=0;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)1.22474487139159*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*cosIntr(Phi);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-1, n=1;  
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.5*((T)2.*powFull(cosIntr(Phi),(T)2.)-cosIntr(Phi)-(T)1.), (T)0.);
+
+    m=-1, n=1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*-powFull(-cosIntr(Phi) + (T)1, (T)1.0)*((T)1.0*cosIntr(Phi) + (T)0.5);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=-1, n=2;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., (T)0.5*sinIntr(Phi)*(cosIntr(Phi)-(T)1.));
+
+    m=-1, n=2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.5*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
-    m=0, n=-2;   
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex(-sqrtIntr((T)3./(T)8.)*((T)1.-powFull(cosIntr(Phi),(T)2.)), (T)0.);
+
+    m=0, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.612372435695794*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
+
     m=0, n=-1;
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0., sqrtIntr((T)3./(T)2.)*sinIntr(Phi)*cosIntr(Phi));
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)1.22474487139159*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*cosIntr(Phi);
     coeffs.set(l, m, n, normFactor*P*expMult);
-    
+
     m=0, n=0;
-    expMult = expIntr(make_cuComplex((T)0., -n*phi1-m*phi2));
-    P = make_cuComplex((T)0.5*((T)3.*powFull(cosIntr(Phi),(T)2.)-(T)1.), (T)0.);
-    coeffs.set(l, m, n, normFactor*P*expMult);    
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)1.5*powFull(cosIntr(Phi), (T)2) - (T)0.5;
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)1.22474487139159*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*cosIntr(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.612372435695794*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+
+    
+    /////////
+    // l=3 //
+    /////////
     
     // Add up coefficients
     __syncthreads();
