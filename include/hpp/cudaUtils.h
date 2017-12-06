@@ -349,6 +349,24 @@ __inline__ __host__ __device__ typename cuTypes<T>::complex operator*(T a, const
     return make_cuComplex(a*z.x, a*z.y);
 }
 
+template<typename T>
+__inline__ __host__ __device__ typename cuTypes<T>::complex operator*(const typename cuTypes<T>::complex z, T a) {
+    return a*z;
+}
+
+template<typename T>
+__inline__ __host__ __device__ typename cuTypes<T>::complex operator-(const typename cuTypes<T>::complex& z, T a) {
+    return make_cuComplex(z.x-a, z.y);
+}
+
+__inline__ __host__ __device__ cuFloatComplex operator-(const cuFloatComplex& z) {
+    return make_cuComplex(-z.x, -z.y);
+}
+
+__inline__ __host__ __device__ cuDoubleComplex operator-(const cuDoubleComplex& z) {
+    return make_cuComplex(-z.x, -z.y);
+}
+
 /**
  * @brief Very rudimentary, but faster than intrinsic conversion
  * @param x
