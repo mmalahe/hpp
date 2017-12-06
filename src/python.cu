@@ -73,7 +73,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getl0Reals", &hpp::GSHCoeffsCUDA<float>::getl0Reals)
         .def("getl1Reals", &hpp::GSHCoeffsCUDA<float>::getl1Reals)
         .def("getl2Reals", &hpp::GSHCoeffsCUDA<float>::getl2Reals)
-    ;    
+        .def("getl3Reals", &hpp::GSHCoeffsCUDA<float>::getl3Reals)
+    ;
     
     // crystalCUDA.h
     boost::python::class_<hpp::CrystalPropertiesCUDA<float,12>>("CrystalPropertiesCUDAF12", 

@@ -638,21 +638,136 @@ __global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned 
     P = one*(T)1.5*powFull(cosIntr(Phi), (T)2) - (T)0.5;
     coeffs.set(l, m, n, normFactor*P*expMult);
 
-    m=0, n=1;
-    expMult = expIntr(-Iim*(n*phi1+m*phi2));
-    P = one*(T)1.22474487139159*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*cosIntr(Phi);
-    coeffs.set(l, m, n, normFactor*P*expMult);
-
-    m=0, n=2;
-    expMult = expIntr(-Iim*(n*phi1+m*phi2));
-    P = one*(T)-0.612372435695794*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
-    coeffs.set(l, m, n, normFactor*P*expMult);
-
-
-    
     /////////
     // l=3 //
     /////////
+    l=3; 
+    normFactor = (T)2.*l+(T)1.;
+    
+    m=-3, n=-3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.125*powFull(cosIntr(Phi) + (T)1, (T)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=0;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.559016994374947*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.125*powFull(-cosIntr(Phi) + (T)1, (T)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*((T)0.75*cosIntr(Phi) - (T)0.5)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*((T)1.18585412256314*cosIntr(Phi) - (T)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=0;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-1.36930639376292*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0)*cosIntr(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*-Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)1.18585412256314*cosIntr(Phi) + (T)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*((T)0.75*cosIntr(Phi) + (T)0.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*((T)1.18585412256314*cosIntr(Phi) - (T)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*powFull(cosIntr(Phi) + (T)1, (T)1.0)*((T)1.875*powFull(cosIntr(Phi), (T)2) - (T)1.25*cosIntr(Phi) - (T)0.125);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=0;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)2.1650635094611*powFull(cosIntr(Phi), (T)2) - (T)0.433012701892219);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*((T)-1.875*powFull(cosIntr(Phi), (T)2) - (T)1.25*cosIntr(Phi) + (T)0.125);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*-Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)1.18585412256314*cosIntr(Phi) + (T)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-3;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.559016994374947*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-2;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*(T)-1.36930639376292*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0)*cosIntr(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-1;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)2.1650635094611*powFull(cosIntr(Phi), (T)2) - (T)0.433012701892219);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=0;
+    expMult = expIntr(-Iim*(n*phi1+m*phi2));
+    P = one*((T)2.5*powFull(cosIntr(Phi), (T)2) - (T)1.5)*cosIntr(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
     
     // Add up coefficients
     __syncthreads();
