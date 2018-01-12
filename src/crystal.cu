@@ -1041,16 +1041,16 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
 } 
 
 // Reset host function
-///@todo: implement specific random seed for orientations
 template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::reset(T init_s, unsigned long int seed) {
     // Create resetted crystals on host
     std::vector<SpectralCrystalCUDA<T>> crystalList(this->nCrystals);
     Tensor2<T> R(3,3);
+    std::mt19937 randgen(seed);    
     for (auto&& crystal : crystalList) {        
         // Initial slip-system deformation resistance and angles
         crystal.s = init_s;
-        randomRotationTensorInPlace<T>(3,R);
+        randomRotationTensorArvo1992<T>(randgen, R);
         crystal.angles = getEulerZXZAngles(R);
     }
     
@@ -1084,6 +1084,12 @@ void SpectralPolycrystalCUDA<T,N>::step(const hpp::Tensor2<T>& L_next, T dt)
     T theta = stretchingTensorDecomp.theta;
     T strainRate = stretchingTensorDecomp.DNorm;
     T strainIncrement = strainRate*dt;
+    
+    // DEBUG: report on recomposed velocity gradient
+//    std::cout << "L in = " << L_next << std::endl;
+//    auto stretchingTensor = stretchingVelocityGradient(stretchingTensorDecomp.theta, stretchingTensorDecomp.DNorm);
+//    auto LReconstructed = transformOutOfFrame(stretchingTensor, stretchingTensorDecomp.evecs);
+//    std::cout << "LReconstructed = " << LReconstructed << std::endl;
     
     // The rotational component of the stretching tensor
     Tensor2CUDA<T,3,3> RStretchingTensor(stretchingTensorDecomp.evecs);

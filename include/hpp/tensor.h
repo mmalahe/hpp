@@ -1610,30 +1610,6 @@ inline std::mt19937 makeMt19937(bool defaultSeed) {
 
 // Arvo 1992 method
 template <typename T>
-void randomRotationTensorArvo1992(Tensor2<T>& A, bool defaultSeed=false) {
-    // Generator
-    static std::mt19937 gen = makeMt19937(defaultSeed);
-    
-    // Static to avoid expensive alloc/dealloc for the tens/hundreds of millions regime
-    static std::vector<T> v(3);
-    static Tensor2<T> R(3,3);
-    static Tensor2<T> H(3,3);
-    
-    // double is specified here, as if it is not, the values out of the
-    // distribution are different for float and double, even with the same
-    // default seed
-    static std::uniform_real_distribution<double> dist(0.0,1.0);
-    
-    // Random samples
-    T x1 = (T)dist(gen);
-    T x2 = (T)dist(gen);
-    T x3 = (T)dist(gen);
-    
-    // Generate 
-    rotationTensorFrom3UniformRandomsArvo1992(A, x1, x2, x3);
-}
-
-template <typename T>
 void rotationTensorFrom3UniformRandomsArvo1992(Tensor2<T>& A, T x1, T x2, T x3) {    
     // Static to avoid expensive alloc/dealloc for the tens/hundreds of millions regime
     static std::vector<T> v(3);
@@ -1661,6 +1637,36 @@ void rotationTensorFrom3UniformRandomsArvo1992(Tensor2<T>& A, T x1, T x2, T x3) 
     
     // Final matrix
     A = H*R;
+}
+
+template <typename T>
+void randomRotationTensorArvo1992(std::mt19937& gen, Tensor2<T>& A) {    
+    // Static to avoid expensive alloc/dealloc for the tens/hundreds of millions regime
+    static std::vector<T> v(3);
+    static Tensor2<T> R(3,3);
+    static Tensor2<T> H(3,3);
+    
+    // double is specified here, as if it is not, the values out of the
+    // distribution are different for float and double, even with the same
+    // default seed
+    static std::uniform_real_distribution<double> dist(0.0,1.0);
+    
+    // Random samples
+    T x1 = (T)dist(gen);
+    T x2 = (T)dist(gen);
+    T x3 = (T)dist(gen);
+    
+    // Generate 
+    rotationTensorFrom3UniformRandomsArvo1992(A, x1, x2, x3);
+}
+
+template <typename T>
+void randomRotationTensorArvo1992(Tensor2<T>& A, bool defaultSeed=false) {
+    // Create generator once
+    static std::mt19937 gen = makeMt19937(defaultSeed);
+    
+    // Generate
+    randomRotationTensorArvo1992(gen, A);
 }
 
 template <typename T>
