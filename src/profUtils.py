@@ -77,13 +77,13 @@ def readPerfAnnotated(filename):
         try:
             instrKind = instrDB[instr].kind
         except:
-            print "Type unknown for", instr
+            print("Type unknown for", instr)
             instrKind = 'unknown'
         if instrKind in costByKind.keys():
             costByKind[instrKind] += instrCosts[instr]
         else:
             costByKind[instrKind] = instrCosts[instr]
-        print instr, instrCosts[instr]
+        print(instr, instrCosts[instr])
     
     return costByKind
     

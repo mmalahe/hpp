@@ -204,7 +204,7 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     n_poles = len(pole_history_data)
     poles_per_row = 3
     n_rows = int(ceil(float(n_poles)/poles_per_row))
-    n_cols = n_poles/n_rows
+    n_cols = ceil(n_poles/n_rows)
     
     # Colorbar spacing
     cbar_main_frac = 0.13/n_rows
@@ -223,7 +223,7 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     pole_names_ordered = [name[::-1] for name in pole_names_ordered_strings_reveresed]    
     
     # Get number of timesteps
-    ntimesteps = pole_history_data.values()[0].shape[0]
+    ntimesteps = list(pole_history_data.values())[0].shape[0]
     
     # Get ranges
     min_density = 1e10
@@ -304,7 +304,7 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     
     # Update function
     def animFunc(it):
-        print "Plotting frame", it
+        print("Plotting frame", it)
         i_subplot = 0
         for pole_name in pole_names_ordered:
             # Set current axes

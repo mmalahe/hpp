@@ -5,6 +5,29 @@ from plotting import *
 from runUtils import *
 from numpy import polyfit, log, exp
 import numpy as np
+from collections import OrderedDict
+
+def getParameterPlottingName(param_name):
+    if param_name == 'n_terms':
+        plot_name = "Number of terms in Fourier series"
+    elif param_name == 'refinement_multiplier':
+        plot_name = "Refinement multiplier"
+    elif param_name == 'db_dim':
+        plot_name = "Spectral database dimension"
+    else:
+        raise Exception("No plotting name for {}.".format(param_name))
+    return plot_name
+    
+def getShortParameterPlottingName(param_name):
+    if param_name == 'n_terms':
+        plot_name = "$N_t$"
+    elif param_name == 'refinement_multiplier':
+        plot_name = "$N_r$"
+    elif param_name == 'db_dim':
+        plot_name = "$N_g$"
+    else:
+        raise Exception("No plotting name for {}.".format(param_name))
+    return plot_name
 
 def gaussianFilterHistogramHistory(hists, sigma=12.0):
     filtered = zeros(hists.shape)
@@ -162,6 +185,111 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         elif do_iterative_pole_plots:
             plotPoleHistogramsHistory(pole_data_iterative, pole_figure_plot_timestep_list, experiment_name+"_poles_iterative")
 
+def strainStressValuesAndLabels(run):
+    experiment_name = run['experiment_name']
+    true_strain_history, T_cauchy_history = run.getStrainAndStress()
+    T_11 = array([T_cauchy[0,0] for T_cauchy in T_cauchy_history])
+    T_12 = array([T_cauchy[0,1] for T_cauchy in T_cauchy_history])
+    T_22 = array([T_cauchy[1,1] for T_cauchy in T_cauchy_history])
+    T_33 = array([T_cauchy[2,2] for T_cauchy in T_cauchy_history])
+    strain = true_strain_history
+    if 'simple_shear' in experiment_name:    
+        stress = abs(T_12)
+        x_label = r"$|\epsilon|$"
+        y_label = "Stress (MPa)"
+        legend_prefix = r"$\sigma_{12}$"
+    elif 'simple_compression' in experiment_name:
+        sigma = T_33 - 0.5*(T_11+T_22)
+        stress = abs(sigma)
+        x_label = r"$|\epsilon|$"
+        y_label = r"$\sigma$ (MPa)"
+        legend_prefix = ""       
+    elif 'plane_strain_compression' in experiment_name:
+        stress = abs(T_33)
+        x_label = r"$|\epsilon|$"
+        y_label = "Stress (MPa)"
+        legend_prefix = r"$\sigma_{33}$"       
+    else:
+        raise Exception("No known strain/stress definitions and labels for {}.".format(experiment_name))
+        
+    return strain, stress, x_label, y_label, legend_prefix
+    
+def getPlaneNormalsAndPoleNames(run):
+    experiment_name = run['experiment_name']
+    plane_normals_A = [[1.0,1.0,1.0],[1.0,1.0,0.0],[1.0,0.0,0.0]]
+    pole_names_A = ['111','110','100']
+    plane_normals_B = [[0.0,0.0,1.0],[0.0,1.0,1.0],[1.0,1.0,1.0]]
+    pole_names_B = ['001','011','111']
+    if 'simple_shear' in experiment_name:    
+        plane_normals = plane_normals_A  
+        pole_names = pole_names_A  
+    elif 'simple_compression' in experiment_name:
+        plane_normals = plane_normals_B 
+        pole_names = pole_names_B       
+    elif 'plane_strain_compression' in experiment_name:
+        plane_normals = plane_normals_B 
+        pole_names = pole_names_B       
+    else:
+        raise Exception("No known plane normals and pole names for {}.".format(experiment_name))
+    return plane_normals, pole_names
+
+def doSolverParameterPlot(runs, param_name):
+    # Number of runs
+    n_runs = len(runs)    
+    
+    # Names
+    param_plotting_name = getParameterPlottingName(param_name)
+    param_short_plotting_name = getShortParameterPlottingName(param_name)
+    figname_prefix = "{}={}-{}".format(param_name, runs[0][param_name], runs[-1][param_name])
+        
+    # Strain stress figure setup
+    figure()
+    leg = []       
+    figname = figname_prefix+"_ss.png"
+        
+    # Make plots
+    stress_max = 0.0
+    for run in runs:
+        strain, stress, x_label, y_label, legend_prefix = strainStressValuesAndLabels(run)
+        stress_max = max(stress_max, np.max(stress))
+        plot(np.abs(strain), stress)
+        param_value = run[param_name]
+        leg.append("{}, {}={}".format(legend_prefix, param_plotting_name, param_value))        
+
+    ylim((0.0, stress_max*1.05)) 
+    legend(leg, loc='best')
+    xlabel(x_label)
+    ylabel(y_label)      
+    
+    # Save
+    savefig(figname, bbox_inches='tight')
+    
+    # Pole figure setup
+    plane_normals, pole_names = getPlaneNormalsAndPoleNames(run)
+    pole_figure_plot_timestep_list = runs[-1]['pole_figure_timestep_selection']
+    smoothing_per_pixel = run['histogram_smoothing_per_pixel']
+    
+    pole_data_combo = OrderedDict()
+    for run in runs:
+        # Fetch pole data and set smoothing parameters    
+        pole_histograms = run.getPoleHistograms()
+        pole_data = {"{"+name+"}":array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
+        n_pixels_side = list(pole_histograms.values())[0].shape[1]        
+        smoothing_sigma = n_pixels_side*smoothing_per_pixel
+        
+        # Smooth data   
+        pole_data = {name: gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma) for name in pole_data.keys()}
+        
+        # Add to combined data
+        param_value = run[param_name]
+        param_suffix = "{}={}".format(param_short_plotting_name, param_value)
+        for pole_name in pole_data.keys():
+            pole_data_combo["{}, {}".format(pole_name, param_suffix)] = pole_data[pole_name]
+    figname = figname_prefix+"_poles"
+    
+    # Plot pole figures
+    plotPoleHistogramsHistory(pole_data_combo, pole_figure_plot_timestep_list, figname)
+
 def getLog2Ticks(x_variable_list):
     log2Ticks = [int(log(x)/log(2)) for x in x_variable_list]
     ticks = [2**a for a in log2Ticks]
@@ -171,13 +299,7 @@ def getLog2Ticks(x_variable_list):
 def doErrorStudy(reference_run, runs, x_variable_name, x_variable_plot_name=None):
     # Names for plotting
     if x_variable_plot_name == None:
-        x_variable_plot_name = ""
-        if x_variable_name == 'n_terms':
-            x_variable_plot_name = "Number of terms in Fourier series"
-        elif x_variable_name == 'refinement_multiplier':
-            x_variable_plot_name = "Refinement multiplier"
-        elif x_variable_name == 'db_dim':
-            x_variable_plot_name = "Spectral database dimension"
+        x_variable_plot_name = getParameterPlottingName(x_variable_name)
     
     # Number of runs
     n_runs = len(runs)

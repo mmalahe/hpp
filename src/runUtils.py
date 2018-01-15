@@ -21,8 +21,9 @@ def getCfgDir():
 def getBinDir(build_type="release"):
     cfg_dir = getCfgDir()
     cfg_filename = os.path.join(cfg_dir, "%s.txt" % (build_type))
-    exec(open(cfg_filename,'r').read())
-    return bin_dir
+    read_dict = {}
+    exec(open(cfg_filename,'r').read(), read_dict)
+    return read_dict['bin_dir']
 
 def getSpectralDatabaseFilename(db_dir, db_dim, use_unified_coeff_order):
     if use_unified_coeff_order:
@@ -40,7 +41,7 @@ class GenericRun(object):
         self.verbose = verbose
 
     def run(self):
-        print "Run execution not defined for this subclass of GenericRun."
+        print("Run execution not defined for this subclass of GenericRun.")
 
     def __getitem__(self, key):
         return self.params[key]
@@ -81,7 +82,7 @@ def getStrainStressFromResultsFile(filename, stress_unit='MPa'):
     elif stress_unit == 'GPa':
         T_cauchy_history = [array(a) for a in T_cauchy_history]
     else:
-        print "Haven't implemented stress unit \""+stress_unit+"\"."
+        print("Haven't implemented stress unit \""+stress_unit+"\".")
     
     # Return
     return true_strain_history, T_cauchy_history
@@ -133,13 +134,13 @@ class IterativeSolveRun(GenericRun):
         
         # Call program
         if self.verbose:
-            print " ".join(args)
+            print(" ".join(args))
         call(args)
         
         # Detailed profiling stats
         if self['do_profile']:
             perfData = getPerfPercentages()
-            print perfData
+            print(perfData)
             
     def getStrainAndStress(self):
         return getStrainStressFromResultsFile(self['results_filename'])
@@ -227,13 +228,13 @@ class SpectralSolveRun(GenericRun):
         
         # Call program
         if self.verbose:
-            print " ".join(args)
+            print(" ".join(args))
         call(args)
         
         # Detailed profiling stats
         if self['do_profile']:
             perfData = getPerfPercentages()
-            print perfData
+            print(perfData)
         
     def getStrainAndStress(self):
         return getStrainStressFromResultsFile(self['results_filename'])
@@ -246,17 +247,17 @@ class SpectralSolveRun(GenericRun):
         if elapsed > 0:        
             # Overall profiling stats
             nFourierTermsComputed = results.attrs['nTimestepsTaken']*self['n_crystals']*self['n_terms']*results.attrs['nComponents']
-            print "elapsed = ", elapsed
-            print "gigaterms computed =", nFourierTermsComputed/1.0e9
-            print "gigaterms/second =", (nFourierTermsComputed/elapsed)/1.0e9
+            print("elapsed = ", elapsed)
+            print("gigaterms computed =", nFourierTermsComputed/1.0e9)
+            print("gigaterms/second =", (nFourierTermsComputed/elapsed)/1.0e9)
             
             # Implementation makes use of symmetries in real data, so the actual
             # number of terms computed at the hardware level is a little over half
             #print "gigaterms computed (hardware)=", nFourierTermsComputedHardware/1e9
             #print "gigaterms/second (hardware) =", (nFourierTermsComputedHardware/elapsed)/1.0e9
-            print "terms/terms(hardware) =", float(nFourierTermsComputed)/results.attrs['nFourierTermsComputedHardware']
+            print("terms/terms(hardware) =", float(nFourierTermsComputed)/results.attrs['nFourierTermsComputedHardware'])
             
-            print "strain steps/second = ", results.attrs['nTimestepsTaken']/elapsed
+            print("strain steps/second = ", results.attrs['nTimestepsTaken']/elapsed)
             
             return (nFourierTermsComputed/elapsed)/1.0e9
         else:
@@ -290,8 +291,8 @@ def expandRunsByListParameter(runs, paramName, paramValList):
             elif 'float' in str(type(val)):
                 name_format += "%g"
             else:
-                print "type is", type(val)
-                print "Treating", val, "as a string."
+                print("type is", type(val))
+                print("Treating", val, "as a string.")
                 name_format += "%s"
                 val = str(val)
             
@@ -319,7 +320,7 @@ def expandRunsByAllListParameters(runs,exclude=[]):
         
         # Expand this run through those lists
         expandedRuns = [run]
-        for paramName, paramValList in expandParams.iteritems():
+        for paramName, paramValList in expandParams.items():
             expandedRuns = expandRunsByListParameter(expandedRuns, paramName, paramValList)
             
         # Add the expanded runs to the new list

@@ -28,7 +28,7 @@ journalRCParams['axes.labelsize'] = 'large'
 allParamSets['journal'] = journalRCParams 
 
 def setPlotDefaults(kind):
-    for key, value in allParamSets[kind].iteritems():
+    for key, value in allParamSets[kind].items():
         matplotlib.rcParams[key] = value
 
 def removeBorder(ax):
