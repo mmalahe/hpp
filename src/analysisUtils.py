@@ -347,7 +347,7 @@ def doErrorStudy(reference_run, runs, x_variable_name, x_variable_plot_name=None
     figname = reference_run['name']+"_error_vs_"+x_variable_name+".png"
     savefig(figname)
     
-def doSpectralPerformanceStudy(runs, x_variable_name, x_variable_plot_name=None):
+def doSpectralPerformanceStudy(runs, x_variable_name, x_variable_plot_name=None, ideal_throughput=None):
     # Names for plotting
     if x_variable_plot_name == None:
         x_variable_plot_name = ""
@@ -362,13 +362,21 @@ def doSpectralPerformanceStudy(runs, x_variable_name, x_variable_plot_name=None)
     x_variable_list = [run[x_variable_name] for run in runs]
     gterms_rate_list = [run.getGigatermsComputationRate() for run in runs]
     
-    # Plot
+    # Main plot
     figure()
     semilogx(x_variable_list, gterms_rate_list, 'k+')
     xlabel(x_variable_plot_name)
     ylabel("Throughput (Gigaterms/s)")
+    
+    # Add ideal throughput
+    if ideal_throughput != None:
+        semilogx([x_variable_list[0],x_variable_list[-1]],[ideal_throughput, ideal_throughput], 'b-')
+        legend(['Data', "Ideal Throughput = {}".format(ideal_throughput)], loc='best')
+        
     ticks, tickNames = getLog2Ticks(x_variable_list)
     xticks(ticks, tickNames)
+    
+    # Save    
     figname = runs[-1]['name']+"_rate_vs_"+x_variable_name+".png"
     savefig(figname)
     
