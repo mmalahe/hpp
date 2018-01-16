@@ -169,7 +169,7 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         if do_spectral_solve_plot:
             # Literature comparison
             if do_literature_comparison:
-                plot(lit_spec_strain, lit_spec_stress, 'ro')
+                plot(lit_spec_strain, lit_spec_stress, 'r.')
                 leg.append(lit_spec_leg)
                 stress_max = max(stress_max, np.max(lit_spec_stress)) 
                 
@@ -218,12 +218,12 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         if do_spectral_pole_plots:
             pole_histograms_spectral = spectral_run.getPoleHistograms()
             pole_data_spectral = {"{"+name+"}":array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
-            n_pixels_side = pole_histograms_spectral.values()[0].shape[1] 
+            n_pixels_side = list(pole_histograms_spectral.values())[0].shape[1] 
             smoothing_per_pixel = spectral_run['histogram_smoothing_per_pixel']
         if do_iterative_pole_plots:
             pole_histograms_iterative = iterative_run.getPoleHistograms()
             pole_data_iterative = {"{"+name+"}":array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
-            n_pixels_side = pole_histograms_iterative.values()[0].shape[1]
+            n_pixels_side = list(pole_histograms_iterative.values())[0].shape[1]
             smoothing_per_pixel = iterative_run['histogram_smoothing_per_pixel']
         if do_pole_plots:
             smoothing_sigma = n_pixels_side*smoothing_per_pixel
