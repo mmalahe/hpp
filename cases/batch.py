@@ -91,7 +91,7 @@ spectral_solve_params.update(spectral_db_params)
 spectral_solve_params.update(plotting_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
-spectral_solve_params['n_terms'] = 2**14
+spectral_solve_params['n_terms'] = 2**13
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(9,16)]
 
