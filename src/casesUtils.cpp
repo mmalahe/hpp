@@ -30,6 +30,12 @@ Experiment<U>::Experiment(std::string experimentName) {
         F_of_t = std::bind(simpleCompressionDeformationGradient<U>, std::placeholders::_1, strainRate);
         L_of_t = std::bind(simpleCompressionVelocityGradient<U>, std::placeholders::_1, strainRate);
     }
+    else if (experimentName == "mihaila2014_plane_strain_compression") {
+        tEnd = 1000.0;
+        strainRate = 1.0e-3;
+        F_of_t = std::bind(planeStrainCompressionDeformationGradient<U>, std::placeholders::_1, strainRate);
+        L_of_t = std::bind(planeStrainCompressionVelocityGradient<U>, std::placeholders::_1, strainRate);
+    }
     else if (experimentName == "savage2015_plane_strain_compression") {
         tEnd = 1000.0;
         strainRate = 1.0e-3;
