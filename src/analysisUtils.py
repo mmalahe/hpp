@@ -86,11 +86,17 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
     # Loop through plots
     for i_plot in range(n_plots):    
         # Make sure runs are matching up
-        iterative_run = iterative_solve_runs[i_plot]
-        spectral_run = spectral_solve_runs[i_plot]
-        assert(iterative_run['name'] == spectral_run['name'])
-        run_name = iterative_run['name']
-        experiment_name = iterative_run['experiment_name']
+        if do_iterative_solve_plot:
+            iterative_run = iterative_solve_runs[i_plot]
+            run_name = iterative_run['name']
+            experiment_name = iterative_run['experiment_name']
+        if do_spectral_solve_plot:
+            spectral_run = spectral_solve_runs[i_plot]
+            run_name = spectral_run['name']
+            experiment_name = spectral_run['experiment_name']
+        if do_iterative_solve_plot and do_spectral_solve_plot:
+            assert(iterative_run['name'] == spectral_run['name'])
+            assert(iterative_run['experiment_name'] == spectral_run['experiment_name'])       
         
         # Fetch literature results
         if do_literature_comparison:
@@ -399,12 +405,15 @@ def doErrorStudy(reference_run, runs, x_variable_name, x_variable_plot_name=None
     leg.append("Data")
     loglog(x_variable_list, fit_l2, 'k--')
     leg.append("Fit with slope %1.2f" % (slope))
-    xlim(0.95*min(x_variable_list),1.05*max(x_variable_list))
     xlabel(x_variable_plot_name)
     ylabel("L2 error")
     legend(leg, loc='best')
     ticks, tickNames = getLog2Ticks(x_variable_list)
-    xticks(ticks, tickNames)
+    gca().set_xticks(ticks)
+    gca().set_xticklabels(tickNames)
+    print(ticks, tickNames)
+    #~ xticks(ticks, tickNames)
+    xlim(0.95*min(x_variable_list),1.05*max(x_variable_list))
     figname = reference_run['name']+"_error_vs_"+x_variable_name+".png"
     savefig(figname)
     
