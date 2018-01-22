@@ -36,26 +36,26 @@ def gaussianFilterHistogramHistory(hists, sigma=12.0):
         filtered[i,:,:] = gaussian_filter(hists[i,:,:], sigma=sigma)
     return filtered
 
-def getLiteratureStrainStressFilenamesLegends(experiment_name):
-    literature_dir = "literature"
+def getLiteratureStrainStressFilenamesLegends(run):
+    experiment_name = run['experiment_name']
+    n_terms = run['n_terms']
+    
     if experiment_name == "mihaila2014_simple_shear":
-        iterative_fname = "mihaila2014_sh_iterative.csv"
         iterative_legend = "Mihaila et. al. (iterative)"
-        spectral_fname = "mihaila2014_sh_spectral_8192.csv"
         spectral_legend = "Mihaila et. al. (spectral)"
     elif experiment_name == "mihaila2014_plane_strain_compression":
-        iterative_fname = "mihaila2014_psc_iterative.csv"
         iterative_legend = "Mihaila et. al. (iterative)"
-        spectral_fname = "mihaila2014_psc_spectral_8192.csv"
         spectral_legend = "Mihaila et. al. (spectral)"
     elif experiment_name == "savage2015_plane_strain_compression":
-        iterative_fname = "savage2015_psc_iterative.csv"
         iterative_legend = "Savage et. al. (iterative)"
-        spectral_fname = "savage2015_psc_spectral_2048.csv"
         spectral_legend = "Savage et. al. (spectral)"    
     else:
         raise Exception("Don't know what to fetch for {}.".format(experiment_name))
         
+    iterative_fname = "{}_iterative.csv".format(experiment_name)
+    spectral_fname = "{}_spectral_{}.csv".format(experiment_name, n_terms)
+    
+    literature_dir = "literature"
     iterative_fname = os.path.join(literature_dir, iterative_fname)
     spectral_fname = os.path.join(literature_dir, spectral_fname)
     
