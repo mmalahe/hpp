@@ -16,8 +16,8 @@ setPlotDefaults('journal')
 do_iterative_solve = False
 do_spectral_solve = False
 
-do_iterative_solve_plot = False
-do_spectral_solve_plot = False
+do_iterative_solve_plot = True
+do_spectral_solve_plot = True
 
 error_study_type = None
 #~ error_study_type = 'db_dim'
@@ -52,7 +52,8 @@ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 #~ problem_params['experiment_name'].append('plane_strain_compression_grid_texture')
 #~ problem_params['experiment_name'].append('simple_shear_grid_texture')
-problem_params['experiment_name'].append('mihaila2014_simple_shear')
+#~ problem_params['experiment_name'].append('mihaila2014_simple_shear')
+problem_params['experiment_name'].append('mihaila2014_plane_strain_compression')
 #~ problem_params['experiment_name'].append('savage2015_plane_strain_compression')
 #~ problem_params['experiment_name'].append('kalidindi1992_simple_shear')
 #~ problem_params['experiment_name'].append('kalidindi1992_simple_compression')
@@ -91,7 +92,7 @@ spectral_solve_params.update(spectral_db_params)
 spectral_solve_params.update(plotting_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
-spectral_solve_params['n_terms'] = 2**16
+spectral_solve_params['n_terms'] = 2**13
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(7,15)]
 
@@ -116,7 +117,7 @@ for run in spectral_solve_runs:
 
 # Solution plots
 if do_iterative_solve_plot or do_spectral_solve_plot:
-    doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs)
+    doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs, do_literature_comparison=True)
 
 # Plots of solutions as a function of solver parameters
 if solver_parameter_plot_type != None:

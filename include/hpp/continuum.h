@@ -70,15 +70,14 @@ StretchingTensorDecomposition<T> getStretchingTensorDecomposition(const Tensor2<
     
     // Ensure that the determinant of the eigenvector matrix is positive
     // for the purposes of treating it like a rotation
-    Tensor2<T> RTest(decomp.evecs);
-    if (RTest.det() < 0) {
+    if (decomp.evecs.det() < 0) {
         std::swap(Devals[0], Devals[1]);
         for (int i=0; i<3; i++) {
             std::swap(decomp.evecs(i,0), decomp.evecs(i,1));
         }
     }
-    if (!RTest.isRotationMatrix()) {
-        Tensor2<T> product = RTest*RTest.trans();
+    if (!decomp.evecs.isRotationMatrix()) {
+        Tensor2<T> product = decomp.evecs*decomp.evecs.trans();
         std::cerr << "R*R^T = " << product << std::endl;
         throw std::runtime_error("The transformation to the stretching tensor frame is not a rotation.");
     }

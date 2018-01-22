@@ -164,7 +164,7 @@ if do_calculate_spectral_database_error:
     args += ["-o", spectral_error_out_filename]
     if use_unified_coeff_order:
         args += ["-u"]
-    print args
+    print(args)
     call(args)
 
 if do_plot_spectral_database_error:

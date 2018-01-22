@@ -6,6 +6,7 @@ from runUtils import *
 from numpy import polyfit, log, exp
 import numpy as np
 from collections import OrderedDict
+import csv
 
 def getParameterPlottingName(param_name):
     if param_name == 'n_terms':
@@ -35,7 +36,42 @@ def gaussianFilterHistogramHistory(hists, sigma=12.0):
         filtered[i,:,:] = gaussian_filter(hists[i,:,:], sigma=sigma)
     return filtered
 
-def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs):
+def getLiteratureStrainStressFilenamesLegends(experiment_name):
+    literature_dir = "literature"
+    if experiment_name == "mihaila2014_simple_shear":
+        iterative_fname = "mihaila2014_sh_iterative.csv"
+        iterative_legend = "Mihaila et. al. (iterative)"
+        spectral_fname = "mihaila2014_sh_spectral_8192.csv"
+        spectral_legend = "Mihaila et. al. (spectral)"
+    elif experiment_name == "mihaila2014_plane_strain_compression":
+        iterative_fname = "mihaila2014_psc_iterative.csv"
+        iterative_legend = "Mihaila et. al. (iterative)"
+        spectral_fname = "mihaila2014_psc_spectral_8192.csv"
+        spectral_legend = "Mihaila et. al. (spectral)"
+    elif experiment_name == "savage2015_plane_strain_compression":
+        iterative_fname = "savage2015_psc_iterative.csv"
+        iterative_legend = "Savage et. al. (iterative)"
+        spectral_fname = "savage2015_psc_spectral_2048.csv"
+        spectral_legend = "Savage et. al. (spectral)"    
+    else:
+        raise Exception("Don't know what to fetch for {}.".format(experiment_name))
+        
+    iterative_fname = os.path.join(literature_dir, iterative_fname)
+    spectral_fname = os.path.join(literature_dir, spectral_fname)
+    
+    return iterative_fname, iterative_legend, spectral_fname, spectral_legend
+
+def loadLiteratureStrainStress(filename):
+    strain = []
+    stress = []
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            strain.append(float(row[0]))
+            stress.append(float(row[1]))
+    return strain, stress
+
+def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs, do_literature_comparison=False):
     # Number of plots
     assert(do_iterative_solve_plot or do_spectral_solve_plot)
     if do_iterative_solve_plot:
@@ -50,11 +86,23 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
     # Loop through plots
     for i_plot in range(n_plots):    
         # Make sure runs are matching up
-        iterative_run = iterative_solve_runs[i_plot]
-        spectral_run = spectral_solve_runs[i_plot]
-        assert(iterative_run['name'] == spectral_run['name'])
-        run_name = iterative_run['name']
-        experiment_name = iterative_run['experiment_name']
+        if do_iterative_solve_plot:
+            iterative_run = iterative_solve_runs[i_plot]
+            run_name = iterative_run['name']
+            experiment_name = iterative_run['experiment_name']
+        if do_spectral_solve_plot:
+            spectral_run = spectral_solve_runs[i_plot]
+            run_name = spectral_run['name']
+            experiment_name = spectral_run['experiment_name']
+        if do_iterative_solve_plot and do_spectral_solve_plot:
+            assert(iterative_run['name'] == spectral_run['name'])
+            assert(iterative_run['experiment_name'] == spectral_run['experiment_name'])       
+        
+        # Fetch literature results
+        if do_literature_comparison:
+            lit_it_fname, lit_it_leg, lit_spec_fname, lit_spec_leg = getLiteratureStrainStressFilenamesLegends(experiment_name)
+            lit_it_strain, lit_it_stress = loadLiteratureStrainStress(lit_it_fname)
+            lit_spec_strain, lit_spec_stress = loadLiteratureStrainStress(lit_spec_fname)
         
         # Figure setup
         figure()
@@ -85,35 +133,18 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
             plane_normals = plane_normals_A  
             pole_names = pole_names_A  
             x_label = "Strain"
-            y_label = "Stress (MPa)"
+            y_label = "Stress (MPa)"       
         
         # Stress strain plots
         stress_max = 0.0
-        if do_spectral_solve_plot:    
-            # Load data
-            true_strain_history, T_cauchy_history = spectral_run.getStrainAndStress()
-            T_11 = array([T_cauchy[0,0] for T_cauchy in T_cauchy_history])
-            T_12 = array([T_cauchy[0,1] for T_cauchy in T_cauchy_history])
-            T_22 = array([T_cauchy[1,1] for T_cauchy in T_cauchy_history])
-            T_33 = array([T_cauchy[2,2] for T_cauchy in T_cauchy_history])
-            
-            # Plotting
-            if 'simple_shear' in experiment_name:
-                spectral_stress = abs(T_12)
-                leg.append("$\sigma_{12}$ (spectral)")
-            elif experiment_name == 'kalidindi1992_simple_compression':
-                sigma = T_33 - 0.5*(T_11+T_22)
-                spectral_stress = abs(sigma)
-                leg.append("spectral")
-            elif 'plane_strain_compression' in experiment_name:
-                spectral_stress = abs(T_33)
-                leg.append("$\sigma_{33}$ (spectral)")
-            
-            stress_max = max(stress_max, np.max(spectral_stress))    
-            plot(np.abs(true_strain_history), spectral_stress, 'k+')            
-            figname += "_spectral"
         
         if do_iterative_solve_plot:
+            # Literature comparison
+            if do_literature_comparison:
+                plot(lit_it_strain, lit_it_stress, 'r-')
+                leg.append(lit_it_leg)
+                stress_max = max(stress_max, np.max(lit_it_stress))            
+            
             # Load data
             true_strain_history, T_cauchy_history = iterative_run.getStrainAndStress()
             T_11 = array([T_cauchy[0,0] for T_cauchy in T_cauchy_history])
@@ -130,14 +161,50 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
                 iterative_stress = abs(sigma)
                 leg.append("iterative")
             elif 'plane_strain_compression' in experiment_name:
-                iterative_stress = abs(T_33)
-                leg.append("$\sigma_{33}$ (iterative)")
+                iterative_stress = T_11-T_33
+                leg.append("$\sigma_{11} - \sigma_{33}$ (iterative)")
             
             stress_max = max(stress_max, np.max(iterative_stress)) 
-            plot(np.abs(true_strain_history), iterative_stress, 'k-')
+            if do_literature_comparison:
+                linespec = 'k--'
+            else:
+                linespec = 'k-'
+            plot(np.abs(true_strain_history), iterative_stress, linespec)
             figname += "_iterative"
         
+        if do_spectral_solve_plot:
+            # Literature comparison
+            if do_literature_comparison:
+                plot(lit_spec_strain, lit_spec_stress, 'r.')
+                leg.append(lit_spec_leg)
+                stress_max = max(stress_max, np.max(lit_spec_stress)) 
+                
+            # Load data
+            true_strain_history, T_cauchy_history = spectral_run.getStrainAndStress()
+            T_11 = array([T_cauchy[0,0] for T_cauchy in T_cauchy_history])
+            T_12 = array([T_cauchy[0,1] for T_cauchy in T_cauchy_history])
+            T_22 = array([T_cauchy[1,1] for T_cauchy in T_cauchy_history])
+            T_33 = array([T_cauchy[2,2] for T_cauchy in T_cauchy_history])            
+            
+            # Plotting
+            if 'simple_shear' in experiment_name:
+                spectral_stress = abs(T_12)
+                leg.append("$\sigma_{12}$ (spectral)")
+            elif experiment_name == 'kalidindi1992_simple_compression':
+                sigma = T_33 - 0.5*(T_11+T_22)
+                spectral_stress = abs(sigma)
+                leg.append("spectral")
+            elif 'plane_strain_compression' in experiment_name:
+                spectral_stress = T_11-T_33
+                leg.append("$\sigma_{11} - \sigma_{33}$ (spectral)")
+            
+            stress_max = max(stress_max, np.max(spectral_stress))
+            plot(np.abs(true_strain_history), spectral_stress, 'k+')            
+            figname += "_spectral"        
+        
         # Common plotting
+        strain_max = np.max(true_strain_history)
+        xlim((0.0, strain_max*1.05))
         ylim((0.0, stress_max*1.05)) 
         legend(leg, loc='best')
         xlabel(x_label)
@@ -157,12 +224,12 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         if do_spectral_pole_plots:
             pole_histograms_spectral = spectral_run.getPoleHistograms()
             pole_data_spectral = {"{"+name+"}":array(pole_histograms_spectral[name], dtype=numpy.float64) for name in pole_names}
-            n_pixels_side = pole_histograms_spectral.values()[0].shape[1] 
+            n_pixels_side = list(pole_histograms_spectral.values())[0].shape[1] 
             smoothing_per_pixel = spectral_run['histogram_smoothing_per_pixel']
         if do_iterative_pole_plots:
             pole_histograms_iterative = iterative_run.getPoleHistograms()
             pole_data_iterative = {"{"+name+"}":array(pole_histograms_iterative[name], dtype=numpy.float64) for name in pole_names}
-            n_pixels_side = pole_histograms_iterative.values()[0].shape[1]
+            n_pixels_side = list(pole_histograms_iterative.values())[0].shape[1]
             smoothing_per_pixel = iterative_run['histogram_smoothing_per_pixel']
         if do_pole_plots:
             smoothing_sigma = n_pixels_side*smoothing_per_pixel
@@ -338,12 +405,15 @@ def doErrorStudy(reference_run, runs, x_variable_name, x_variable_plot_name=None
     leg.append("Data")
     loglog(x_variable_list, fit_l2, 'k--')
     leg.append("Fit with slope %1.2f" % (slope))
-    xlim(0.95*min(x_variable_list),1.05*max(x_variable_list))
     xlabel(x_variable_plot_name)
     ylabel("L2 error")
     legend(leg, loc='best')
     ticks, tickNames = getLog2Ticks(x_variable_list)
-    xticks(ticks, tickNames)
+    gca().set_xticks(ticks)
+    gca().set_xticklabels(tickNames)
+    print(ticks, tickNames)
+    #~ xticks(ticks, tickNames)
+    xlim(0.95*min(x_variable_list),1.05*max(x_variable_list))
     figname = reference_run['name']+"_error_vs_"+x_variable_name+".png"
     savefig(figname)
     

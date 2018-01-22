@@ -238,6 +238,7 @@ CrystalProperties<U> rotate(const CrystalProperties<U>& propsOld, hpp::Tensor2<U
         propsNew.n_0[i] = rotTensor*propsOld.n_0[i];
         propsNew.S_0[i] = hpp::outer(propsNew.m_0[i], propsNew.n_0[i]);
     }
+    propsNew.L = transformOutOfFrame(propsOld.L, rotTensor);
     return propsNew;
 }
 

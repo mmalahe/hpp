@@ -486,15 +486,9 @@ hpp::Tensor2<U> strainHardeningRates(const CrystalProperties<U>& props, const st
  * @return 
  */
 template <typename U>
-hpp::Tensor2<U> strainHardeningRatesVoce(const CrystalProperties<U>& props, const std::vector<U>& s_alphas) 
+U strainHardeningRateVoce(const CrystalProperties<U>& props, const std::vector<U>& s_alphas) 
 {
-    hpp::Tensor2<U> h(props.n_alpha, props.n_alpha);
-    for (unsigned int j=0; j<props.n_alpha; j++) {
-        U h_b = slipHardeningRate(props.h_0, props.s_s, props.a, s_alphas[j]);
-        for (unsigned int i=0; i<props.n_alpha; i++) {
-            h(i,j) = h_b;
-        }
-    }
+    U h = slipHardeningRate(props.h_0, props.s_s, props.a, s_alphas[0]);
     return h;
 }
 
@@ -505,25 +499,40 @@ const std::vector<U>& s_alphas_current_time, const std::vector<U>& s_alphas_prev
     // Evaluate shear strain increments
     std::vector<U> Dgamma_alphas = shearStrainIncrements(props, T_next, s_alphas_prev_iter, dt);
     
-    // Evaluating Equation 41 in Kalidindi1992
-    hpp::Tensor2<U> h;
-    if (props.hardeningLaw == HARDENING_LAW_BROWN) {
+    // Evaluating Equation 36 in Kalidindi 1992
+    std::vector<U> s_alphas(props.n_alpha);    
+    
+    if (props.hardeningLaw == HARDENING_LAW_BROWN) {        
+        // Evaluating Equation 41 in Kalidindi1992
+        hpp::Tensor2<U> h;
         h = strainHardeningRates(props, s_alphas_prev_iter);
+        
+        // Continuing with evaluating Equation 36
+        for (unsigned int a=0; a<props.n_alpha; a++) {
+            s_alphas[a] = s_alphas_current_time[a];
+            for (unsigned int b=0; b<props.n_alpha; b++) {
+                s_alphas[a] += h(a,b)*std::abs(Dgamma_alphas[b]);
+            }
+        }
     }
     else if (props.hardeningLaw == HARDENING_LAW_VOCE) {
-        h = strainHardeningRatesVoce(props, s_alphas_prev_iter);
+        // Evaluating Equation 41 in Kalidindi1992 for the case of
+        // only one shared slip system deformation resistance
+        U h = strainHardeningRateVoce(props, s_alphas_prev_iter);
+        
+        // Continuing with evaluating Equation 36 for the case of
+        // only one shared slip system deformation resistance
+        U Dgamma_abs_sum = 0.0;
+        for (const auto& Dgamma_alpha : Dgamma_alphas) {
+            Dgamma_abs_sum += std::abs(Dgamma_alpha);
+        }
+        U s_new = s_alphas_current_time[0] + h*Dgamma_abs_sum;
+        for (auto&& s_alpha : s_alphas) {
+            s_alpha = s_new;
+        }
     }
     else {
         throw std::runtime_error("Did not recognise hardening law.");
-    }
-    
-    // Evaluating Equation 36 in Kalidindi 1992
-    std::vector<U> s_alphas(props.n_alpha);
-    for (unsigned int a=0; a<props.n_alpha; a++) {
-        s_alphas[a] = s_alphas_current_time[a];
-        for (unsigned int b=0; b<props.n_alpha; b++) {
-            s_alphas[a] += h(a,b)*std::abs(Dgamma_alphas[b]);
-        }
     }
 
     // Return

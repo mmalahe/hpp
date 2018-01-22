@@ -1941,6 +1941,38 @@ Tensor2<T> transformOutOfFrame(const Tensor2<T>& A_star, const Tensor2<T>& Q) {
     return Q*A_star*Q.trans();
 }
 
+/**
+ * @brief Transform tensor \f$ \mathbf{E}^* \f$ out of the frame given by the columns of \f$ \mathbf{Q} \f$ 
+ * @param E_star \f$ \mathbf{E}^* \f$
+ * @param Q \f$ \mathbf{Q} \f$ 
+ * @return \f$ \mathbf{E} \f$
+ * @todo Use symmetries to reduce the computation
+ */
+template <typename T>
+Tensor4<T> transformOutOfFrame(const Tensor4<T>& E_star, const Tensor2<T>& Q) {
+    Tensor4<T> E(3,3,3,3);
+    for (int m=0; m<3; m++) {
+        for (int n=0; n<3; n++) {
+            for (int p=0; p<3; p++) {
+                for (int q=0; q<3; q++) {
+                    T val = 0.0;
+                    for (int i=0; i<3; i++) {
+                        for (int j=0; j<3; j++) {
+                            for (int k=0; k<3; k++) {
+                                for (int l=0; l<3; l++) {
+                                    val += Q.getVal(m,i)*Q.getVal(n,j)*Q.getVal(p,k)*Q.getVal(q,l)*E_star.getVal(i,j,k,l);
+                                }
+                            }
+                        }
+                    }
+                    E(m,n,p,q) = val;
+                }
+            }
+        }
+    }
+    return E;
+}
+
 } //END NAMESPACE HPP
 
 #endif /* HPP_TENSOR_H */
