@@ -342,8 +342,11 @@ void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5Handler& infile, hid_t
     hid_t plist_in = infile.getPropertyListTransferIndependent();
     hid_t plist_out = outfile.getPropertyListTransferIndependent();
     
-    // 0. GET THE COMPONENT SUMMED MAGNITUDES AND AVERAGE MAGNITUDES
-    std::vector<double> componentMagSums(spectralDatasetIDs.size());
+    // 0.a GET THE COMPONENT SUMMED MAGNITUDES AND AVERAGE MAGNITUDES
+    double sigmaMagSum = 0.0;
+    double WpMagSum = 0.0;
+    std::vector<double> componentSums(spectralDatasetIDs.size(), 0.0);
+    std::vector<double> componentMagSums(spectralDatasetIDs.size(), 0.0);    
     for (unsigned int iDset=0; iDset<spectralDatasetIDs.size(); iDset++) {
         auto dsetID = spectralDatasetIDs[iDset];
         std::string dsetInName = dsetID.baseName;
@@ -353,20 +356,78 @@ void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5Handler& infile, hid_t
         // Read input data
         readHDFDataToFFTWInput4D(dsetIn, plist_in, componentIdx, cfg);
         
-        // Execute and check FFTW
-        executeAndCheckFFTW(cfg);
-        
-        // Get the average magnitude of the component to scale by
-        for (int i=0; i<cfg.nLocalComplex; i++) {            
-            componentMagSums[iDset] += std::sqrt(std::pow(cfg.out[i][0],2.0)+std::pow(cfg.out[i][1],2.0));
+        // Get the sum and sum of magnitudes of each component
+        for (int i=0; i<cfg.nLocalReal; i++) {
+            auto val = cfg.in[i];
+            auto mag = std::abs(val);
+            componentSums[iDset] += val;            
+            componentMagSums[iDset] += mag;
         }
     }
+    
+    // Calculate mean
+    for (auto&& componentSum : componentSums) {
+        componentSum = hpp::MPISum(componentSum, comm);
+    }
+    std::vector<double> componentAvgs;
+    for (const auto& componentSum : componentSums) {
+        componentAvgs.push_back(componentSum/cfg.NReal);
+    }
+    if (comm_rank == 0) {
+        std::cout << "Component averages: ";
+        hpp::operator<<(std::cout, componentAvgs);
+        std::cout << std::endl;
+    }    
+    
+    // Calculate mean of magnitudes
     for (auto&& componentMagSum : componentMagSums) {
         componentMagSum = hpp::MPISum(componentMagSum, comm);
     }
     std::vector<double> componentAvgMags;
     for (const auto& componentMagSum : componentMagSums) {
-        componentAvgMags.push_back(componentMagSum/cfg.NComplex);
+        componentAvgMags.push_back(componentMagSum/cfg.NReal);
+    }
+    if (comm_rank == 0) {
+        std::cout << "Component magnitude averages: ";
+        hpp::operator<<(std::cout, componentAvgMags);
+        std::cout << std::endl;
+    }
+    
+    // 0.b GET THE COMPONENT MAGNITUDE VARIANCES
+    std::vector<double> componentVarianceSums(spectralDatasetIDs.size(), 0.0);
+    for (unsigned int iDset=0; iDset<spectralDatasetIDs.size(); iDset++) {
+        auto dsetID = spectralDatasetIDs[iDset];
+        std::string dsetInName = dsetID.baseName;
+        std::vector<hsize_t> componentIdx(dsetID.component.begin(), dsetID.component.end());
+        hid_t dsetIn = infile.getDataset(dsetInName);        
+        
+        // Read input data
+        readHDFDataToFFTWInput4D(dsetIn, plist_in, componentIdx, cfg);
+        
+        // Get the variance of the raw component to scale by
+        for (int i=0; i<cfg.nLocalReal; i++) {            
+            auto val = std::abs(cfg.in[i]);
+            componentVarianceSums[iDset] += std::pow(val-componentAvgs[iDset], 2.0);
+        }    
+    }
+    for (auto&& componentVarianceSum : componentVarianceSums) {
+        componentVarianceSum = hpp::MPISum(componentVarianceSum, comm);
+    }
+    std::vector<double> componentVariances;
+    for (const auto& componentVarianceSum : componentVarianceSums) {
+        componentVariances.push_back(componentVarianceSum/cfg.NReal);
+    }
+    
+    // Get standard deviations from variances
+    std::vector<double> componentStandardDeviations(componentVariances);
+    for (auto&& componentStandardDeviation : componentStandardDeviations) {
+        componentStandardDeviation = std::sqrt(componentStandardDeviation);
+    }
+    
+    if (comm_rank == 0) {
+        std::cout << "Component standard deviations: ";
+        hpp::operator<<(std::cout, componentStandardDeviations);
+        std::cout << std::endl;
     }
     
     // 1. CREATE LIST OF THE SQUARED MAGNITUDES OF THE COMPONENTS
@@ -380,24 +441,18 @@ void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5Handler& infile, hid_t
         // Read input data
         readHDFDataToFFTWInput4D(dsetIn, plist_in, componentIdx, cfg);
         
+        // Pre-scale data to mean zero, variance 1
+        for (int i=0; i<cfg.nLocalReal; i++) {            
+            cfg.in[i] = (cfg.in[i]-componentAvgs[iDset])/componentStandardDeviations[iDset];
+        }    
+        
         // Execute and check FFTW
         executeAndCheckFFTW(cfg);
         
-        // Get the average magnitude of the component to scale by
-        double componentScale = 0.0;
-        for (int i=0; i<cfg.nLocalComplex; i++) {            
-            componentScale += std::sqrt(std::pow(cfg.out[i][0],2.0)+std::pow(cfg.out[i][1],2.0));
-        }
-        componentScale /= cfg.nLocalComplex;
-        
-        // Add the magnitudes
-        for (int i=0; i<cfg.nLocalComplex; i++) {            
-            // Use the squared magnitude
-//            orderingMagnitudes[i] += std::pow(cfg.out[i][0]/componentAvgMags[iDset],2.0);
-//            orderingMagnitudes[i] += std::pow(cfg.out[i][1]/componentAvgMags[iDset],2.0);
-            
-            // Use the magnitude
-            orderingMagnitudes[i] += std::sqrt(std::pow(cfg.out[i][0]/componentAvgMags[iDset],2.0)+std::pow(cfg.out[i][1]/componentAvgMags[iDset],2.0));
+        // Add the squared magnitudes
+        for (int i=0; i<cfg.nLocalComplex; i++) {
+            auto mag = std::sqrt(std::pow(cfg.out[i][0],2.0)+std::pow(cfg.out[i][1],2.0));
+            orderingMagnitudes[i] += std::pow(mag, 2.0);
         }
     }
     
