@@ -100,7 +100,12 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         
         # Fetch literature results
         if do_literature_comparison:
-            lit_it_fname, lit_it_leg, lit_spec_fname, lit_spec_leg = getLiteratureStrainStressFilenamesLegends(experiment_name)
+            if do_iterative_solve_plot and do_spectral_solve_plot:
+                lit_it_fname, lit_it_leg, lit_spec_fname, lit_spec_leg = getLiteratureStrainStressFilenamesLegends(spectral_run)
+            elif do_iterative_solve_plot:
+                lit_it_fname, lit_it_leg, lit_spec_fname, lit_spec_leg = getLiteratureStrainStressFilenamesLegends(iterative_run)
+            elif do_spectral_solve_plot:
+                lit_it_fname, lit_it_leg, lit_spec_fname, lit_spec_leg = getLiteratureStrainStressFilenamesLegends(spectral_run)            
             lit_it_strain, lit_it_stress = loadLiteratureStrainStress(lit_it_fname)
             lit_spec_strain, lit_spec_stress = loadLiteratureStrainStress(lit_spec_fname)
         
