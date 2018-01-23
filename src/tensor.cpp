@@ -275,8 +275,8 @@ void Tensor2<T>::printToStream(std::ostream& out) const
         }
         else {
             out << ",";
-        }
-        out << std::endl;
+            out << std::endl;
+        }        
     }
 }
 
