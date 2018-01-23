@@ -265,7 +265,11 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     unsigned int idx = blockDim.x*blockIdx.x + threadIdx.x;
     
     // Shared memory for IDFT
-    const unsigned int nSharedSpectral = 1024;
+    #ifdef DEBUG_BUILD // shared memory is limited for debugging
+        const unsigned int nSharedSpectral = 128;
+    #else
+        const unsigned int nSharedSpectral = 1024;
+    #endif  
     __shared__ SpectralCoordCUDA<4> sharedCoords[nSharedSpectral];
     __shared__ SpectralCoeffCUDA<T> sharedCoeffs[nSharedSpectral];
     
@@ -381,7 +385,11 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     unsigned int pairIdx = blockDim.x*blockIdx.x + threadIdx.x;
     
     // Shared memory for IDFT
-    const unsigned int nSharedSpectral = (8/sizeof(T))*128;
+    #ifdef DEBUG_BUILD // shared memory is limited for debugging
+        const unsigned int nSharedSpectral = (8/sizeof(T))*16;
+    #else
+        const unsigned int nSharedSpectral = (8/sizeof(T))*128;
+    #endif        
     __shared__ SpectralDataUnifiedCUDA<T,4,P> sharedData[nSharedSpectral];
     
     // If out of bounds, go through motions of calculation, but don't update at end
