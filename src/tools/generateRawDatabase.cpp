@@ -166,8 +166,8 @@ void generateDatabase(std::string output_filename, unsigned int gridLength, MPI_
     std::vector<hsize_t> gridDims = {nAlpha, nBeta, nGamma, nTheta};
     
     // Grid lengths accounting for symmetries
-    // Alpha uses the F(gamma) = F(gamma - pi/2) symmetry
-    // Theta uses the F(theta) = -F(theta - pi) symmetry
+    // Gamma uses the F(gamma) = F(gamma - pi/2) symmetry
+    // Theta uses the F(theta) = -F(theta - pi) symmetry    
     unsigned int nAlphaSymm = nAlpha; 
     unsigned int nBetaSymm = nBeta;
     unsigned int nGammaSymm = nGamma/4;
