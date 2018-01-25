@@ -36,7 +36,7 @@ def getSpectralDatabaseFilename(db_dir, db_dim, use_unified_coeff_order):
 
 class GenericRun(object):
     def __init__(self, params={}, verbose=False):
-        self.params = {}
+        self.params = OrderedDict()
         self.params['name'] = ''
         self.params.update(params)
         self.verbose = verbose
