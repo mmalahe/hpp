@@ -4,6 +4,7 @@ from subprocess import call
 from numpy import array
 from crystal import *
 import h5py
+from collections import OrderedDict
 
 CPU_DEBUG_ARGS = ["gdb","--args"]
 GPU_DEBUG_ARGS = ["cuda-gdb","--args"]
@@ -311,7 +312,7 @@ def expandRunsByAllListParameters(runs,exclude=[]):
     allExpandedRuns = []
     for run in runs:
         # Get which parameters are lists
-        expandParams = {}
+        expandParams = OrderedDict()
         for paramName in run.params.keys():
             if paramName not in exclude:
                 paramVal = run.params[paramName]
