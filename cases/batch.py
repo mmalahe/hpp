@@ -121,7 +121,7 @@ if do_iterative_solve_plot or do_spectral_solve_plot:
 
 # Plots of solutions as a function of solver parameters
 if solver_parameter_plot_type != None:
-    doSolverParameterPlot(spectral_solve_runs, solver_parameter_plot_type)
+    doSolverParameterPlot(spectral_solve_runs, solver_parameter_plot_type, iterative_run=iterative_solve_runs[0])
 
 # Error studies
 if error_study_type != None:    

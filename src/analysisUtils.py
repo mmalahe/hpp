@@ -305,7 +305,7 @@ def getPlaneNormalsAndPoleNames(run):
         raise Exception("No known plane normals and pole names for {}.".format(experiment_name))
     return plane_normals, pole_names
 
-def doSolverParameterPlot(runs, param_name):
+def doSolverParameterPlot(runs, param_name, iterative_run=None):
     # Number of runs
     n_runs = len(runs)    
     
@@ -339,9 +339,10 @@ def doSolverParameterPlot(runs, param_name):
     # Pole figure setup
     plane_normals, pole_names = getPlaneNormalsAndPoleNames(run)
     pole_figure_plot_timestep_list = runs[-1]['pole_figure_timestep_selection']
-    smoothing_per_pixel = run['histogram_smoothing_per_pixel']
-    
+    smoothing_per_pixel = run['histogram_smoothing_per_pixel']    
     pole_data_combo = OrderedDict()
+    
+    # Add spectral runs
     for run in runs:
         # Fetch pole data and set smoothing parameters    
         pole_histograms = run.getPoleHistograms()
@@ -349,15 +350,28 @@ def doSolverParameterPlot(runs, param_name):
         n_pixels_side = list(pole_histograms.values())[0].shape[1]        
         smoothing_sigma = n_pixels_side*smoothing_per_pixel
         
-        # Smooth data   
-        pole_data = {name: gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma) for name in pole_data.keys()}
+        # Smooth data
+        pole_data_smoothed = OrderedDict()
+        for name in pole_data.keys():
+            pole_data_smoothed[name] = gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma)
         
         # Add to combined data
         param_value = run[param_name]
         param_suffix = "{}={}".format(param_short_plotting_name, param_value)
         for pole_name in pole_data.keys():
-            pole_data_combo["{}, {}".format(pole_name, param_suffix)] = pole_data[pole_name]
+            pole_data_combo["{}, {}".format(pole_name, param_suffix)] = pole_data_smoothed[pole_name]
     figname = figname_prefix+"_poles"
+    
+    # Add iterative run
+    pole_histograms = iterative_run.getPoleHistograms()
+    pole_data = {"{"+name+"}":array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
+    n_pixels_side = list(pole_histograms.values())[0].shape[1]        
+    smoothing_sigma = n_pixels_side*smoothing_per_pixel
+    pole_data_smoothed = OrderedDict()
+    for name in pole_data.keys():
+        pole_data_smoothed[name] = gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma)
+    for pole_name in pole_data.keys():
+        pole_data_combo["{}, Iterative".format(pole_name)] = pole_data_smoothed[pole_name]
     
     # Plot pole figures
     plotPoleHistogramsHistory(pole_data_combo, pole_figure_plot_timestep_list, figname)

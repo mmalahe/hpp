@@ -217,10 +217,11 @@ def plotPoleHistogramsHistory(pole_history_data, timestep_selection, base_filena
     subplots_adjust(wspace=0)
     
     # Arrange poles
-    pole_names_unordered = pole_history_data.keys()
-    pole_names_unordered_strings_reversed = [name[::-1] for name in pole_names_unordered]
-    pole_names_ordered_strings_reveresed = sorted(pole_names_unordered_strings_reversed)
-    pole_names_ordered = [name[::-1] for name in pole_names_ordered_strings_reveresed]    
+    #~ pole_names_unordered = pole_history_data.keys()
+    #~ pole_names_unordered_strings_reversed = [name[::-1] for name in pole_names_unordered]
+    #~ pole_names_ordered_strings_reveresed = sorted(pole_names_unordered_strings_reversed)
+    #~ pole_names_ordered = [name[::-1] for name in pole_names_ordered_strings_reveresed]
+    pole_names_ordered = list(pole_history_data.keys())
     
     # Get number of timesteps
     ntimesteps = list(pole_history_data.values())[0].shape[0]
