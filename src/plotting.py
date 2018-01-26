@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib.pyplot import *
 from numpy import array
+from itertools import cycle
 
 # Plot parameter sets
 allParamSets = {}
@@ -26,6 +27,12 @@ journalRCParams['xtick.labelsize'] = 'large'
 journalRCParams['ytick.labelsize'] = 'large'
 journalRCParams['axes.labelsize'] = 'large'
 allParamSets['journal'] = journalRCParams 
+
+def blackLinesGenerator():
+    return cycle(["k-","k--","k-.","k:"])
+    
+def blackMarkersAndLinesGenerator():
+    return cycle(["k+","k:","k--","k.","k-"])
 
 def setPlotDefaults(kind):
     for key, value in allParamSets[kind].items():

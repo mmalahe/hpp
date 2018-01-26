@@ -277,10 +277,10 @@ def strainStressValuesAndLabels(run):
         y_label = r"$\sigma$ (MPa)"
         legend_prefix = ""       
     elif 'plane_strain_compression' in experiment_name:
-        stress = abs(T_33)
+        stress = T_11-T_33
         x_label = r"$|\epsilon|$"
         y_label = "Stress (MPa)"
-        legend_prefix = r"$\sigma_{33}$"       
+        legend_prefix = r"$\sigma_{11} - \sigma_{33}$"
     else:
         raise Exception("No known strain/stress definitions and labels for {}.".format(experiment_name))
         
@@ -321,12 +321,13 @@ def doSolverParameterPlot(runs, param_name, iterative_run=None):
         
     # Make plots
     stress_max = 0.0
+    linegen = blackMarkersAndLinesGenerator()
     for run in runs:
         strain, stress, x_label, y_label, legend_prefix = strainStressValuesAndLabels(run)
         stress_max = max(stress_max, np.max(stress))
-        plot(np.abs(strain), stress)
+        plot(np.abs(strain), stress, next(linegen))
         param_value = run[param_name]
-        leg.append("{}, {}={}".format(legend_prefix, param_plotting_name, param_value))        
+        leg.append("{}, {}={}".format(legend_prefix, param_short_plotting_name, param_value))        
 
     ylim((0.0, stress_max*1.05)) 
     legend(leg, loc='best')
@@ -337,44 +338,46 @@ def doSolverParameterPlot(runs, param_name, iterative_run=None):
     savefig(figname, bbox_inches='tight')
     
     # Pole figure setup
-    plane_normals, pole_names = getPlaneNormalsAndPoleNames(run)
-    pole_figure_plot_timestep_list = runs[-1]['pole_figure_timestep_selection']
-    smoothing_per_pixel = run['histogram_smoothing_per_pixel']    
-    pole_data_combo = OrderedDict()
-    
-    # Add spectral runs
-    for run in runs:
-        # Fetch pole data and set smoothing parameters    
-        pole_histograms = run.getPoleHistograms()
-        pole_data = {"{"+name+"}":array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
-        n_pixels_side = list(pole_histograms.values())[0].shape[1]        
-        smoothing_sigma = n_pixels_side*smoothing_per_pixel
+    if runs[0]['do_plot_pole_figures']:
+        plane_normals, pole_names = getPlaneNormalsAndPoleNames(run)
+        pole_figure_plot_timestep_list = runs[-1]['pole_figure_timestep_selection']
+        smoothing_per_pixel = run['histogram_smoothing_per_pixel']    
+        pole_data_combo = OrderedDict()
         
-        # Smooth data
-        pole_data_smoothed = OrderedDict()
-        for name in pole_data.keys():
-            pole_data_smoothed[name] = gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma)
+        # Add spectral runs
+        for run in runs:
+            # Fetch pole data and set smoothing parameters    
+            pole_histograms = run.getPoleHistograms()
+            pole_data = {"{"+name+"}":array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
+            n_pixels_side = list(pole_histograms.values())[0].shape[1]        
+            smoothing_sigma = n_pixels_side*smoothing_per_pixel
+            
+            # Smooth data
+            pole_data_smoothed = OrderedDict()
+            for name in pole_data.keys():
+                pole_data_smoothed[name] = gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma)
+            
+            # Add to combined data
+            param_value = run[param_name]
+            param_suffix = "{}={}".format(param_short_plotting_name, param_value)
+            for pole_name in pole_data.keys():
+                pole_data_combo["{}, {}".format(pole_name, param_suffix)] = pole_data_smoothed[pole_name]
+        figname = figname_prefix+"_poles"
         
-        # Add to combined data
-        param_value = run[param_name]
-        param_suffix = "{}={}".format(param_short_plotting_name, param_value)
-        for pole_name in pole_data.keys():
-            pole_data_combo["{}, {}".format(pole_name, param_suffix)] = pole_data_smoothed[pole_name]
-    figname = figname_prefix+"_poles"
-    
-    # Add iterative run
-    pole_histograms = iterative_run.getPoleHistograms()
-    pole_data = {"{"+name+"}":array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
-    n_pixels_side = list(pole_histograms.values())[0].shape[1]        
-    smoothing_sigma = n_pixels_side*smoothing_per_pixel
-    pole_data_smoothed = OrderedDict()
-    for name in pole_data.keys():
-        pole_data_smoothed[name] = gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma)
-    for pole_name in pole_data.keys():
-        pole_data_combo["{}, Iterative".format(pole_name)] = pole_data_smoothed[pole_name]
-    
-    # Plot pole figures
-    plotPoleHistogramsHistory(pole_data_combo, pole_figure_plot_timestep_list, figname)
+        if iterative_run != None:
+            # Add iterative run
+            pole_histograms = iterative_run.getPoleHistograms()
+            pole_data = {"{"+name+"}":array(pole_histograms[name], dtype=numpy.float64) for name in pole_names}
+            n_pixels_side = list(pole_histograms.values())[0].shape[1]        
+            smoothing_sigma = n_pixels_side*smoothing_per_pixel
+            pole_data_smoothed = OrderedDict()
+            for name in pole_data.keys():
+                pole_data_smoothed[name] = gaussianFilterHistogramHistory(pole_data[name], sigma=smoothing_sigma)
+            for pole_name in pole_data.keys():
+                pole_data_combo["{}, Iterative".format(pole_name)] = pole_data_smoothed[pole_name]
+        
+        # Plot pole figures
+        plotPoleHistogramsHistory(pole_data_combo, pole_figure_plot_timestep_list, figname)
 
 def getLog2Ticks(x_variable_list):
     log2Ticks = [int(log(x)/log(2)) for x in x_variable_list]
