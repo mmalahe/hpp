@@ -14,7 +14,7 @@ setPlotDefaults('journal')
 
 # Top level control
 do_iterative_solve = False
-do_spectral_solve = False
+do_spectral_solve = True
 
 do_iterative_solve_plot = True
 do_spectral_solve_plot = True
@@ -52,7 +52,7 @@ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 #~ problem_params['experiment_name'].append('plane_strain_compression_grid_texture')
 #~ problem_params['experiment_name'].append('simple_shear_grid_texture')
-#~ problem_params['experiment_name'].append('mihaila2014_simple_shear')
+problem_params['experiment_name'].append('mihaila2014_simple_shear')
 problem_params['experiment_name'].append('mihaila2014_plane_strain_compression')
 #~ problem_params['experiment_name'].append('savage2015_plane_strain_compression')
 #~ problem_params['experiment_name'].append('kalidindi1992_simple_shear')
@@ -62,7 +62,7 @@ problem_params['experiment_name'].append('mihaila2014_plane_strain_compression')
 # Spectral database parameters
 spectral_db_params = OrderedDict()
 spectral_db_params['db_dir'] = "databases"
-spectral_db_params['db_dim'] = 128
+spectral_db_params['db_dim'] = 64
 #~ spectral_db_params['db_dim'] = [8,16,32,64,128]
 spectral_db_params['refinement_multiplier'] = 128
 #~ spectral_db_params['refinement_multiplier'] = [1,16,128]
