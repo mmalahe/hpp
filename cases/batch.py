@@ -26,10 +26,11 @@ error_study_type = None
 
 solver_parameter_plot_type = None
 #~ solver_parameter_plot_type = 'refinement_multiplier'
+#~ solver_parameter_plot_type = 'n_terms'
 
-#~ spectral_performance_study_type = None
+spectral_performance_study_type = None
 #~ spectral_performance_study_type = 'n_terms'
-spectral_performance_study_type = 'n_crystals'
+#~ spectral_performance_study_type = 'n_crystals'
 #~ spectral_performance_study_type = 'refinement_multiplier'
 
 spectral_mem_study_type = None
@@ -46,9 +47,9 @@ problem_params = OrderedDict()
 problem_params['default_seed'] = True
 #~ problem_params['n_crystals'] = 390000000
 #~ problem_params['n_crystals'] = 2*22*768*2**5
-#~ problem_params['n_crystals'] = 2**16
+problem_params['n_crystals'] = 2**16
 #~ problem_params['n_crystals'] = 2*768
-problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
+#~ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 #~ problem_params['experiment_name'].append('plane_strain_compression_grid_texture')
 #~ problem_params['experiment_name'].append('simple_shear_grid_texture')
@@ -61,18 +62,18 @@ problem_params['experiment_name'].append('mihaila2014_plane_strain_compression')
 
 # Spectral database parameters
 spectral_db_params = OrderedDict()
-spectral_db_params['db_dir'] = "databases"
-spectral_db_params['db_dim'] = 64
+spectral_db_params['db_dir'] = os.path.join("databases", "voce")
+spectral_db_params['db_dim'] = 128
 #~ spectral_db_params['db_dim'] = [8,16,32,64,128]
 spectral_db_params['refinement_multiplier'] = 128
 #~ spectral_db_params['refinement_multiplier'] = [1,16,128]
-#~ spectral_db_params['refinement_multiplier'] = [1,4,16,64,128]
+#~ spectral_db_params['refinement_multiplier'] = [1,4,16,128]
 spectral_db_params['use_unified_coeff_order'] = True  
 
 # Plotting parameters
 ss_figure_title = None
 plotting_params = OrderedDict()
-plotting_params['do_plot_pole_figures'] = True
+plotting_params['do_plot_pole_figures'] = False
 plotting_params['histogram_smoothing_per_pixel'] = 0.01
 plotting_params['pole_figure_timestep_selection'] = [50]
 
@@ -94,7 +95,9 @@ spectral_solve_params.update(plotting_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
 spectral_solve_params['n_terms'] = 2**13
+#~ spectral_solve_params['n_terms'] = [2**10, 2**13, 2**16]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
+#~ spectral_solve_params['n_terms'] = [2**i for i in range(11,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(7,15)]
 
 # Optionally include number of terms in title
@@ -125,7 +128,8 @@ if do_iterative_solve_plot or do_spectral_solve_plot:
 
 # Plots of solutions as a function of solver parameters
 if solver_parameter_plot_type != None:
-    doSolverParameterPlot(spectral_solve_runs, solver_parameter_plot_type, iterative_run=iterative_solve_runs[0])
+    #~ doSolverParameterPlot(spectral_solve_runs, solver_parameter_plot_type, iterative_run=iterative_solve_runs[0])
+    doSolverParameterPlot(spectral_solve_runs, solver_parameter_plot_type)
 
 # Error studies
 if error_study_type != None:    
