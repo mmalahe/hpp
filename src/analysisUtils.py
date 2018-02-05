@@ -41,14 +41,14 @@ def getLiteratureStrainStressFilenamesLegends(run):
     n_terms = run['n_terms']
     
     if experiment_name == "mihaila2014_simple_shear":
-        iterative_legend = "Mihaila et. al. (iterative)"
-        spectral_legend = "Mihaila et. al. (spectral)"
+        iterative_legend = r"Mihaila $\it{et. al.}$ (iterative)"
+        spectral_legend = r"Mihaila $\it{et. al.}$ (spectral)"
     elif experiment_name == "mihaila2014_plane_strain_compression":
-        iterative_legend = "Mihaila et. al. (iterative)"
-        spectral_legend = "Mihaila et. al. (spectral)"
+        iterative_legend = r"Mihaila $\it{et. al.}$ (iterative)"
+        spectral_legend = r"Mihaila $\it{et. al.}$ (spectral)"
     elif experiment_name == "savage2015_plane_strain_compression":
-        iterative_legend = "Savage et. al. (iterative)"
-        spectral_legend = "Savage et. al. (spectral)"    
+        iterative_legend = r"Savage $\it{et. al.}$ (iterative)"
+        spectral_legend = r"Savage $\it{et. al.}$ (spectral)"    
     else:
         raise Exception("Don't know what to fetch for {}.".format(experiment_name))
         
