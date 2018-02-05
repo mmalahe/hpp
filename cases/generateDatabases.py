@@ -50,7 +50,7 @@ spectralDatabaseExecutable = os.path.join(bin_dir,"generateSpectralDatabase")
 spectralErrorExecutable = os.path.join(bin_dir,"evaluateCompressionError")
 
 # File paths
-db_dir = "databases"
+db_dir = os.path.join("databases", "voce")
 if not os.path.exists(db_dir):
     os.makedirs(db_dir)
 raw_database_filename = os.path.join(db_dir, "databaseRaw%d.hdf5" % (raw_dim))
