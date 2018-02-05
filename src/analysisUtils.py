@@ -71,7 +71,7 @@ def loadLiteratureStrainStress(filename):
             stress.append(float(row[1]))
     return strain, stress
 
-def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs, do_literature_comparison=False):
+def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs, do_literature_comparison=False, ss_figure_title=None):
     # Number of plots
     assert(do_iterative_solve_plot or do_spectral_solve_plot)
     if do_iterative_solve_plot:
@@ -213,7 +213,9 @@ def doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_s
         ylim((0.0, stress_max*1.05)) 
         legend(leg, loc='best')
         xlabel(x_label)
-        ylabel(y_label)        
+        ylabel(y_label)
+        if ss_figure_title != None:
+            title(ss_figure_title, loc='left')     
     
         # Save
         figname += ".png"

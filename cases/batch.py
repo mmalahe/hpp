@@ -70,6 +70,7 @@ spectral_db_params['refinement_multiplier'] = 128
 spectral_db_params['use_unified_coeff_order'] = True  
 
 # Plotting parameters
+ss_figure_title = None
 plotting_params = OrderedDict()
 plotting_params['do_plot_pole_figures'] = True
 plotting_params['histogram_smoothing_per_pixel'] = 0.01
@@ -96,6 +97,9 @@ spectral_solve_params['n_terms'] = 2**13
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(7,15)]
 
+# Optionally include number of terms in title
+#~ ss_figure_title = "b) {} Fourier terms".format(spectral_solve_params['n_terms'])
+
 # Iterative solves
 iterative_solve_base_runs = [IterativeSolveRun(iterative_solve_params, iterative_solve_verbose)]
 iterative_solve_runs = expandRunsByAllListParameters(iterative_solve_base_runs, exclude=['pole_figure_timestep_selection'])
@@ -117,7 +121,7 @@ for run in spectral_solve_runs:
 
 # Solution plots
 if do_iterative_solve_plot or do_spectral_solve_plot:
-    doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs, do_literature_comparison=True)
+    doIterativeSpectralPlots(do_iterative_solve_plot, iterative_solve_runs, do_spectral_solve_plot, spectral_solve_runs, do_literature_comparison=True, ss_figure_title=ss_figure_title)
 
 # Plots of solutions as a function of solver parameters
 if solver_parameter_plot_type != None:
