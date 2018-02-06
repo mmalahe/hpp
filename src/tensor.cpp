@@ -126,9 +126,10 @@ void Tensor2<T>::constructFromHDF5Dataset(hid_t dset_id, hid_t plist_id, std::ve
 
 /**
  * @brief Construct from HD5 dataset and offset
- * @details C++ API
- * @param file
- * @param datasetName
+ * @details Using the HDF5 C++ API
+ * @param dataset
+ * @param gridOffset
+ * @param tensorDims
  */
 template <typename T>
 Tensor2<T>::Tensor2(H5::DataSet& dataset, std::vector<hsize_t> gridOffset, std::vector<hsize_t> tensorDims)
@@ -157,9 +158,11 @@ Tensor2<T>::Tensor2(H5::H5File& file, const H5std_string& datasetName, std::vect
 
 /**
  * @brief Construct from HD5 dataset and offset
- * @details C API
- * @param file
- * @param datasetName
+ * @details Uses the HDF5 C API
+ * @param dset_id
+ * @param plist_id
+ * @param gridOffset
+ * @param tensorDims
  */
 template <typename T>
 Tensor2<T>::Tensor2(hid_t dset_id, hid_t plist_id, std::vector<hsize_t> gridOffset, std::vector<hsize_t> tensorDims)

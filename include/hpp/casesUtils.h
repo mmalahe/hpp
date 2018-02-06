@@ -54,7 +54,7 @@ Tensor2<U> simpleShearVelocityGradient(U t, U shear_rate) {
  * \f$\mathbf{F}(1,1) = \exp(-0.5\dot{\varepsilon} t)\f$,
  * \f$\mathbf{F}(2,2) = \exp(1.0\dot{\varepsilon} t)\f$.
  * @param t The current time \f$t\f$
- * @param shear_rate The shear rate \f$ \dot{\varepsilon}\f$
+ * @param comp_rate the compression rate \f$ \dot{\varepsilon}\f$
  * @tparam U the scalar type
  * @return \f$ \mathbf{F} \f$
  */
@@ -73,7 +73,7 @@ Tensor2<U> simpleCompressionDeformationGradient(U t, U comp_rate) {
  * \f$\mathbf{L}(0,0) = -0.5\dot{\varepsilon}\f$, 
  * \f$\mathbf{L}(1,1) = -0.5\dot{\varepsilon}\f$,
  * \f$\mathbf{L}(2,2) = 1.0\dot{\varepsilon}\f$.
- * @param shear_rate The shear rate \f$ \dot{\varepsilon}\f$
+ * @param comp_rate the compression rate \f$ \dot{\varepsilon}\f$
  * @tparam U the scalar type
  * @return \f$ \mathbf{L} \f$
  */
@@ -92,8 +92,8 @@ Tensor2<U> simpleCompressionVelocityGradient(U t, U comp_rate) {
  * \f$\mathbf{F}(0,0) = \exp(1.0\dot{\varepsilon} t)\f$, 
  * \f$\mathbf{F}(1,1) = 1.0\f$,
  * \f$\mathbf{F}(2,2) = \exp(-1.0\dot{\varepsilon} t)\f$.
- * @param t The current time \f$t\f$
- * @param shear_rate The shear rate \f$ \dot{\varepsilon}\f$
+ * @param t
+ * @param comp_rate
  * @tparam U the scalar type
  * @return \f$ \mathbf{F} \f$
  */
@@ -111,7 +111,7 @@ Tensor2<U> planeStrainCompressionDeformationGradient(U t, U comp_rate) {
  * @details The velocity gradient is zero with the addition of
  * \f$\mathbf{L}(0,0) = 1.0\dot{\varepsilon}\f$, 
  * \f$\mathbf{L}(2,2) = -1.0\dot{\varepsilon}\f$.
- * @param shear_rate The shear rate \f$ \dot{\varepsilon}\f$
+ * @param comp_rate the compression rate \f$ \dot{\varepsilon}\f$
  * @tparam U the scalar type
  * @return \f$ \mathbf{L} \f$
  */
@@ -139,7 +139,7 @@ Tensor2<U> staticDeformationGradient(U t) {
 /**
  * @brief The velocity gradient for no deformation.
  * @details The velocity gradient is zero.
- * @param shear_rate the shear rate \f$ \dot{\varepsilon}\f$
+ * @param t The current time \f$t\f$
  * @tparam U the scalar type
  * @return \f$ \mathbf{L} \f$
  */

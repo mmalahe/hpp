@@ -1,4 +1,4 @@
-/// @file gsh.h
+/// @file gshCUDA.h
 /// @author Michael Malahe
 /// @brief Header file for generalized spherical harmonic basis
 #ifndef HPP_GSH_H
@@ -21,7 +21,7 @@ namespace hpp
  * @date 29/11/17
  * @file gsh.h
  * @brief The complex generalized spherical harmonic coefficients for real data.
- * @detail For real data, there is the guarantee that 
+ * @details For real data, there is the guarantee that 
  * C[l,-m,-n] = (-1)^{(m+n)} C[l,m,n]*. So, we only store the upper triangular
  * values for m and n, such that n>=m. These values are then flattened in
  * row major order.

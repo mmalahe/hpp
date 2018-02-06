@@ -157,9 +157,9 @@ inline std::vector<U> shearStrainIncrements(const CrystalProperties<U>& props, c
  * @brief In-place version of hpp.shearStrainIncrements
  * @param props the properties of the material defined in hpp.CrystalProperties
  * @param T \f$\mathbf{T}^*\f$
- * @param s_alphas a list of \f$s^\alpha(t_{i+1})\f$ for each slip system \f$\alpha\f$
+ * @param s_alphas  a list of \f$s^\alpha(t_{i+1})\f$ for each slip system \f$\alpha\f$
  * @param dt \f$\Delta t\f$
- * @param A list of \f$\Delta \gamma^\alpha\f$ for each \f$\alpha\f$ to return
+ * @param Dgamma_alphas list of \f$\Delta \gamma^\alpha\f$ for each \f$\alpha\f$ to return
  */
 template <typename U>
 inline void shearStrainIncrementsInPlace(const CrystalProperties<U>& props, const hpp::Tensor2<U>& T, const std::vector<U>& s_alphas, const U dt, std::vector<U>& Dgamma_alphas) {
@@ -480,7 +480,7 @@ hpp::Tensor2<U> strainHardeningRates(const CrystalProperties<U>& props, const st
 
 /**
  * @brief Voce hardening law
- * @detail identical for each slip system
+ * @details identical for each slip system
  * @param props
  * @param s_alphas
  * @return 
@@ -1074,10 +1074,11 @@ void Polycrystal<U>::addTextureToHistory() {
 }
 
 /**
- * @brief Writes out pole histograms to HDF5.
- * @detail
- * @param outfile the output file
- * @param poles the poles to plot
+ * @brief 
+ * @param outfile
+ * @param dsetBaseName
+ * @param history
+ * @param pole
  */
 template <typename T>
 void writePoleHistogramHistoryHDF5(H5::H5File& outfile, const std::string& dsetBaseName, std::vector<Tensor2<T>>& history, const std::vector<T>& pole) {

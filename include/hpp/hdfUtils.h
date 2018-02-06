@@ -136,10 +136,10 @@ hid_t createHDF5GridOfArrays(hid_t file_id, std::string datasetName, std::vector
 /**
  * @brief Gets the parameters and ensures that they're compatible with the actual dataset.
  * @param dset_id
- * @param plist_id
  * @param gridOffset
  * @param arrayDims
- * @param output
+ * @param arrayCount
+ * @return 
  */
 template <typename T>
 HDFReadWriteParamsC getReadWriteParametersForMultipleHDF5Arrays(hid_t dset_id, std::vector<hsize_t> gridOffset, 
@@ -220,10 +220,9 @@ HDFReadWriteParamsC getReadWriteParametersForMultipleHDF5Arrays(hid_t dset_id, s
 /**
  * @brief Gets the parameters and ensures that they're compatible with the actual dataset.
  * @param dset_id
- * @param plist_id
  * @param gridOffset
  * @param arrayDims
- * @param output
+ * @return 
  */
 template <typename T>
 HDFReadWriteParamsC getReadWriteParametersForSingleHDF5Array(hid_t dset_id, std::vector<hsize_t> gridOffset, 

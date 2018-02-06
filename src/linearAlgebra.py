@@ -105,7 +105,7 @@ def secondOrderAsFourthOrder(A):
     
     Args:
         A: the matrix \f$A\f$
-    Returns
+    Returns:
         The fourth order tensor \f$T\f$
     """
     initial_shape = A.shape
@@ -139,7 +139,7 @@ def secondOrderAsFourthOrder3(A):
     
     Args:
         A: the 9x9 matrix \f$A\f$
-    Returns
+    Returns:
         The 3x3x3x3 tensor \f$T\f$
     """
     T = zeros((3,3,3,3))

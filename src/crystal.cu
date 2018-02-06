@@ -486,7 +486,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
 // Average kernel
 /**
  * @brief Get the average Cauchy stress.
- * @detail Deprecated in favour of the fast reduction kernels.
+ * @details Deprecated in favour of the fast reduction kernels.
  * @todo remove
  * @param F_next
  * @param L_next
@@ -1278,7 +1278,7 @@ void SpectralPolycrystalCUDA<T,N>::getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_H
 
 /**
  * @brief Writes out pole histograms to HDF5.
- * @detail
+ * @details
  * @param outfile the output file
  * @param poles the poles to plot
  */

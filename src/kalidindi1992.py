@@ -156,7 +156,7 @@ class Crystal():
             self._mprops, tensor_A, self._T, self._s_alphas, dt, self._DT_max, self._DT_tol, 
             self._Ds_tol, self. algebraic_max_iter)
         except numpy.linalg.linalg.LinAlgError as error:
-            print "Linalg error, step not good."
+            print("Linalg error, step not good.")
             step_good = False
         self._step_good = step_good
         
@@ -428,8 +428,8 @@ def getS_0(m_0, n_0):
     calls kalidindi1992.getS_0_Internal.
     
     Args:
-        m: A list of \f$\mathbf{m}_0^\alpha\f$ for each slip system
-        n: A list of \f$\mathbf{n}_0^\alpha\f$ for each slip system
+        m_0: A list of \f$\mathbf{m}_0^\alpha\f$ for each slip system
+        n_0: A list of \f$\mathbf{n}_0^\alpha\f$ for each slip system
     Returns:
         An array of the outer products for each slip system, with the 
         first dimension of the array indexing the slip system, and the 
@@ -660,8 +660,9 @@ def TensorC_alphas(L, A, S_0, n_alpha):
     
     Args:
         L: \f$\mathcal{L}\f$
-        B_alpha: \f$\mathbf{B}^\alpha\f$
-        
+        A: \f$\mathbf{A}\f$
+        S_0: \f$\mathbf{S}_0^\alpha\f$ for each slip system \f$\alpha\f$
+        n_alpha: the number of slip systems
     Returns:
         \f$\mathbf{C}^\alpha\f$
 	"""
@@ -766,7 +767,7 @@ def PlasticShearingRateDigitsLost(mprops, T, s_alphas):
         mprops: the properties of the material defined in kalidindi1992.CrystalMaterialProperties
         T: \f$\mathbf{T}^*(t_{i+1})\f$
         s_alphas: a list of \f$s^\alpha(t_{i+1})\f$ for each slip system \f$\alpha\f$
-    Returns
+    Returns:
         The theoretical number of digits lost as a float.
     """
     n_digits_lost_max = 0.0
@@ -935,7 +936,6 @@ def NewtonStressCorrection(mprops, tensor_A, C_alphas, s_alphas, T_old, DT_max, 
     Args:
         mprops: the properties of the material defined in kalidindi1992.CrystalMaterialProperties
         tensor_A: the tensor \f$\mathbf{A}\f$ returned by a call to kalidindi1992.TensorA
-        Dgamma_alphas: list of \f$\Delta \gamma^{\alpha} (\mathbf{T}^*_n(t_{i+1}), s_k^{\alpha}(t_{i+1}))\f$ for each \f$\alpha\f$
         C_alphas: list of \f$\mathbf{C}^\alpha\f$ for each \f$\alpha\f$
         s_alphas: a list of \f$s^\alpha(t_{i+1})\f$ for each slip system \f$\alpha\f$
         T_old: \f$\mathbf{T}^*_n(t_{i+1})\f$
@@ -984,7 +984,7 @@ def SlipHardeningRate(h_0, s_s, a, s_beta):
     return h_0*((1.0-s_beta/s_s))**a
 
 def TensorQ_fcc(q):
-    """Get the tensor \mathbf{Q} defined in Equation 42 of Kalidindi1992
+    """Get the tensor \f$\mathbf{Q}\f$ defined in Equation 42 of Kalidindi1992
     
     The equation is:
     \f{equation}{
@@ -1057,7 +1057,6 @@ def StrainHardeningRates(mprops, s_alphas):
     Args:
         mprops: the properties of the material defined in kalidindi1992.CrystalMaterialProperties
         s_alphas: a list of \f$s^\alpha(t_{i+1})\f$ for each slip system \f$\alpha\f$
-        Q: \f$\mathbf{Q}\f$
     Returns:
         \f$h^{\alpha \beta}\f$
     """       
@@ -1287,7 +1286,7 @@ def PlasticDeformationGradientUpdate(mprops, F_p_prev_time, Dgamma_alphas):
     # Return
     return F_p
 
-def SetTimestepByShearRate(dt_old, DGamma_alphas, Dgamma_goal, r_min, r_max):
+def SetTimestepByShearRate(dt_old, DGamma_alphas, DGamma_goal, r_min, r_max):
     """Set the new timestep based on a maximum shear rate.
     
     Based on Section 4.3 of Kalidindi 1992. Defining \f$R\f$ to be
@@ -1303,13 +1302,12 @@ def SetTimestepByShearRate(dt_old, DGamma_alphas, Dgamma_goal, r_min, r_max):
     
     Args:
         dt_old: \f$\Delta t_i\f$
-        Dgamma_alphas: list of \f$\Delta \gamma^{\alpha} (\mathbf{T}^*_n(t_{i}), s_k^{\alpha}(t_{i}))\f$ for each \f$\alpha\f$
-        Dgamma_goal: \f$\Delta \gamma_s\f$
+        DGamma_alphas: list of \f$\Delta \gamma^{\alpha} (\mathbf{T}^*_n(t_{i}), s_k^{\alpha}(t_{i}))\f$ for each \f$\alpha\f$
+        DGamma_goal: \f$\Delta \gamma_s\f$
         r_min: \f$R_{\mathrm{min}}\f$
         r_max: \f$R_{\mathrm{max}}\f$
     """
-    r = max(abs(DGamma_alphas))/Dgamma_goal
-    #print "r = %1.3g"%(r)
+    r = max(abs(DGamma_alphas))/DGamma_goal
     if r<r_min:
         dt = dt_old*(r_max+r_min)/(2*r_min)
     elif r >= r_min and r < r_max:
@@ -1352,7 +1350,7 @@ def PlasticSpinTensor(mprops, gammadot_alphas, m_alphas, n_alphas):
     
     Args:
         mprops: the properties of the material defined in kalidindi1992.CrystalMaterialProperties
-        gammdot_alphas: \f$\dot{\gamma}^\alpha\f$
+        gammadot_alphas: \f$\dot{\gamma}^\alpha\f$
         m_alphas: \f$\mathbf{m}^\alpha\f$ for each slip system \f$\alpha\f$
         n_alphas: \f$\mathbf{n}^\alpha\f$ for each slip system \f$\alpha\f$
     Returns:
@@ -1370,7 +1368,7 @@ def GammadotAbsSum(gammadot_alphas):
     Equation 18 of Mihaila2014.
     
     Args:
-        gammdot_alphas: \f$\dot{\gamma}^\alpha\f$
+        gammadot_alphas: \f$\dot{\gamma}^\alpha\f$
     Returns:
         The sum of the absolute values.
     """
@@ -1477,7 +1475,7 @@ def replicate():
             
             # Timestep banner
             if it_count % print_interval == 0:
-                print "##########t=%1.2g start##########" % (t)
+                print("##########t=%1.2g start##########" % (t))
 
             # If timestep was decreased earlier, prevent subsequent increases
             if prevent_next_x_timestep_increases > 0:
@@ -1486,13 +1484,13 @@ def replicate():
             # Do the main solve
             step_good = False
             while not step_good:
-                print "Current dt = %1.3g"%(dt)
+                print("Current dt = %1.3g"%(dt))
                 
                 F_next = F_of_t(t + dt)
                 
                 # Try step
                 step_good, new_dt = polycrystal.step(F_next, dt)
-                print "new_dt/dt = %1.3g"%(new_dt/dt)
+                print("new_dt/dt = %1.3g"%(new_dt/dt))
                 
                 # If the step is not accepted, reduce the timestep
                 if not step_good:
@@ -1514,9 +1512,7 @@ def replicate():
             
             # Wall clock timing
             elapsed_time = time.time()-start_time
-            approximate_remaining = (t_end-t)*elapsed_time/dt    
-            #~ if it_count % print_interval == 0:
-                #~ print "%1.2e seconds remaining"%(approximate_remaining)    
+            approximate_remaining = (t_end-t)*elapsed_time/dt      
             it_count += 1
             
             # Store important quantities

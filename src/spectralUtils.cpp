@@ -471,8 +471,9 @@ U SpectralDatabaseUnified<U>::getIDFTReal(std::string dsetBasename, std::vector<
 /**
  * @brief Load the given datasets
  * @param dbfile
- * @param dsetBasename
- * @param componentIdxUint
+ * @param dsetIDs
+ * @param nTerms
+ * @param refineMult
  */
 template <typename U>
 void SpectralDatabaseUnified<U>::loadDatasets(HDF5Handler& dbfile, std::vector<SpectralDatasetID> dsetIDs, unsigned int nTerms, unsigned int refineMult) {
@@ -1116,12 +1117,14 @@ void evaluateSpectralCompressionErrorFullUnified(std::string rawDBName, std::str
  * @brief Evaluate the error incurred in the spectral reresentation of a database
  * @param rawDBName
  * @param spectralDBName
- * @param errorDBName
- * @param nTerms
+ * @param dsetBasenames
+ * @param nTermsMax
+ * @param refineMult
  * @param axisSlice a vector of length N, where N is the dimension of the dataset, containing [axis, otherCoord0, otherCoord1, ..., otherCoordN-1], where axis specifies the axis along which a slice is to be taken, and the values otherCoord0, ..., otherCoordN-1 specify in order what the fixed values of the coordinates should be in the other dimensions. For example, an axis slice of [2, 19, 3, 5] specifies that the slice is to be taken along axis/dimension "2", that is, the third axis. The following numbers then dictate that the fixed coordinates for the other axes should be:
     - 19 for axis 0
     - 3 for axis 1
     - 5 for axis 3
+ * @param outFilename
  * @param comm
  */
 void evaluateSpectralCompressionErrorAxisSlice(std::string rawDBName, std::string spectralDBName, std::vector<std::string> dsetBasenames, unsigned int nTermsMax, unsigned int refineMult, std::vector<int> axisSlice, std::string outFilename, MPI_Comm comm) {
@@ -1271,18 +1274,7 @@ void evaluateSpectralCompressionErrorAxisSlice(std::string rawDBName, std::strin
 }
 
 /**
- * @brief Evaluate the error incurred in the spectral reresentation of a database
- * @detail For the "unified" database format, with a single set of ordered coordinates
- * corresponding to all of the components.
- * @param rawDBName
- * @param spectralDBName
- * @param errorDBName
- * @param nTerms
- * @param axisSlice a vector of length N, where N is the dimension of the dataset, containing [axis, otherCoord0, otherCoord1, ..., otherCoordN-1], where axis specifies the axis along which a slice is to be taken, and the values otherCoord0, ..., otherCoordN-1 specify in order what the fixed values of the coordinates should be in the other dimensions. For example, an axis slice of [2, 19, 3, 5] specifies that the slice is to be taken along axis/dimension "2", that is, the third axis. The following numbers then dictate that the fixed coordinates for the other axes should be:
-    - 19 for axis 0
-    - 3 for axis 1
-    - 5 for axis 3
- * @param comm
+ * @copydoc evaluateSpectralCompressionErrorAxisSlice
  */
 void evaluateSpectralCompressionErrorAxisSliceUnified(std::string rawDBName, std::string spectralDBName, std::vector<std::string> dsetBasenames, unsigned int nTermsMax, unsigned int refineMult, std::vector<int> axisSlice, std::string outFilename, MPI_Comm comm) {
     // Only process this function on root in this implementation

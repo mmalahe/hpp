@@ -6,7 +6,7 @@ namespace hpp
 
 /**
  * @brief Get the maximum number of resident warps per multiprocessor
- * @detail See http://docs.nvidia.com/cuda/cuda-c-programming-guide/#features-and-technical-specifications
+ * @details See http://docs.nvidia.com/cuda/cuda-c-programming-guide/#features-and-technical-specifications
  * @param devProp
  * @return 
  */

@@ -46,7 +46,7 @@ std::vector<hsize_t> getDatasetDims(hid_t dset_id) {
  * @brief Create a handler for HDF5 parallel I/O on a file
  * @param filename the name of the file
  * @param comm the MPI communicator
- * @param flags the 
+ * @param doCreate if true, overwrite the file if it exists
  * @return 
  */
 HDF5Handler::HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate) {
@@ -95,9 +95,8 @@ HDF5Handler::HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate) {
 
 /**
  * @brief Create a handler for HDF5 serial I/O on a file
- * @param filename the name of the file
- * @param comm the MPI communicator
- * @param flags the 
+ * @param filename filename the name of the file
+ * @param doCreate if true, overwrite the file if it exists
  * @return 
  */
 HDF5Handler::HDF5Handler(std::string filename, bool doCreate) {    

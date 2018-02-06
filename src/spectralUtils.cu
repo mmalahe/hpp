@@ -1,7 +1,7 @@
 /** @file spectralUtils.cu
 * @author Michael Malahe
 * @brief Source file for spectral utilities CUDA implementations
-* @detail
+* @details
 */
 
 #include <hpp/config.h>

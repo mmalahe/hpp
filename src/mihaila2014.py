@@ -130,7 +130,7 @@ def getMainQuantities(mprops, T_0, s_0, F_p_0, g_p, theta, e_dot, dt_initial, mi
         g_p: \f$\mathbf{g}^p\f$, a mihaila2014.CrystalOrientationSpace instance defining the crystal orientation
         theta: the angular parameter for the strain, \f$\theta\f$, defined in mihaila2014.stretchingVelocityGradient
         e_dot: the strain rate, \f$\dot{\epsilon}\f$
-        dt: the timestep, \f$\Delta t\f$
+        dt_initial: the initial timestep, \f$\Delta t\f$
         min_strain: the minimum strain \f$\epsilon\f$ before the simulation is stopped
     """
     # Rotate the crystal in the crystal orientation space

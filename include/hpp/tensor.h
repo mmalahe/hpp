@@ -559,8 +559,8 @@ inline unsigned int Tensor2<T>::flat(const unsigned int i, const unsigned int j)
 
 /**
  * @brief Unflatten the two indices of the tensor
- * @details The unflattening order is dictated by Tensor2::layout
- * @param idx the flattened index
+ * @details The unflattening order is dictated by the macro HPP_ARRAY_LAYOUT
+ * @param flat_idx the flattened index
  * @return an idx2d with the unflattened indices
  */
 template <typename T>
@@ -598,12 +598,12 @@ inline T Tensor2<T>::getVal(unsigned int i, unsigned int j) const
 /**
  * @brief Get the value of \f$T_{i}\f$
  * @details Where \f$i\f$ is the index in the underlying array.
- * Bounds checking is done for debug builds.
- * @param i
- * @param j
+ * Bounds checking is done for debug builds. 
+ * @param flatIdx i
  * @tparam T the scalar type
  * @return \f$T_{i}\f$
- */
+ * @return 
+*/
 template <typename T>
 inline T Tensor2<T>::getValFlat(unsigned int flatIdx) const
 {
@@ -1145,9 +1145,8 @@ inline unsigned int Tensor4<T>::flat(unsigned int i, unsigned int j, unsigned in
 
 /**
  * @brief Unflatten the four indices of the tensor
- *
- * This is currently done in row-major order.
- * @param idx the flattened index
+ * @details This is currently done in row-major order.
+ * @param flat_idx idx the flattened index
  * @return an idx4d instance with the unflattened indices
  */
 template <typename T>
