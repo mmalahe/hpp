@@ -404,8 +404,11 @@ private:
  * @param infile the file
  * @param dsetNameCoords the name of the dataset containing the spectral coordinates
  * @param dsetNameCoeffs the name of the dataset containing the corresponding spectral coefficients
+ * @param componentIdx the vector or tensor index of the component of the quantity to load
  * @param coordsList the list of coordinates to return
  * @param coeffList the list of coefficients to return
+ * @param nTerms the number of Fourier terms to load
+ * @param refineMult the spectral refinement multiplier to use
  */
 template <typename U>
 void loadSpectralDatabase(hpp::HDF5Handler& infile, std::string dsetNameCoords, std::string dsetNameCoeffs, std::vector<hsize_t> componentIdx, std::vector<std::vector<unsigned int>>& coordsList, std::vector<std::complex<U>>& coeffList, unsigned int nTerms, unsigned int refineMult=1)
@@ -522,9 +525,7 @@ void loadSpectralDatabase(hpp::HDF5Handler& infile, std::string dsetNameCoords, 
 
 /**
  * @brief TruncatedIFFTND where all dimensions have the same number of points
- * @param expTable table of pre-computed complex exponentials \f$ [e^{0}, e^{2\pi i (1/N)}, e^{2\pi i (2/N)}, ..., e^{2\pi i (N-1)/N}] \f$
- * @param nTerms number of terms
- * @return
+ * @copydoc TruncatedIFFT4DSingleSquareReal
  */
 template <typename U>
 std::complex<U> TruncatedIFFTNDSingleSquare(const unsigned int spatialDim, const std::vector<std::complex<U>>& expTable, const std::vector<std::vector<unsigned int>>& spectralCoordsList, const std::vector<std::complex<U>>& coeffs, std::vector<unsigned int> spatialCoord, unsigned int nTerms)
@@ -861,9 +862,10 @@ U TruncatedIFFT4DSingleSquareRealAVX2(const unsigned int spatialDim, const U exp
  * @brief
  * @param spatialDim
  * @param expTable 16/32-byte (float/double) aligned array of real-im pairs from the exp table
- * @param coeffs 16/32-byte (float/double) aligned array of real-im pairs from the coeffs list
- * @param spatialCoord
- * @param nTerms
+ * @param spectralCoordsList 16/32-byte (float/double) aligned array of spectral indices
+ * @param coeffs 16/32-byte (float/double) aligned array of real-im pairs from the coeffs list in the same order as the spectral indices
+ * @param spatialCoord the spatial coordinate
+ * @param nTerms the number of Fourier terms to use
  * @return
  */
 template <typename U>

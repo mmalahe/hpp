@@ -288,8 +288,11 @@ def tensordotKalidindi4_2_in_place(A,B,C):
     Args:
         A: \f$\mathbf{A}\f$
         B: \f$\mathbf{B}\f$
+        C: The product \f$\mathbf{C}\f$
+    
     Returns:
-        The product \f$\mathbf{C}\f$
+        None
+        
     """
     for i in range(3):
         for j in range(3):

@@ -147,9 +147,8 @@ bool operator==(const SpectralDatasetID& l, const SpectralDatasetID& r) {
 
 /**
  * @brief Load a single component from a dataset
- * @param dbfile
- * @param dsetBasename
- * @param componentIdxUint
+ * @copydoc SpectralDatabase::loadDataset
+ * @param componentIdxUint the vector or tensor index of the component of the quantity to fetch 
  */
 template <typename U>
 void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5Handler& dbfile, std::string dsetBasename, std::vector<unsigned int> componentIdxUint, unsigned int nTerms, unsigned int refineMult) {
@@ -267,6 +266,8 @@ void SpectralDatabase<U>::loadDatasetSingleComponent(HDF5Handler& dbfile, std::s
  * @brief Load all of the components from a dataset
  * @param dbfile
  * @param dsetBasename
+ * @param nTerms the number of Fourier terms to load
+ * @param refineMult the spectral refinement multiplier
  */
 template <typename U>
 void SpectralDatabase<U>::loadDataset(HDF5Handler& dbfile, std::string dsetBasename, unsigned int nTerms, unsigned int refineMult) {

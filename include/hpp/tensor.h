@@ -1686,6 +1686,7 @@ void rotationTensorFrom3UniformRandoms(Tensor2<T>& A, T x1, T x2, T x3) {
     For more information see
     http://en.wikipedia.org/wiki/Orthogonal_matrix#Randomization
  * @param dim
+ * @param defaultSeed if true, use a default random seed, otherwise generate a truly random one
  * @return The rotation tensor
  */
 template <typename T>
@@ -1739,7 +1740,8 @@ Tensor2<T> randomRotationTensorStewart1980(unsigned int dim, bool defaultSeed=fa
     For more information see
     http://en.wikipedia.org/wiki/Orthogonal_matrix#Randomization
  * @param dim
- * @return The rotation tensor
+ * @param A the output tensor to populate
+ * @param defaultSeed if true, use a default random seed, otherwise generate a truly random one
  */
 template <typename T>
 void randomRotationTensorInPlace(unsigned int dim, Tensor2<T>& A, bool defaultSeed=false) {

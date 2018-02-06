@@ -81,16 +81,17 @@ def EulerZXZRotationMatrix(alpha, beta, gamma):
     """Returns the active, intrinsic, right-handed EulerZXZ rotation matrix.
     
     The matrix is defined by
-    \f{equation}
+    \f{equation}{
     R = Z_1 X_2 Z_3 =
     \begin{bmatrix}
     c_1 c_3 - c_2 s_1 s_3 & -c_1 s_3 - c_2 c_3 s_1 & s_1 s_2 \\
     c_3 s_1 + c_2 c_2 s_3 & c_1 c_2 c_3 - s_1 s_3 & -c_1 s_2 \\
-    s_2 s_3 & c_3 s_2 & c2 
+    s_2 s_3 & c_3 s_2 & c2
     \end{bmatrix},
     \f}
+    
     where
-    \f{eqnarray}
+    \f{eqnarray}{
     c_1 & = & \cos(\alpha) \\
     c_2 & = & \cos(\beta) \\
     c_3 & = & \cos(\gamma) \\

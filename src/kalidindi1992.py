@@ -78,6 +78,7 @@ class Crystal():
         Reads in and applies the crystal properties and initial conditions.
         
         Args:
+            mprops: the properties of the material defined in kalidindi1992.CrystalMaterialProperties
             T_init: the initial stress tensor \f$\mathbf{T}\f$
             s_0: a single slip hardening rate \f$s_0\f$ applied to every slip system.
             F_p_0: the initial plastic deformation gradient \f$F^p_0\f$
@@ -1267,11 +1268,11 @@ def PlasticDeformationGradientUpdate(mprops, F_p_prev_time, Dgamma_alphas):
     \f[
     \mathbf{F}^p (t_{i+1}) = \left( \mathbf{1}+\sum_\alpha \Delta \gamma^\alpha \mathbf{S}_0^\alpha \right) \mathbf{F}^p (t_i).
     \f]
-    It is further divided by $^3\sqrt{\det{\mathbf{F}^p}}$ to force a unit determinant.
+    It is further divided by \f$^3\sqrt{\det{\mathbf{F}^p}}\f$ to force a unit determinant.
     
     Args:
         mprops: the properties of the material defined in kalidindi1992.CrystalMaterialProperties
-        F_p_prev_time: \mathbf{F}^p (t_i)
+        F_p_prev_time: \f$\mathbf{F}^p (t_i)\f$
         Dgamma_alphas: list of \f$\Delta \gamma^{\alpha} (\mathbf{T}^*_n(t_{i+1}), s_k^{\alpha}(t_{i+1}))\f$ for each \f$\alpha\f$  
     Returns:
         \f$\mathbf{F}^p (t_{i+1})\f$

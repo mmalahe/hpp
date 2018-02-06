@@ -142,6 +142,7 @@ Tensor2<T>::Tensor2(H5::DataSet& dataset, std::vector<hsize_t> gridOffset, std::
  * @details Where the dataset itself is just the tensor
  * @param file
  * @param datasetName
+ * @param tensorDims the dimension of the tensor to load
  */
 template <typename T>
 Tensor2<T>::Tensor2(H5::H5File& file, const H5std_string& datasetName, std::vector<hsize_t> tensorDims)

@@ -70,6 +70,7 @@ const std::vector<hpp::Tensor2<U>>& S_0, const unsigned int n_alpha)
  * @param A \f$\mathbf{A}\f$
  * @param S_0 List of \f$\mathbf{S}_0^\alpha\f$ for each \f$\alpha\f$
  * @param n_alpha the number of slip systems
+ * @param dumB_alpha a dummy tensor of size 3x3 for holding intermediate values of \f$\mathbf{B}^\alpha\f$
  * @param C_alphas list of \f$\mathbf{C}^\alpha\f$ for each \f$\alpha\f$ to be returned
  * @tparam U the scalar type
  */
@@ -229,8 +230,10 @@ inline hpp::Tensor4<U> tensorJ(const CrystalProperties<U>& props, const std::vec
 
 /**
  * @brief In-place version of hpp.tensorJ
+ * @copydoc tensorJ
  * @param dum2ndOrder a 3x3 dummy tensor
- * @param dum2ndOrder a 3x3x3x3 dummy tensor
+ * @param dum4thOrder a 3x3x3x3 dummy tensor
+ * @param J a 3x3x3x3 tensor for the output of J
  */
 template <typename U>
 inline void tensorJInPlace(const CrystalProperties<U>& props, const std::vector<hpp::Tensor2<U>>& C_alphas, 
@@ -624,6 +627,8 @@ const std::vector<U>& Dgamma_alphas)
  * @brief Mihaila 2014 equation 14
  * @param mprops
  * @param gammadot_alphas
+ * @param m_alphas an array of \f$\mathbf{m}^\alpha\f$ for each slip system \f$\alpha\f$
+ * @param n_alphas an array of \f$\mathbf{n}^\alpha\f$ for each slip system \f$\alpha\f$
  * @return 
  */
 template <typename U>

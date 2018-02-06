@@ -71,7 +71,7 @@ def velocityGradient(theta, e_dot):
     \f$\mathbf{D}\f$ is obtained from a call to mihaila2014.stretchingVelocityGradient.
     For \f$\mathbf{W}\f$, below Equation 19 in Kalidindi2006, "It is 
     implicitly assumed that the Fourier coefficients were obtained with 
-    \f$\dot{\epsilon} = \dot{\epsilon}_0\f$ and \mathbf{W}=\mathbf{0}."
+    \f$\dot{\epsilon} = \dot{\epsilon}_0\f$ and \f$\mathbf{W}=\mathbf{0}\f$."
     
     Args:
         theta: \f$\theta\f$
@@ -101,9 +101,6 @@ def latticRotationTensor(F_e):
     R, U = polarDecomposition(F_e)
     return R
 
-#FIXME: perhaps change the direction of the strain itself.
-#CHECK: whether this way, or by rotating the crystal, these should
-# have an identical result
 def getMainQuantities(mprops, T_0, s_0, F_p_0, g_p, theta, e_dot, dt_initial, min_strain):
     """Computes the three main quantities of interest from Mihaila2014.
     
