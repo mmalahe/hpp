@@ -522,7 +522,7 @@ void loadSpectralDatabase(hpp::HDF5Handler& infile, std::string dsetNameCoords, 
 
 /**
  * @brief TruncatedIFFTND where all dimensions have the same number of points
- * @param expTable table of pre-computed complex exponentials \f$ [e^{0}, e^{2\pi i (1/N)}, e^{2\pi i (2/N)}, ..., e^{2\pi i (N-1)/N}}] \f$
+ * @param expTable table of pre-computed complex exponentials \f$ [e^{0}, e^{2\pi i (1/N)}, e^{2\pi i (2/N)}, ..., e^{2\pi i (N-1)/N}] \f$
  * @param nTerms number of terms
  * @return
  */
