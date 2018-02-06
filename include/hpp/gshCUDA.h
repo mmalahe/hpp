@@ -31,23 +31,23 @@ template <typename T>
 class GSHCoeffsCUDA {
     public:
         __host__ __device__ GSHCoeffsCUDA(){
-            for (unsigned int i=0; i<nl0; i++) {
+            for (int i=0; i<nl0; i++) {
                 l0[i].x = 0.0;
                 l0[i].y = 0.0;
             }
-            for (unsigned int i=0; i<nl1; i++) {
+            for (int i=0; i<nl1; i++) {
                 l1[i].x = 0.0;
                 l1[i].y = 0.0;
             }
-            for (unsigned int i=0; i<nl2; i++) {
+            for (int i=0; i<nl2; i++) {
                 l2[i].x = 0.0;
                 l2[i].y = 0.0;
             }
-            for (unsigned int i=0; i<nl3; i++) {
+            for (int i=0; i<nl3; i++) {
                 l3[i].x = 0.0;
                 l3[i].y = 0.0;
             }
-            for (unsigned int i=0; i<nl4; i++) {
+            for (int i=0; i<nl4; i++) {
                 l4[i].x = 0.0;
                 l4[i].y = 0.0;
             }
@@ -157,7 +157,7 @@ class GSHCoeffsCUDA {
         
         __host__ std::vector<T> getl0Reals() {
             std::vector<T> vals(2*nl0);
-            for (unsigned int i=0; i<nl0; i++) {
+            for (int i=0; i<nl0; i++) {
                 vals[2*i] = l0[i].x;
                 vals[2*i+1] = l0[i].y;                
             }
@@ -166,7 +166,7 @@ class GSHCoeffsCUDA {
         
         __host__ std::vector<T> getl1Reals() {
             std::vector<T> vals(2*nl1);
-            for (unsigned int i=0; i<nl1; i++) {
+            for (int i=0; i<nl1; i++) {
                 vals[2*i] = l1[i].x;
                 vals[2*i+1] = l1[i].y;                
             }
@@ -175,7 +175,7 @@ class GSHCoeffsCUDA {
         
         __host__ std::vector<T> getl2Reals() {
             std::vector<T> vals(2*nl2);
-            for (unsigned int i=0; i<nl2; i++) {
+            for (int i=0; i<nl2; i++) {
                 vals[2*i] = l2[i].x;
                 vals[2*i+1] = l2[i].y;
             }
@@ -184,7 +184,7 @@ class GSHCoeffsCUDA {
         
         __host__ std::vector<T> getl3Reals() {
             std::vector<T> vals(2*nl3);
-            for (unsigned int i=0; i<nl3; i++) {
+            for (int i=0; i<nl3; i++) {
                 vals[2*i] = l3[i].x;
                 vals[2*i+1] = l3[i].y;
             }
@@ -193,7 +193,7 @@ class GSHCoeffsCUDA {
         
         __host__ std::vector<T> getl4Reals() {
             std::vector<T> vals(2*nl4);
-            for (unsigned int i=0; i<nl4; i++) {
+            for (int i=0; i<nl4; i++) {
                 vals[2*i] = l4[i].x;
                 vals[2*i+1] = l4[i].y;
             }
@@ -215,19 +215,19 @@ class GSHCoeffsCUDA {
 template <typename T>
 __host__ __device__ GSHCoeffsCUDA<T> operator+(const GSHCoeffsCUDA<T>& coeffs1, const GSHCoeffsCUDA<T>& coeffs2) {
     GSHCoeffsCUDA<T> res;
-    for (unsigned int i=0; i<res.nl0; i++) {
+    for (int i=0; i<res.nl0; i++) {
         res.l0[i] = coeffs1.l0[i]+coeffs2.l0[i];
     }
-    for (unsigned int i=0; i<res.nl1; i++) {
+    for (int i=0; i<res.nl1; i++) {
         res.l1[i] = coeffs1.l1[i]+coeffs2.l1[i];
     }
-    for (unsigned int i=0; i<res.nl2; i++) {
+    for (int i=0; i<res.nl2; i++) {
         res.l2[i] = coeffs1.l2[i]+coeffs2.l2[i];
     }
-    for (unsigned int i=0; i<res.nl3; i++) {
+    for (int i=0; i<res.nl3; i++) {
         res.l3[i] = coeffs1.l3[i]+coeffs2.l3[i];
     }
-    for (unsigned int i=0; i<res.nl4; i++) {
+    for (int i=0; i<res.nl4; i++) {
         res.l4[i] = coeffs1.l4[i]+coeffs2.l4[i];
     }
     return res;
@@ -241,19 +241,19 @@ __host__ __device__ void operator+=(GSHCoeffsCUDA<T>& A, const GSHCoeffsCUDA<T>&
 template <typename T>
 __host__ __device__ GSHCoeffsCUDA<T> operator/(const GSHCoeffsCUDA<T>& coeffs, T val) {
     GSHCoeffsCUDA<T> res;
-    for (unsigned int i=0; i<res.nl0; i++) {
+    for (int i=0; i<res.nl0; i++) {
         res.l0[i] = coeffs.l0[i]/val;
     }
-    for (unsigned int i=0; i<res.nl1; i++) {
+    for (int i=0; i<res.nl1; i++) {
         res.l1[i] = coeffs.l1[i]/val;
     }
-    for (unsigned int i=0; i<res.nl2; i++) {
+    for (int i=0; i<res.nl2; i++) {
         res.l2[i] = coeffs.l2[i]/val;
     }
-    for (unsigned int i=0; i<res.nl3; i++) {
+    for (int i=0; i<res.nl3; i++) {
         res.l3[i] = coeffs.l3[i]/val;
     }
-    for (unsigned int i=0; i<res.nl4; i++) {
+    for (int i=0; i<res.nl4; i++) {
         res.l4[i] = coeffs.l4[i]/val;
     }
     return res;

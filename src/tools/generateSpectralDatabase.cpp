@@ -343,8 +343,6 @@ void readPerformDFTThenWriteOrderedCoeffsUnified(hpp::HDF5Handler& infile, hid_t
     hid_t plist_out = outfile.getPropertyListTransferIndependent();
     
     // 0.a GET THE COMPONENT SUMMED MAGNITUDES AND AVERAGE MAGNITUDES
-    double sigmaMagSum = 0.0;
-    double WpMagSum = 0.0;
     std::vector<double> componentSums(spectralDatasetIDs.size(), 0.0);
     std::vector<double> componentMagSums(spectralDatasetIDs.size(), 0.0);    
     for (unsigned int iDset=0; iDset<spectralDatasetIDs.size(); iDset++) {

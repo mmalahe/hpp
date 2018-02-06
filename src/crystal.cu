@@ -1091,7 +1091,6 @@ void SpectralPolycrystalCUDA<T,N>::step(const hpp::Tensor2<T>& L_next, T dt)
     StretchingTensorDecomposition<T> stretchingTensorDecomp = getStretchingTensorDecomposition(L_next); 
     T theta = stretchingTensorDecomp.theta;
     T strainRate = stretchingTensorDecomp.DNorm;
-    T strainIncrement = strainRate*dt;
     
     // DEBUG: report on recomposed velocity gradient
 //    std::cout << "L in = " << L_next << std::endl;

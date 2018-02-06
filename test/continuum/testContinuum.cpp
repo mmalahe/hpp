@@ -73,9 +73,6 @@ void testHomogenizations() {
     U c11 = 169.05;
     U c12 = 121.93;
     U c44 = 75.5;
-    U I0 = 1.858;
-    U I1 = 0.4101;
-    U I2 = 0.02072;
     
     // Volume average
     Tensor4<U> c1 = cubeSymmetricElasticityTensor<U>(1.0*c11, 1.0*c12, 1.0*c44);
