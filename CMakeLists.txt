@@ -107,7 +107,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/hpp)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/hpp)
 
 # Generate additional flags for both debug and release builds
-set(COMMON_CXX_FLAGS "${HPP_GENERAL_CXX_FLAGS} -ggdb ${OpenMP_CXX_FLAGS}")
+set(COMMON_CXX_FLAGS "-ggdb ${OpenMP_CXX_FLAGS}")
 
 # Compiler-specific flags
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -236,10 +236,6 @@ configure_file("cmake/HPPConfig.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfig.cmake"
   COPYONLY
 )
-#configure_file("cmake/HPPConfig.cmake.in"
-#  "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfig.cmake"
-#  COPYONLY
-#)
 set(ConfigPackageLocation "lib/cmake/hpp")
 install(EXPORT hppTargets
         FILE HPPTargets.cmake
