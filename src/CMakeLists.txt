@@ -4,7 +4,6 @@ include(HPPCommon)
 ###############
 # C++ LIBRARY #
 ###############
-
 set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp crystal.cpp hdfUtils.cpp spectralUtils.cpp mpiUtils.cpp profUtils.cpp)
 set (HPP_CU_SOURCES cudaUtils.cu tensor.cu spectralUtils.cu crystal.cu)
 
@@ -13,7 +12,13 @@ if (${HPP_USE_CUDA})
 else()
     add_library(hpp SHARED ${HPP_CPP_SOURCES})
 endif()
-    
+
+target_include_directories(hpp 
+    PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>  
+    $<INSTALL_INTERFACE:include>
+)
+
 target_link_libraries(hpp ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 target_link_libraries(hpp ${FFTW_LIBRARIES} ${FFTW_MPI_LIBRARIES})
 target_link_libraries(hpp ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES})
@@ -42,11 +47,19 @@ add_subdirectory(tools)
 # INSTALLATION #
 ################
 
-# Installation of library
+# Installation of headers
 install(
-    TARGETS hpp
-    LIBRARY
-    DESTINATION "lib"
+    DIRECTORY "${PROJECT_SOURCE_DIR}/include/hpp"
+    DESTINATION "include"
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# Installation of main library
+install(TARGETS hpp 
+        EXPORT hppTargets
+        LIBRARY DESTINATION "lib"
+        ARCHIVE DESTINATION "lib"
+        INCLUDES DESTINATION "include"
 )
 
 # Installation of Python interface

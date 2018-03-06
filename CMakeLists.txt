@@ -2,8 +2,9 @@ cmake_minimum_required (VERSION 3.4)
 
 # Project name and version.
 project (hpp)
-set (hpp_VERSION_MAJOR 0)
-set (hpp_VERSION_MINOR 5)
+#set (hpp_VERSION_MAJOR 0)
+#set (hpp_VERSION_MINOR 5)
+set (hpp_VERSION "0.5.0")
 
 # COMPILERS #
 #############
@@ -54,7 +55,6 @@ find_package(CUDA 7.5)
 if (${CUDA_FOUND})
     find_package(GPUS)
     include_directories(${CUDA_INCLUDE_DIRS})
-    message(${CUDA_INCLUDE_DIRS})
 endif()
 
 # Packages for the Python wrapper
@@ -222,3 +222,39 @@ if (${HPP_USE_CUDA})
 else()
     message(STATUS "    CUDA: ${HPP_USE_CUDA}")
 endif()
+
+# Installation of cmake configuration information
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfigVersion.cmake"
+  VERSION ${hpp_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+export(EXPORT hppTargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPTargets.cmake"
+  NAMESPACE hpp::
+)
+configure_file("cmake/HPPConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfig.cmake"
+  COPYONLY
+)
+#configure_file("cmake/HPPConfig.cmake.in"
+#  "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfig.cmake"
+#  COPYONLY
+#)
+set(ConfigPackageLocation "lib/cmake/hpp")
+install(EXPORT hppTargets
+        FILE HPPTargets.cmake
+        NAMESPACE hpp::
+        DESTINATION ${ConfigPackageLocation}
+)
+install(
+  FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/hpp/HPPConfigVersion.cmake"
+  DESTINATION
+    ${ConfigPackageLocation}
+  COMPONENT
+    Devel
+)
+
