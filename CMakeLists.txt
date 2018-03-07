@@ -45,9 +45,6 @@ include_directories(${FFTW_INCLUDES})
 find_package(TCLAP REQUIRED)
 include_directories(${TCLAP_INCLUDES})
 
-# SSE instructions
-find_package(SSE)
-
 # CUDA
 find_package(CUDA 7.5)
 if (${CUDA_FOUND})
@@ -76,18 +73,6 @@ CHECK_SYMBOL_EXISTS(aligned_alloc stdlib.h HPP_HAVE_ALIGNED_ALLOC)
 # OPTIONS #
 ###########
 
-# SSE instructions
-option(HPP_USE_MMX "Use MMX instructions." ${MMX_FOUND})
-option(HPP_USE_SSE "Use SSE instructions." ${SSE_FOUND})
-option(HPP_USE_SSE2 "Use SSE2 instructions." ${SSE2_FOUND})
-option(HPP_USE_SSE3 "Use SSE3 instructions." ${SSE3_FOUND})
-option(HPP_USE_SSE4_1 "Use SSE4.1 instructions." ${SSE4_1_FOUND})
-option(HPP_USE_SSE4_2 "Use SSE4.2 instructions." ${SSE4_2_FOUND})
-option(HPP_USE_AVX "Use AVX instructions." ${AVX_FOUND})
-option(HPP_USE_AVX2 "Use AVX2 instructions." ${AVX2_FOUND})
-option(HPP_USE_FMA "Use FMA instructions." ${FMA_FOUND})
-option(HPP_USE_FMA4 "Use FMA4 instructions." ${FMA4_FOUND})
-
 # CUDA
 option(HPP_USE_CUDA "Use CUDA." ${CUDA_FOUND})
 set(HPP_CUDA_ARCH_LIST ${CUDA_ARCHS_FOUND} CACHE string "List of CUDA architectures to use.")
@@ -106,59 +91,25 @@ include_directories(include)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/hpp)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/hpp)
 
-# Generate additional flags for both debug and release builds
-set(COMMON_CXX_FLAGS "-ggdb ${OpenMP_CXX_FLAGS}")
+# Pull the architectures-specific compiler flags into CPU_ARCHITECTURE_FLAGS
+include(OptimizeForArchitecture)
+OptimizeForArchitecture()
+# Convert from ";" separated list to space separated string
+string(REPLACE ";" " " CPU_ARCHITECTURE_FLAGS "${CPU_ARCHITECTURE_FLAGS}")
 
-# Compiler-specific flags
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    message(STATUS "Adding GNU/Clang compiler flags.")
-    # SSE instructions
-    if (${HPP_USE_MMX})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mmmx")
-    endif()
-    if (${HPP_USE_SSE})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -msse")
-    endif()
-    if (${HPP_USE_SSE2})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -msse2")
-    endif()
-    if (${HPP_USE_SSE3})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -msse3")
-    endif()
-    if (${HPP_USE_SSE4_1})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -msse4.1")
-    endif()
-    if (${HPP_USE_SSE4_2})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -msse4.2")
-    endif()
-    if (${HPP_USE_AVX})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mavx")
-    endif()
-    if (${HPP_USE_AVX2})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
-    endif()
-    if (${HPP_USE_FMA})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mfma")
-    endif()
-    if (${HPP_USE_FMA4})
-        set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -mfma4")
-    endif()
-endif()
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    message(STATUS "Using Clang-specific compiler flags.")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    message(STATUS "Using GNU-specific compiler flags.")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-    message(STATUS "Using PGI-specific compiler flags.")
-endif()
+# Add the architectures-specific flags to all build configurations
+set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} ${CPU_ARCHITECTURE_FLAGS}")
+
+# Add OpenMP flags
+set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 # Add general flags to both builds
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${COMMON_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${COMMON_CXX_FLAGS}")
 
 # Flags specific to debug and release builds
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG_BUILD -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb -DDEBUG_BUILD -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 
 # CUDA flags
 if (${HPP_USE_CUDA})
@@ -203,16 +154,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 message(STATUS "Options:")
 message(STATUS "")
 message(STATUS "  CPU options:")
-message(STATUS "    MMX: ${HPP_USE_MMX}")
-message(STATUS "    SSE: ${HPP_USE_SSE}")
-message(STATUS "    SSE2: ${HPP_USE_SSE2}")
-message(STATUS "    SSE3: ${HPP_USE_SSE3}")
-message(STATUS "    SSE4.1: ${HPP_USE_SSE4_1}")
-message(STATUS "    SSE4.2: ${HPP_USE_SSE4_2}")
-message(STATUS "    AVX: ${HPP_USE_AVX}")
-message(STATUS "    AVX2: ${HPP_USE_AVX2}")
-message(STATUS "    FMA: ${HPP_USE_FMA}")
-message(STATUS "    FMA4: ${HPP_USE_FMA4}")
+message(STATUS "    Architecture flags: ${CPU_ARCHITECTURE_FLAGS}")
 message(STATUS "")
 message(STATUS "  GPU options:")
 if (${HPP_USE_CUDA})
@@ -220,7 +162,6 @@ if (${HPP_USE_CUDA})
 else()
     message(STATUS "    CUDA: ${HPP_USE_CUDA}")
 endif()
-
 # Installation of cmake configuration information
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
