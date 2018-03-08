@@ -1,10 +1,34 @@
-include("${CMAKE_CURRENT_LIST_DIR}/HPPTargets.cmake")
+# This file is used to include and link correctly for packages that fetch this 
+# package using Cmake's find_package, e.g. with a "find_package(HPP)"
+# This is the method suggested here: https://cmake.org/pipermail/cmake/2017-October/066366.html
 
-# Fetch
+# Find dependencies
+include(CMakeFindDependencyMacro)
+find_dependency(OpenMP)
+find_dependency(MPI)
+find_dependency(LAPACK)
+find_dependency(BLAS)
+set(HDF5_PREFER_PARALLEL TRUE)
+# Note we use find_package here because find_dependency doesn't support
+# components. See e.g. https://cmake.org/pipermail/cmake-developers/2016-February/027876.html
+find_package(HDF5 COMPONENTS C CXX)
+find_dependency(FFTW)
+find_dependency(TCLAP)
+find_dependency(CUDA 7.5)
+
+# Transitive/external includes
+set(HPP_EXTERNAL_INCLUDES ${HPP_EXTERNAL_INCLUDES} ${MPI_CXX_INCLUDE_PATH})
+set(HPP_EXTERNAL_INCLUDES ${HPP_EXTERNAL_INCLUDES} ${TCLAP_INCLUDES})
+set(HPP_EXTERNAL_INCLUDES ${HPP_EXTERNAL_INCLUDES} ${HDF5_INCLUDE_DIRS})
+set(HPP_EXTERNAL_INCLUDES ${HPP_EXTERNAL_INCLUDES} ${FFTW_INCLUDES})
+set(HPP_EXTERNAL_INCLUDES ${HPP_EXTERNAL_INCLUDES} ${CUDA_INCLUDE_DIRS})
+
+# Fetch package targets
+include("${CMAKE_CURRENT_LIST_DIR}/HPPTargets.cmake")
 get_target_property(HPP_INTERFACE_INCLUDE_DIRS hpp::hpp INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(HPP_LINK_LIBRARIES hpp::hpp INTERFACE_LINK_LIBRARIES)
 get_target_property(HPP_LOCATION_RELEASE hpp::hpp IMPORTED_LOCATION_RELEASE)
 
-# Set
-set(HPP_INCLUDE_DIRS "${HPP_INTERFACE_INCLUDE_DIRS}")
-set(HPP_LIBRARIES "${HPP_LOCATION_RELEASE};${HPP_LINK_LIBRARIES}")
+# Set variables for consumer
+set(HPP_INCLUDE_DIRS ${HPP_INTERFACE_INCLUDE_DIRS} ${HPP_EXTERNAL_INCLUDES})
+set(HPP_LIBRARIES ${HPP_LOCATION_RELEASE} ${HPP_LINK_LIBRARIES})
