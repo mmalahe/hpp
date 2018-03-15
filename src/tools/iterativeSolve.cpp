@@ -68,11 +68,12 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
         // Generate rotation
         rotTensor = hpp::EulerZXZRotationMatrix(anglesLocal[i]);
         
-        // Rotate
-        hpp::CrystalProperties<U> propsRotated = hpp::rotate(props, rotTensor);
+        // Add initial rotation
         hpp::CrystalInitialConditions<U> initRotated = init;
         initRotated.crystalRotation = rotTensor;
-        crystal_list[i] = hpp::Crystal<U>(propsRotated, config, initRotated);
+        
+        // Add to crystal list
+        crystal_list[i] = hpp::Crystal<U>(props, config, initRotated);
     }
     
     // Generate polycrystal and solve

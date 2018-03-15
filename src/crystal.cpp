@@ -360,6 +360,9 @@ void Crystal<U>::applyInitialConditions()
     // Derived initial conditions
     Tensor2<U> F = identityTensor2<U>(3);
     F_e = F*F_p.inv();
+    
+    // Rotate crystal properties according to initial orientation
+    props = hpp::rotate(unrotatedProps, init.crystalRotation);
 
     // The most recent step (the reset) has been accepted
     step_accepted = true;
@@ -373,11 +376,11 @@ Crystal<U>::Crystal() {
 }
 
 template <typename U>
-Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config, 
+Crystal<U>::Crystal(const CrystalProperties<U>& unrotatedProps, const CrystalSolverConfig<U>& config, 
                     const CrystalInitialConditions<U>& init, const CrystalOutputConfig& outputConfig)
 {
     // Material properties
-    this->props = props;
+    this->unrotatedProps = unrotatedProps;
     
     // Solver configuration
     this->config = config;
@@ -413,11 +416,11 @@ Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig
 }
 
 template <typename U>
-Crystal<U>::Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config, 
+Crystal<U>::Crystal(const CrystalProperties<U>& unrotatedProps, const CrystalSolverConfig<U>& config, 
                     const CrystalInitialConditions<U>& init)
 {
     CrystalOutputConfig outputConfig;
-    *this = Crystal<U>(props, config, init, outputConfig);
+    *this = Crystal<U>(unrotatedProps, config, init, outputConfig);
 }
 
 template <typename U>

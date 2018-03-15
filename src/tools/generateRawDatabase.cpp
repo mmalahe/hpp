@@ -88,11 +88,10 @@ MainQuantities<U> solveForMainQuantities(hpp::CrystalProperties<U> props, hpp::T
     
     // Rotate the crystal properties
     hpp::Tensor2<U> crystalRotation = hpp::EulerZXZRotationMatrix(g_p.alpha, g_p.beta, g_p.gamma);
-    hpp::CrystalProperties<U> propsRotated = hpp::rotate(props, crystalRotation);
     init.crystalRotation = crystalRotation;
     
     // Construct crystal
-    std::vector<hpp::Crystal<U>> initialCrystals = {hpp::Crystal<U>(propsRotated, config, init)};
+    std::vector<hpp::Crystal<U>> initialCrystals = {hpp::Crystal<U>(props, config, init)};
     hpp::Polycrystal<U> polycrystal = hpp::Polycrystal<U>(initialCrystals, MPI_COMM_SELF);
     
     // Calculate the velocity gradient
@@ -125,7 +124,7 @@ MainQuantities<U> solveForMainQuantities(hpp::CrystalProperties<U> props, hpp::T
     
     // Determine main quantities to store
     MainQuantities<U> mainQuantities;
-    mainQuantities.sigmaPrime = TCauchy.deviatoricComponent()/(s*std::pow(std::abs(strainRate), propsRotated.m));
+    mainQuantities.sigmaPrime = TCauchy.deviatoricComponent()/(s*std::pow(std::abs(strainRate), props.m));
     mainQuantities.W_p = W_p/strainRate;
     std::vector<U> gammadot_alphas = hpp::operator/(crystal.getShearStrainRates(), strainRate);
     mainQuantities.gammadotAbsSum = 0.0;

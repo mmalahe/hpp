@@ -342,9 +342,9 @@ class Crystal
 public:
     // Constructor
     Crystal();
-    Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config,
+    Crystal(const CrystalProperties<U>& unrotatedProps, const CrystalSolverConfig<U>& config,
             const CrystalInitialConditions<U>& init);
-    Crystal(const CrystalProperties<U>& props, const CrystalSolverConfig<U>& config,
+    Crystal(const CrystalProperties<U>& unrotatedProps, const CrystalSolverConfig<U>& config,
             const CrystalInitialConditions<U>& init, const CrystalOutputConfig& outputConfig);
 
     // Stepping
@@ -377,6 +377,7 @@ protected:
 
 private:
     // PROBLEM AND SOLVER SETTINGS //
+    CrystalProperties<U> unrotatedProps;
     CrystalProperties<U> props;
     CrystalSolverConfig<U> config;
     CrystalInitialConditions<U> init;
