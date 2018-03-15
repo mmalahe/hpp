@@ -465,6 +465,7 @@ public:
     
     // Higher level interface
     void resetRandomOrientations(U init_s, unsigned long int seed);
+    void resetHistories();
     
 protected:
 

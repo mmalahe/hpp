@@ -1018,7 +1018,18 @@ void Polycrystal<U>::resetRandomOrientations(U init_s, unsigned long int seed) {
     this->applyInitialConditions();
 
     // Reset other dependent quantities
-    //this->resetHistories();
+    this->resetHistories();
+}
+
+template <typename U>
+void Polycrystal<U>::resetHistories() {
+    t_history.clear();
+    T_cauchy_history.clear();
+    poleHistogramHistory111.clear();
+    poleHistogramHistory110.clear();
+    poleHistogramHistory100.clear();
+    poleHistogramHistory001.clear();
+    poleHistogramHistory011.clear();    
 }
 
 template <typename T>

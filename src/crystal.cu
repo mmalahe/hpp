@@ -1094,7 +1094,6 @@ void SpectralPolycrystalCUDA<T,N>::resetGivenOrientations(T init_s, const std::v
 
 template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::resetHistories() {
-    // Reset other quantities
     tHistory.clear();
     TCauchyHistory.clear();
     poleHistogramHistory111.clear();
