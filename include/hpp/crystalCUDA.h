@@ -206,6 +206,7 @@ public:
     
     // Simulation
     void resetRandomOrientations(T init_s, unsigned long int seed);
+    void resetGivenOrientations(T init_s, const std::vector<EulerAngles<T>>& angleList);
     void resetHistories();
     void step(const hpp::Tensor2<T>& L_next, T dt);
     void step(const hpp::Tensor2<T>& F_next, const hpp::Tensor2<T>& L_next, T dt);

@@ -1051,7 +1051,7 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
 // Reset host function
 template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::resetRandomOrientations(T init_s, unsigned long int seed) {
-    // Create resetted crystals on host
+    // Create reset crystals on host
     std::vector<SpectralCrystalCUDA<T>> crystalList(this->nCrystals);
     Tensor2<T> R(3,3);
     std::mt19937 randgen(seed);    
@@ -1065,7 +1065,30 @@ void SpectralPolycrystalCUDA<T,N>::resetRandomOrientations(T init_s, unsigned lo
     // Copy to device
     copyVecToDeviceSharedPtr(crystalList, this->crystalsD);
 
-    // Reset other quantities
+    // Reset other dependent quantities
+    this->resetHistories();
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::resetGivenOrientations(T init_s, const std::vector<EulerAngles<T>>& angleList) {
+    // Check sizes
+    if (angleList.size() != this->nCrystals) {
+        std::cerr << "Number of angles supplied = " << angleList.size() << std::endl;
+        std::cerr << "Number of crystals = " << this->nCrystals << std::endl;
+        throw std::runtime_error("Mismatch in angles supplied vs. number of crystals.");
+    }
+    
+    // Set angles
+    std::vector<SpectralCrystalCUDA<T>> crystalList(this->nCrystals);
+    for (unsigned int i=0; i<this->nCrystals; i++) {       
+        crystalList[i].s = init_s;
+        crystalList[i].angles = angleList[i];
+    }
+    
+    // Copy to device
+    copyVecToDeviceSharedPtr(crystalList, this->crystalsD);
+    
+    // Reset other dependent quantities
     this->resetHistories();
 }
 

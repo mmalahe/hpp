@@ -30,9 +30,9 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getVal", &hpp::Tensor2<float>::getVal)
     ;
     boost::python::class_<hpp::EulerAngles<float>>("EulerAnglesF")
-        .add_property("alpha", &hpp::EulerAngles<float>::getAlpha)
-        .add_property("beta", &hpp::EulerAngles<float>::getBeta)
-        .add_property("gamma", &hpp::EulerAngles<float>::getGamma)
+        .add_property("alpha", &hpp::EulerAngles<float>::getAlpha, &hpp::EulerAngles<float>::setAlpha)
+        .add_property("beta", &hpp::EulerAngles<float>::getBeta, &hpp::EulerAngles<float>::setBeta)
+        .add_property("gamma", &hpp::EulerAngles<float>::getGamma, &hpp::EulerAngles<float>::setGamma)
     ;
     boost::python::class_<std::vector<hpp::EulerAngles<float>>>("EulerAnglesFVec")
         .def(boost::python::vector_indexing_suite<std::vector<hpp::EulerAngles<float>>>())
@@ -97,6 +97,7 @@ BOOST_PYTHON_MODULE(hpppy) {
         boost::python::init<std::vector<hpp::SpectralCrystalCUDA<float>>&, const hpp::CrystalPropertiesCUDA<float, 12>&, const hpp::SpectralDatabaseUnified<float>&>())
         .def("evolve", &hpp::SpectralPolycrystalCUDA<float,12>::evolve)
         .def("resetRandomOrientations", &hpp::SpectralPolycrystalCUDA<float,12>::resetRandomOrientations)
+        .def("resetGivenOrientations", &hpp::SpectralPolycrystalCUDA<float,12>::resetGivenOrientations)
         .def("getEulerAnglesZXZActive", &hpp::SpectralPolycrystalCUDA<float,12>::getEulerAnglesZXZActive)
         .def("step", step)
         .def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)

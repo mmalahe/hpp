@@ -1821,6 +1821,9 @@ struct EulerAngles {
     T getAlpha() const {return alpha;}
     T getBeta() const {return beta;}
     T getGamma() const {return gamma;}
+    void setAlpha(const T& alpha) {this->alpha = alpha;}
+    void setBeta(const T& beta) {this->beta = beta;}
+    void setGamma(const T& gamma) {this->gamma = gamma;}
 };
 
 template <typename T>
