@@ -463,6 +463,9 @@ public:
     // Getters
     const std::vector<U>& getTHistory() const {return t_history;}
     
+    // Higher level interface
+    void resetRandomOrientations(U init_s, unsigned long int seed);
+    
 protected:
 
 private:

@@ -1003,6 +1003,24 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
     }
 }
 
+// Reset function
+template <typename U>
+void Polycrystal<U>::resetRandomOrientations(U init_s, unsigned long int seed) {
+    // Create new initial orientations
+    Tensor2<U> R(3,3);
+    std::mt19937 randgen(seed);    
+    for (auto&& crystal : crystal_list) {        
+        randomRotationTensorArvo1992<U>(randgen, R);
+        crystal.init.crystalRotation = R;
+    }
+    
+    // Re-apply initial conditions
+    this->applyInitialConditions();
+
+    // Reset other dependent quantities
+    //this->resetHistories();
+}
+
 template <typename T>
 std::vector<T> cartesianToSpherical(const std::vector<T>& cartVec) {
     // Magnitude
