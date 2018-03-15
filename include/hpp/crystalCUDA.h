@@ -55,7 +55,7 @@ public:
     VecCUDA<T,3> n_0[N];
     Tensor2CUDA<T,3,3> S_0[N];
     Tensor4CUDA<T,3,3,3,3> L;
-    Tensor2CUDA<T,12,12> Q;
+    Tensor2CUDA<T,N,N> Q;
 };
 
 template <typename T>
