@@ -15,13 +15,15 @@
 
 // The module
 BOOST_PYTHON_MODULE(hpppy) {    
-    // General
+    // General //
+    /////////////
     boost::python::class_<std::vector<float> >("FVec")
         .def(boost::python::vector_indexing_suite<std::vector<float>>())
     ;
     boost::python::class_<std::function<hpp::Tensor2<float>(float)>>("Tensor2FunctionOfScalarF");
     
-    // tensor.h
+    // tensor.h //
+    //////////////
     boost::python::class_<hpp::Tensor2<float>>("Tensor2F", 
         boost::python::init<const unsigned int, const unsigned int>())
         .def("getn1", &hpp::Tensor2<float>::getn1)
@@ -38,7 +40,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def(boost::python::vector_indexing_suite<std::vector<hpp::EulerAngles<float>>>())
     ;
     
-    // casesUtils.h
+    // casesUtils.h //
+    //////////////////
     boost::python::class_<hpp::Experiment<float>>("ExperimentF", 
         boost::python::init<std::string>())
         .add_property("strainRate", &hpp::Experiment<float>::getStrainRate)
@@ -49,7 +52,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("generateNextOrientationAngles", &hpp::Experiment<float>::generateNextOrientationAngles)
     ;
     
-    // spectralUtils.h
+    // spectralUtils.h //
+    /////////////////////
     boost::python::class_<hpp::SpectralDatasetID>("SpectralDatasetID");
     boost::python::class_<std::vector<hpp::SpectralDatasetID> >("SpectralDatasetIDVec")
         .def(boost::python::vector_indexing_suite<std::vector<hpp::SpectralDatasetID>>())
@@ -58,7 +62,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         boost::python::init<std::string, std::vector<hpp::SpectralDatasetID>, unsigned int, unsigned int>())
     ;
     
-    // crystal.h
+    // crystal.h //
+    ///////////////
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
     boost::python::class_<hpp::CrystalInitialConditions<float>>("CrystalInitialConditionsF")
         .add_property("s_0", &hpp::CrystalInitialConditions<float>::getS0, &hpp::CrystalInitialConditions<float>::setS0)
@@ -67,7 +72,18 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
     boost::python::def("defaultCrystalSpectralDatasetIDs", hpp::defaultCrystalSpectralDatasetIDs);
     
-    // gshCUDA.h
+    boost::python::class_<hpp::Polycrystal<float>>("PolycrystalF", 
+        boost::python::init<const std::vector<hpp::Crystal<float>>&>());
+        //.def("resetRandomOrientations", &hpp::Polycrystal<float>::resetRandomOrientations)
+        //.def("resetGivenOrientations", &hpp::SpectralPolycrystalCUDA<float,12>::resetGivenOrientations)
+        //.def("getEulerAnglesZXZActive", &hpp::SpectralPolycrystalCUDA<float,12>::getEulerAnglesZXZActive)
+        //.def("step", step)
+        //.def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)
+        //.def("getPoleHistogram", getPoleHistogram)
+    //;
+    
+    // gshCUDA.h //
+    ///////////////
     boost::python::class_<hpp::GSHCoeffsCUDA<float>>("GSHCoeffsCUDAF", 
         boost::python::init<>())
         .def("getl0Reals", &hpp::GSHCoeffsCUDA<float>::getl0Reals)
@@ -77,7 +93,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getl4Reals", &hpp::GSHCoeffsCUDA<float>::getl4Reals)
     ;
     
-    // crystalCUDA.h
+    // crystalCUDA.h //
+    ///////////////////
     boost::python::class_<hpp::CrystalPropertiesCUDA<float,12>>("CrystalPropertiesCUDAF12", 
         boost::python::init<const hpp::CrystalProperties<float>&>())
     ;
@@ -88,11 +105,15 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::class_<std::vector<hpp::SpectralCrystalCUDA<float>> >("SpectralCrystalCUDAFVec")
         .def(boost::python::vector_indexing_suite<std::vector<hpp::SpectralCrystalCUDA<float>>>())
     ;
+
+    // SpectralPolycrystalCUDA //
+    /////////////////////////////
     
-    // Selection of overloaded methods
+    // Selection of particular overloaded methods
     void (hpp::SpectralPolycrystalCUDA<float,12>::*step)(const hpp::Tensor2<float>&, float) = &hpp::SpectralPolycrystalCUDA<float,12>::step;
     hpp::Tensor2<float> (hpp::SpectralPolycrystalCUDA<float,12>::*getPoleHistogram)(int, int, int) = &hpp::SpectralPolycrystalCUDA<float,12>::getPoleHistogram;
     
+    // Interface
     boost::python::class_<hpp::SpectralPolycrystalCUDA<float,12>>("SpectralPolycrystalCUDAF12", 
         boost::python::init<std::vector<hpp::SpectralCrystalCUDA<float>>&, const hpp::CrystalPropertiesCUDA<float, 12>&, const hpp::SpectralDatabaseUnified<float>&>())
         .def("evolve", &hpp::SpectralPolycrystalCUDA<float,12>::evolve)

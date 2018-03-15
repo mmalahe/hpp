@@ -827,6 +827,29 @@ Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Com
     *this = Polycrystal(crystal_list, comm, outputConfig);
 }
 
+/**
+ * @brief Constructor with no MPI communicator provided
+ * @details Created mainly for the Python interface.
+ * @todo Propagate the no MPI choice down throughout the class methods, which
+ * will allow us to use no context and communicator at all.
+ */
+template <typename U>
+Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list) {
+    int MPIHasBeenInitialized;
+    MPI_Initialized(&MPIHasBeenInitialized);
+    if (!MPIHasBeenInitialized) {
+        this->manageOwnMPIContext = true;
+    }
+    if (this->manageOwnMPIContext) {
+        int argc = 0;
+        char **argv = nullptr;
+        MPI_Init(&argc, &argv);
+    }    
+    this->comm = MPI_COMM_SELF;
+    PolycrystalOutputConfig outputConfig;
+    *this = Polycrystal(crystal_list, comm, outputConfig);
+}
+
 template <typename U>
 void Polycrystal<U>::applyInitialConditions() 
 {

@@ -445,6 +445,7 @@ template <typename U>
 class Polycrystal
 {
 public:
+    Polycrystal(const std::vector<Crystal<U>>& crystal_list);
     Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm);
     Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm, const PolycrystalOutputConfig& outputConfig);
     bool step(hpp::Tensor2<U> F_next, U dt);
@@ -486,6 +487,7 @@ private:
     void addTextureToHistory();
 
     // MPI
+    bool manageOwnMPIContext = false;
     MPI_Comm comm;
     int comm_size;
     int comm_rank;
