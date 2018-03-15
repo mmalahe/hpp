@@ -96,7 +96,7 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::class_<hpp::SpectralPolycrystalCUDA<float,12>>("SpectralPolycrystalCUDAF12", 
         boost::python::init<std::vector<hpp::SpectralCrystalCUDA<float>>&, const hpp::CrystalPropertiesCUDA<float, 12>&, const hpp::SpectralDatabaseUnified<float>&>())
         .def("evolve", &hpp::SpectralPolycrystalCUDA<float,12>::evolve)
-        .def("reset", &hpp::SpectralPolycrystalCUDA<float,12>::reset)
+        .def("resetRandomOrientations", &hpp::SpectralPolycrystalCUDA<float,12>::resetRandomOrientations)
         .def("getEulerAnglesZXZActive", &hpp::SpectralPolycrystalCUDA<float,12>::getEulerAnglesZXZActive)
         .def("step", step)
         .def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)

@@ -1050,7 +1050,7 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
 
 // Reset host function
 template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::reset(T init_s, unsigned long int seed) {
+void SpectralPolycrystalCUDA<T,N>::resetRandomOrientations(T init_s, unsigned long int seed) {
     // Create resetted crystals on host
     std::vector<SpectralCrystalCUDA<T>> crystalList(this->nCrystals);
     Tensor2<T> R(3,3);
@@ -1066,14 +1066,19 @@ void SpectralPolycrystalCUDA<T,N>::reset(T init_s, unsigned long int seed) {
     copyVecToDeviceSharedPtr(crystalList, this->crystalsD);
 
     // Reset other quantities
+    this->resetHistories();
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::resetHistories() {
+    // Reset other quantities
     tHistory.clear();
     TCauchyHistory.clear();
     poleHistogramHistory111.clear();
     poleHistogramHistory110.clear();
     poleHistogramHistory100.clear();
     poleHistogramHistory001.clear();
-    poleHistogramHistory011.clear();
-    
+    poleHistogramHistory011.clear();    
 }
 
 // Step host function
