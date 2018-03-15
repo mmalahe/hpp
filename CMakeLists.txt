@@ -61,6 +61,7 @@ endif()
 # Packages for the Python wrapper
 option(HPP_BUILD_PYTHON "Build the Python interface to the library." TRUE)
 if (${HPP_BUILD_PYTHON})
+    set(Python_ADDITIONAL_VERSIONS "3.7" "3.6" "3.5") # in order of preference
     find_package(PythonInterp REQUIRED)
     find_package(PythonLibs REQUIRED)
     find_package(PythonExtras)
