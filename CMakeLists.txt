@@ -13,6 +13,12 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# Intra-project directories
+# These need to be included early so that they'll supersede installed versions
+# of this library that reside in standard system paths on systems where we're 
+# actively developing it.
+include_directories(include)
+
 # FIND PACKAGES #
 #################
 
@@ -83,9 +89,6 @@ configure_file(${PROJECT_SOURCE_DIR}/include/hpp/config.h.in ${PROJECT_SOURCE_DI
 
 # INTERNALS #
 #############
-
-# Intra-project directories
-include_directories(include)
 
 # Default output directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/hpp)
