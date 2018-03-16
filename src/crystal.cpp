@@ -352,6 +352,9 @@ const std::vector<hpp::Tensor2<U>>& C_alphas, const std::vector<U>& s_alphas, co
 template <typename U>
 void Crystal<U>::applyInitialConditions() 
 {
+    // Rotate crystal properties according to initial orientation
+    props = hpp::rotate(unrotatedProps, init.crystalRotation);
+    
     // Apply initial conditions
     T = init.T_init;
     s_alphas = init.s_0*hpp::ones<U>(props.n_alpha);
@@ -360,9 +363,6 @@ void Crystal<U>::applyInitialConditions()
     // Derived initial conditions
     Tensor2<U> F = identityTensor2<U>(3);
     F_e = F*F_p.inv();
-    
-    // Rotate crystal properties according to initial orientation
-    props = hpp::rotate(unrotatedProps, init.crystalRotation);
 
     // The most recent step (the reset) has been accepted
     step_accepted = true;
