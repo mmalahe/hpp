@@ -509,7 +509,7 @@ private:
     void addTextureToHistory();
 
     // MPI
-    bool manageOwnMPIContext = false;
+    bool useMPI = true;
     MPI_Comm comm;
     int comm_size;
     int comm_rank;
