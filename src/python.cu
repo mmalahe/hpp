@@ -20,7 +20,11 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::class_<std::vector<float> >("FVec")
         .def(boost::python::vector_indexing_suite<std::vector<float>>())
     ;
+    boost::python::class_<std::vector<double> >("DVec")
+        .def(boost::python::vector_indexing_suite<std::vector<double>>())
+    ;
     boost::python::class_<std::function<hpp::Tensor2<float>(float)>>("Tensor2FunctionOfScalarF");
+    boost::python::class_<std::function<hpp::Tensor2<double>(double)>>("Tensor2FunctionOfScalarD");
     
     // tensor.h //
     //////////////
@@ -31,13 +35,28 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("setVal", &hpp::Tensor2<float>::setVal)
         .def("getVal", &hpp::Tensor2<float>::getVal)
     ;
+    boost::python::class_<hpp::Tensor2<double>>("Tensor2D", 
+        boost::python::init<const unsigned int, const unsigned int>())
+        .def("getn1", &hpp::Tensor2<double>::getn1)
+        .def("getn2", &hpp::Tensor2<double>::getn2)
+        .def("setVal", &hpp::Tensor2<double>::setVal)
+        .def("getVal", &hpp::Tensor2<double>::getVal)
+    ;
     boost::python::class_<hpp::EulerAngles<float>>("EulerAnglesF")
         .add_property("alpha", &hpp::EulerAngles<float>::getAlpha, &hpp::EulerAngles<float>::setAlpha)
         .add_property("beta", &hpp::EulerAngles<float>::getBeta, &hpp::EulerAngles<float>::setBeta)
         .add_property("gamma", &hpp::EulerAngles<float>::getGamma, &hpp::EulerAngles<float>::setGamma)
     ;
+    boost::python::class_<hpp::EulerAngles<double>>("EulerAnglesD")
+        .add_property("alpha", &hpp::EulerAngles<double>::getAlpha, &hpp::EulerAngles<double>::setAlpha)
+        .add_property("beta", &hpp::EulerAngles<double>::getBeta, &hpp::EulerAngles<double>::setBeta)
+        .add_property("gamma", &hpp::EulerAngles<double>::getGamma, &hpp::EulerAngles<double>::setGamma)
+    ;
     boost::python::class_<std::vector<hpp::EulerAngles<float>>>("EulerAnglesFVec")
         .def(boost::python::vector_indexing_suite<std::vector<hpp::EulerAngles<float>>>())
+    ;
+    boost::python::class_<std::vector<hpp::EulerAngles<double>>>("EulerAnglesDVec")
+        .def(boost::python::vector_indexing_suite<std::vector<hpp::EulerAngles<double>>>())
     ;
     
     // casesUtils.h //
@@ -50,6 +69,15 @@ BOOST_PYTHON_MODULE(hpppy) {
         .add_property("F_of_t", &hpp::Experiment<float>::getF_of_t)
         .add_property("L_of_t", &hpp::Experiment<float>::getL_of_t)
         .def("generateNextOrientationAngles", &hpp::Experiment<float>::generateNextOrientationAngles)
+    ;
+    boost::python::class_<hpp::Experiment<double>>("ExperimentD", 
+        boost::python::init<std::string>())
+        .add_property("strainRate", &hpp::Experiment<double>::getStrainRate)
+        .add_property("tStart", &hpp::Experiment<double>::getTStart)
+        .add_property("tEnd", &hpp::Experiment<double>::getTEnd)
+        .add_property("F_of_t", &hpp::Experiment<double>::getF_of_t)
+        .add_property("L_of_t", &hpp::Experiment<double>::getL_of_t)
+        .def("generateNextOrientationAngles", &hpp::Experiment<double>::generateNextOrientationAngles)
     ;
     
     // spectralUtils.h //
@@ -64,32 +92,56 @@ BOOST_PYTHON_MODULE(hpppy) {
     
     // gsh.h //
     ///////////
-    boost::python::class_<hpp::GSHCoeffsCUDA<float>>("GSHCoeffsF", 
+    boost::python::class_<hpp::GSHCoeffs<float>>("GSHCoeffsF", 
         boost::python::init<>())
-        .def("getl0Reals", &hpp::GSHCoeffsCUDA<float>::getl0Reals)
-        .def("getl1Reals", &hpp::GSHCoeffsCUDA<float>::getl1Reals)
-        .def("getl2Reals", &hpp::GSHCoeffsCUDA<float>::getl2Reals)
-        .def("getl3Reals", &hpp::GSHCoeffsCUDA<float>::getl3Reals)
-        .def("getl4Reals", &hpp::GSHCoeffsCUDA<float>::getl4Reals)
+        .def("getl0Reals", &hpp::GSHCoeffs<float>::getl0Reals)
+        .def("getl1Reals", &hpp::GSHCoeffs<float>::getl1Reals)
+        .def("getl2Reals", &hpp::GSHCoeffs<float>::getl2Reals)
+        .def("getl3Reals", &hpp::GSHCoeffs<float>::getl3Reals)
+        .def("getl4Reals", &hpp::GSHCoeffs<float>::getl4Reals)
     ;
-    boost::python::class_<hpp::GSHCoeffsCUDA<double>>("GSHCoeffsD", 
+    boost::python::class_<hpp::GSHCoeffs<double>>("GSHCoeffsD", 
         boost::python::init<>())
-        .def("getl0Reals", &hpp::GSHCoeffsCUDA<double>::getl0Reals)
-        .def("getl1Reals", &hpp::GSHCoeffsCUDA<double>::getl1Reals)
-        .def("getl2Reals", &hpp::GSHCoeffsCUDA<double>::getl2Reals)
-        .def("getl3Reals", &hpp::GSHCoeffsCUDA<double>::getl3Reals)
-        .def("getl4Reals", &hpp::GSHCoeffsCUDA<double>::getl4Reals)
+        .def("getl0Reals", &hpp::GSHCoeffs<double>::getl0Reals)
+        .def("getl1Reals", &hpp::GSHCoeffs<double>::getl1Reals)
+        .def("getl2Reals", &hpp::GSHCoeffs<double>::getl2Reals)
+        .def("getl3Reals", &hpp::GSHCoeffs<double>::getl3Reals)
+        .def("getl4Reals", &hpp::GSHCoeffs<double>::getl4Reals)
     ;
     
     // crystal.h //
     ///////////////
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
+    boost::python::class_<hpp::CrystalProperties<double>>("CrystalPropertiesD");
+    
     boost::python::class_<hpp::CrystalInitialConditions<float>>("CrystalInitialConditionsF")
         .add_property("s_0", &hpp::CrystalInitialConditions<float>::getS0, &hpp::CrystalInitialConditions<float>::setS0)
+        .add_property("angles", &hpp::CrystalInitialConditions<float>::getEulerAngles, &hpp::CrystalInitialConditions<float>::setEulerAngles)
     ;
+    boost::python::class_<hpp::CrystalInitialConditions<double>>("CrystalInitialConditionsD")
+        .add_property("s_0", &hpp::CrystalInitialConditions<double>::getS0, &hpp::CrystalInitialConditions<double>::setS0)
+        .add_property("angles", &hpp::CrystalInitialConditions<double>::getEulerAngles, &hpp::CrystalInitialConditions<double>::setEulerAngles)
+    ;
+    
     boost::python::def("defaultCrystalPropertiesF", hpp::defaultCrystalProperties<float>);
+    boost::python::def("defaultCrystalPropertiesD", hpp::defaultCrystalProperties<double>);
+    
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
-    boost::python::def("defaultCrystalSpectralDatasetIDs", hpp::defaultCrystalSpectralDatasetIDs);
+    boost::python::def("defaultCrystalInitialConditionsD", hpp::defaultCrystalInitialConditions<double>);
+    
+    boost::python::class_<hpp::Crystal<float>>("CrystalF", 
+        boost::python::init<>())
+    ;
+    boost::python::class_<hpp::Crystal<double>>("CrystalD", 
+        boost::python::init<>())
+    ;
+    
+    boost::python::class_<std::vector<hpp::Crystal<float>>>("CrystalFVec")
+        .def(boost::python::vector_indexing_suite<std::vector<hpp::Crystal<float>>>())
+    ;
+    boost::python::class_<std::vector<hpp::Crystal<double>>>("CrystalDVec")
+        .def(boost::python::vector_indexing_suite<std::vector<hpp::Crystal<double>>>())
+    ;
     
     boost::python::class_<hpp::Polycrystal<float>>("PolycrystalF", 
         boost::python::init<const std::vector<hpp::Crystal<float>>&>())
@@ -100,6 +152,17 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("getGSHCoeffs", &hpp::Polycrystal<float>::getGSHCoeffs);
         //.def("getPoleHistogram", getPoleHistogram)
     //;
+    boost::python::class_<hpp::Polycrystal<double>>("PolycrystalD", 
+        boost::python::init<const std::vector<hpp::Crystal<double>>&>())
+        .def("resetRandomOrientations", &hpp::Polycrystal<double>::resetRandomOrientations)
+        .def("resetGivenOrientations", &hpp::Polycrystal<double>::resetGivenOrientations)
+        .def("getEulerAnglesZXZActive", &hpp::Polycrystal<double>::getEulerAnglesZXZActive)
+        .def("step", &hpp::Polycrystal<double>::stepVelocityGradient)
+        .def("getGSHCoeffs", &hpp::Polycrystal<double>::getGSHCoeffs);
+        //.def("getPoleHistogram", getPoleHistogram)
+    //;
+    
+    boost::python::def("defaultCrystalSpectralDatasetIDs", hpp::defaultCrystalSpectralDatasetIDs);
     
     // gshCUDA.h //
     ///////////////

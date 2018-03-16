@@ -302,14 +302,16 @@ struct CrystalOutputConfig {
 
 template <typename U>
 struct CrystalInitialConditions {
-    hpp::Tensor2<U> T_init;
+    Tensor2<U> T_init;
     U s_0;
-    hpp::Tensor2<U> F_p_0;
-    hpp::Tensor2<U> crystalRotation;
+    Tensor2<U> F_p_0;
+    Tensor2<U> crystalRotation;
     
     // Getters/setters (mainly intended for Python interface)
     U getS0() const {return s_0;}
     void setS0(const U& s_0) {this->s_0 = s_0;}
+    EulerAngles<U> getEulerAngles() const {return getEulerZXZAngles<U>(this->crystalRotation);}
+    void setEulerAngles(const EulerAngles<U>& angles) {this->crystalRotation = EulerZXZRotationMatrix<U>(angles);}    
 };
 template <typename U>
 CrystalInitialConditions<U> defaultCrystalInitialConditions()
@@ -429,6 +431,13 @@ private:
     std::vector<Tensor4<U>> dum4thOrders;
     std::vector<hpp::Tensor2<U>> dumC_alphas;
 };
+
+template <typename U>
+bool operator==(const Crystal<U>& l, const Crystal<U>& r) {
+    throw std::runtime_error("No implementation of crystal comparison function. "
+    "This was only put here to allow the boost Python vector indexing suite to"
+    "make a vector of crystals available as a Python container.");
+}
 
 /**
  * @class PolycrystalOutputConfig
