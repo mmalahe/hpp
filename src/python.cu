@@ -114,6 +114,9 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
     boost::python::class_<hpp::CrystalProperties<double>>("CrystalPropertiesD");
     
+    boost::python::class_<hpp::CrystalSolverConfig<float>>("CrystalSolverConfigF");
+    boost::python::class_<hpp::CrystalSolverConfig<double>>("CrystalSolverConfigD");
+    
     boost::python::class_<hpp::CrystalInitialConditions<float>>("CrystalInitialConditionsF")
         .add_property("s_0", &hpp::CrystalInitialConditions<float>::getS0, &hpp::CrystalInitialConditions<float>::setS0)
         .add_property("angles", &hpp::CrystalInitialConditions<float>::getEulerAngles, &hpp::CrystalInitialConditions<float>::setEulerAngles)
@@ -126,14 +129,17 @@ BOOST_PYTHON_MODULE(hpppy) {
     boost::python::def("defaultCrystalPropertiesF", hpp::defaultCrystalProperties<float>);
     boost::python::def("defaultCrystalPropertiesD", hpp::defaultCrystalProperties<double>);
     
+    boost::python::def("defaultConservativeCrystalSolverConfig", hpp::defaultConservativeCrystalSolverConfig<float>);
+    boost::python::def("defaultConservativeCrystalSolverConfig", hpp::defaultConservativeCrystalSolverConfig<double>);
+    
     boost::python::def("defaultCrystalInitialConditionsF", hpp::defaultCrystalInitialConditions<float>);
     boost::python::def("defaultCrystalInitialConditionsD", hpp::defaultCrystalInitialConditions<double>);
     
     boost::python::class_<hpp::Crystal<float>>("CrystalF", 
-        boost::python::init<>())
+        boost::python::init<const hpp::CrystalProperties<float>&, const hpp::CrystalSolverConfig<float>&, const hpp::CrystalInitialConditions<float>&>())
     ;
     boost::python::class_<hpp::Crystal<double>>("CrystalD", 
-        boost::python::init<>())
+        boost::python::init<const hpp::CrystalProperties<double>&, const hpp::CrystalSolverConfig<double>&, const hpp::CrystalInitialConditions<double>&>())
     ;
     
     boost::python::class_<std::vector<hpp::Crystal<float>>>("CrystalFVec")
