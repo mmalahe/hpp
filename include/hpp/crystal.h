@@ -466,7 +466,8 @@ public:
     // Higher level interface
     void resetHistories();
     void resetRandomOrientations(U init_s, unsigned long int seed);
-    void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);  
+    void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);
+    std::vector<EulerAngles<U>> getEulerAnglesZXZActive();
     
 protected:
 

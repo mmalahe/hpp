@@ -1056,6 +1056,16 @@ void Polycrystal<U>::resetGivenOrientations(U init_s, const std::vector<EulerAng
     // Reset other dependent quantities
     this->resetHistories();
 }
+
+template <typename U>
+std::vector<EulerAngles<U>> Polycrystal<U>::getEulerAnglesZXZActive() {
+    std::vector<EulerAngles<U>> angles(this->crystal_list.size());
+    for (unsigned int i=0; i<this->crystal_list.size(); i++) {        
+        angles[i] = crystal_list[i].getEulerAngles();
+    }
+    return angles;
+}
+
 template <typename T>
 std::vector<T> cartesianToSpherical(const std::vector<T>& cartVec) {
     // Magnitude
