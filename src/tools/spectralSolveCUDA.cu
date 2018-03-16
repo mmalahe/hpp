@@ -163,7 +163,8 @@ int main(int argc, char *argv[])
         defaultSeed = defaultSeedArg.getValue();
     } 
     catch (TCLAP::ArgException &e) {
-        std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
+        std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+        throw e;
     }
     
     // Run
