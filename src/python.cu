@@ -62,6 +62,25 @@ BOOST_PYTHON_MODULE(hpppy) {
         boost::python::init<std::string, std::vector<hpp::SpectralDatasetID>, unsigned int, unsigned int>())
     ;
     
+    // gsh.h //
+    ///////////
+    boost::python::class_<hpp::GSHCoeffsCUDA<float>>("GSHCoeffsF", 
+        boost::python::init<>())
+        .def("getl0Reals", &hpp::GSHCoeffsCUDA<float>::getl0Reals)
+        .def("getl1Reals", &hpp::GSHCoeffsCUDA<float>::getl1Reals)
+        .def("getl2Reals", &hpp::GSHCoeffsCUDA<float>::getl2Reals)
+        .def("getl3Reals", &hpp::GSHCoeffsCUDA<float>::getl3Reals)
+        .def("getl4Reals", &hpp::GSHCoeffsCUDA<float>::getl4Reals)
+    ;
+    boost::python::class_<hpp::GSHCoeffsCUDA<double>>("GSHCoeffsD", 
+        boost::python::init<>())
+        .def("getl0Reals", &hpp::GSHCoeffsCUDA<double>::getl0Reals)
+        .def("getl1Reals", &hpp::GSHCoeffsCUDA<double>::getl1Reals)
+        .def("getl2Reals", &hpp::GSHCoeffsCUDA<double>::getl2Reals)
+        .def("getl3Reals", &hpp::GSHCoeffsCUDA<double>::getl3Reals)
+        .def("getl4Reals", &hpp::GSHCoeffsCUDA<double>::getl4Reals)
+    ;
+    
     // crystal.h //
     ///////////////
     boost::python::class_<hpp::CrystalProperties<float>>("CrystalPropertiesF");
@@ -77,8 +96,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         .def("resetRandomOrientations", &hpp::Polycrystal<float>::resetRandomOrientations)
         .def("resetGivenOrientations", &hpp::Polycrystal<float>::resetGivenOrientations)
         .def("getEulerAnglesZXZActive", &hpp::Polycrystal<float>::getEulerAnglesZXZActive)
-        .def("step", &hpp::Polycrystal<float>::stepVelocityGradient);
-        //.def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)
+        .def("step", &hpp::Polycrystal<float>::stepVelocityGradient)
+        .def("getGSHCoeffs", &hpp::Polycrystal<float>::getGSHCoeffs);
         //.def("getPoleHistogram", getPoleHistogram)
     //;
     

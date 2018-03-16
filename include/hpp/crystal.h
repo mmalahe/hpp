@@ -28,6 +28,7 @@ platforms., (January):785--798, 2014
 #include <hpp/config.h>
 #include <hpp/tensor.h>
 #include <hpp/continuum.h>
+#include <hpp/gsh.h>
 #include <hpp/mpiUtils.h>
 #include <hpp/spectralUtils.h>
 #include <hpp/profUtils.h>
@@ -365,7 +366,8 @@ public:
     const std::vector<U>& getSAlphas() const {
         return s_alphas;
     }
-    EulerAngles<U> getEulerAngles() const; 
+    EulerAngles<U> getEulerAngles() const;
+    GSHCoeffs<U> getGSHCoeffs() const;
 
     // Getting derived properties
     std::vector<U> getShearStrainRates();
@@ -466,9 +468,10 @@ public:
     // Higher level interface, meant for Python functionality
     void resetHistories();
     void resetRandomOrientations(U init_s, unsigned long int seed);
-    void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);
-    std::vector<EulerAngles<U>> getEulerAnglesZXZActive();
+    void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);    
     void stepVelocityGradient(hpp::Tensor2<U> L_next, U DeltaT);
+    std::vector<EulerAngles<U>> getEulerAnglesZXZActive();
+    GSHCoeffs<U> getGSHCoeffs();
     
 protected:
 

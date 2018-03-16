@@ -1,8 +1,8 @@
 /// @file gshCUDA.h
 /// @author Michael Malahe
 /// @brief Header file for generalized spherical harmonic basis
-#ifndef HPP_GSH_H
-#define HPP_GSH_H
+#ifndef HPP_GSHCUDA_H
+#define HPP_GSHCUDA_H
 
 #include <hpp/config.h>
 
@@ -19,7 +19,7 @@ namespace hpp
  * @class GSHCoeffsCUDA
  * @author Michael Malahe
  * @date 29/11/17
- * @file gsh.h
+ * @file gshCUDA.h
  * @brief The complex generalized spherical harmonic coefficients for real data.
  * @details For real data, there is the guarantee that 
  * C[l,-m,-n] = (-1)^{(m+n)} C[l,m,n]*. So, we only store the upper triangular
@@ -361,4 +361,4 @@ __global__ void BLOCK_REDUCE_KEPLER_GSH_COEFFS(GSHCoeffsCUDA<T> *in, GSHCoeffsCU
 #endif /* HPP_USE_CUDA*/
     
 } //END NAMESPACE HPP
-#endif /* HPP_GSH_H */
+#endif /* HPP_GSHCUDA_H */

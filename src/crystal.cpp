@@ -806,6 +806,469 @@ EulerAngles<U> Crystal<U>::getEulerAngles() const {
     return getEulerZXZAngles(F_e_decomp.R*init.crystalRotation);
 }
 
+template <typename U>
+GSHCoeffs<U> Crystal<U>::getGSHCoeffs() const {    
+    EulerAngles<U> angles = this->getEulerAngles();
+    U phi1 = angles.alpha;
+    U Phi = angles.beta;
+    U phi2 = angles.gamma;    
+    
+    // Calculate the coefficients
+    GSHCoeffs<U> coeffs;
+    std::complex<U> one((U)1.0,(U)0.0);
+    std::complex<U> Iim((U)0.0,(U)1.0);
+    
+    // l=0
+    coeffs.set(0, 0, 0, one);
+    
+    /////////
+    // l=1 //
+    /////////
+    int l=1; 
+    U normFactor = (U)2.*l+(U)1.;
+    
+    int m=-1, n=-1;   
+    std::complex<U> expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    std::complex<U> P = one*(U)0.5*((U)1.+std::cos(Phi));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-1, n=0;   
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = Iim*((U)1./std::sqrt((U)2.))*std::sin(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=-1, n=1;   
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)0.5*(std::cos(Phi)-1));
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=0, n=-1;   
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = Iim*((U)1./std::sqrt((U)2.))*std::sin(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    m=0, n=0;   
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    /////////
+    // l=2 //
+    /////////
+    l=2; 
+    normFactor = (U)2.*l+(U)1.;
+    
+    m=-2, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.25*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.5*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.612372435695794*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.5*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.25*std::pow(-std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.5*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)1.0*std::cos(Phi) - (U)0.5)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)1.22474487139159*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::sqrt(std::cos(Phi) + (U)1)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*-std::pow(-std::cos(Phi) + (U)1, (U)1.0)*((U)1.0*std::cos(Phi) + (U)0.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.5*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.612372435695794*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)1.22474487139159*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::sqrt(std::cos(Phi) + (U)1)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)1.5*std::pow(std::cos(Phi), (U)2) - (U)0.5;
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    /////////
+    // l=3 //
+    /////////
+    l=3; 
+    normFactor = (U)2.*l+(U)1.;
+    
+    m=-3, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.125*std::pow(std::cos(Phi) + (U)1, (U)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.306186217847897*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.484122918275927*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.559016994374947*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::pow(std::cos(Phi) + (U)1, (U)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.484122918275927*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.306186217847897*Iim*std::pow(-std::cos(Phi) + (U)1, (U)2.5)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.125*std::pow(-std::cos(Phi) + (U)1, (U)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.306186217847897*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)0.75*std::cos(Phi) - (U)0.5)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)1.5)*((U)1.18585412256314*std::cos(Phi) - (U)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-1.36930639376292*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*-Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::sqrt(std::cos(Phi) + (U)1)*((U)1.18585412256314*std::cos(Phi) + (U)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*((U)0.75*std::cos(Phi) + (U)0.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.306186217847897*Iim*std::pow(-std::cos(Phi) + (U)1, (U)2.5)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.484122918275927*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)1.5)*((U)1.18585412256314*std::cos(Phi) - (U)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(std::cos(Phi) + (U)1, (U)1.0)*((U)1.875*std::pow(std::cos(Phi), (U)2) - (U)1.25*std::cos(Phi) - (U)0.125);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::sqrt(std::cos(Phi) + (U)1)*((U)2.1650635094611*std::pow(std::cos(Phi), (U)2) - (U)0.433012701892219);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*((U)-1.875*std::pow(std::cos(Phi), (U)2) - (U)1.25*std::cos(Phi) + (U)0.125);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*-Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::sqrt(std::cos(Phi) + (U)1)*((U)1.18585412256314*std::cos(Phi) + (U)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.484122918275927*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.559016994374947*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::pow(std::cos(Phi) + (U)1, (U)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-1.36930639376292*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::sqrt(std::cos(Phi) + (U)1)*((U)2.1650635094611*std::pow(std::cos(Phi), (U)2) - (U)0.433012701892219);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)2.5*std::pow(std::cos(Phi), (U)2) - (U)1.5)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    /////////
+    // l=4 //
+    /////////
+    l=4; 
+    normFactor = (U)2.*l+(U)1.;
+    
+    m=-4, n=-4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.0625*std::pow(std::cos(Phi) + (U)1, (U)4.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.176776695296637*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)3.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.330718913883074*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.467707173346743*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::pow(std::cos(Phi) + (U)1, (U)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.522912516583797*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.467707173346743*Iim*std::pow(-std::cos(Phi) + (U)1, (U)2.5)*std::pow(std::cos(Phi) + (U)1, (U)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.330718913883074*std::pow(-std::cos(Phi) + (U)1, (U)3.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.176776695296637*Iim*std::pow(-std::cos(Phi) + (U)1, (U)3.5)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-4, n=4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.0625*std::pow(-std::cos(Phi) + (U)1, (U)4.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.176776695296637*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)3.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)0.5*std::cos(Phi) - (U)0.375)*std::pow(std::cos(Phi) + (U)1, (U)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*((U)0.935414346693485*std::cos(Phi) - (U)0.467707173346743)*std::pow(std::cos(Phi) + (U)1, (U)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)-1.3228756555323*std::cos(Phi) + (U)0.330718913883074)*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-1.4790199457749*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::pow(std::cos(Phi) + (U)1, (U)1.5)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0)*((U)1.3228756555323*std::cos(Phi) + (U)0.330718913883074);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::pow(-std::cos(Phi) + (U)1, (U)2.5)*((U)0.935414346693485*std::cos(Phi) + (U)0.467707173346743)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*-std::pow(-std::cos(Phi) + (U)1, (U)3.0)*((U)0.5*std::cos(Phi) + (U)0.375);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-3, n=4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.176776695296637*Iim*std::pow(-std::cos(Phi) + (U)1, (U)3.5)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.330718913883074*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)3.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*((U)0.935414346693485*std::cos(Phi) - (U)0.467707173346743)*std::pow(std::cos(Phi) + (U)1, (U)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(std::cos(Phi) + (U)1, (U)2.0)*((U)1.75*std::pow(std::cos(Phi), (U)2) - (U)1.75*std::cos(Phi) + (U)0.25);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)1.5)*((U)2.47487373415292*std::pow(std::cos(Phi), (U)2) - (U)1.23743686707646*std::cos(Phi) - (U)0.176776695296637);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0)*((U)-2.76699295264733*std::pow(std::cos(Phi), (U)2) + (U)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::sqrt(std::cos(Phi) + (U)1)*((U)-2.47487373415292*std::pow(std::cos(Phi), (U)2) - (U)1.23743686707646*std::cos(Phi) + (U)0.176776695296637);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*((U)1.75*std::pow(std::cos(Phi), (U)2) + (U)1.75*std::cos(Phi) + (U)0.25);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::pow(-std::cos(Phi) + (U)1, (U)2.5)*((U)0.935414346693485*std::cos(Phi) + (U)0.467707173346743)*std::sqrt(std::cos(Phi) + (U)1);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-2, n=4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.330718913883074*std::pow(-std::cos(Phi) + (U)1, (U)3.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-0.467707173346743*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::pow(std::cos(Phi) + (U)1, (U)2.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*((U)-1.3228756555323*std::cos(Phi) + (U)0.330718913883074)*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::pow(std::cos(Phi) + (U)1, (U)1.5)*((U)2.47487373415292*std::pow(std::cos(Phi), (U)2) - (U)1.23743686707646*std::cos(Phi) - (U)0.176776695296637);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(std::cos(Phi) + (U)1, (U)1.0)*((U)3.5*std::pow(std::cos(Phi), (U)3) - (U)2.625*std::pow(std::cos(Phi), (U)2) - (U)0.75*std::cos(Phi) + (U)0.375);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::sqrt(std::cos(Phi) + (U)1)*((U)3.91311896062463*std::pow(std::cos(Phi), (U)2) - (U)1.67705098312484)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*((U)-3.5*std::pow(std::cos(Phi), (U)3) - (U)2.625*std::pow(std::cos(Phi), (U)2) + (U)0.75*std::cos(Phi) + (U)0.375);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::sqrt(std::cos(Phi) + (U)1)*((U)-2.47487373415292*std::pow(std::cos(Phi), (U)2) - (U)1.23743686707646*std::cos(Phi) + (U)0.176776695296637);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0)*((U)1.3228756555323*std::cos(Phi) + (U)0.330718913883074);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=-1, n=4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.467707173346743*Iim*std::pow(-std::cos(Phi) + (U)1, (U)2.5)*std::pow(std::cos(Phi) + (U)1, (U)1.5);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-4;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)0.522912516583797*std::pow(-std::cos(Phi) + (U)1, (U)2.0)*std::pow(std::cos(Phi) + (U)1, (U)2.0);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-3;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)-1.4790199457749*Iim*std::pow(-std::cos(Phi) + (U)1, (U)1.5)*std::pow(std::cos(Phi) + (U)1, (U)1.5)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-2;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*std::pow(-std::cos(Phi) + (U)1, (U)1.0)*std::pow(std::cos(Phi) + (U)1, (U)1.0)*((U)-2.76699295264733*std::pow(std::cos(Phi), (U)2) + (U)0.395284707521047);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=-1;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*Iim*std::sqrt(-std::cos(Phi) + (U)1)*std::sqrt(std::cos(Phi) + (U)1)*((U)3.91311896062463*std::pow(std::cos(Phi), (U)2) - (U)1.67705098312484)*std::cos(Phi);
+    coeffs.set(l, m, n, normFactor*P*expMult);
+
+    m=0, n=0;
+    expMult = std::exp(-Iim*(n*phi1+m*phi2));
+    P = one*(U)4.375*std::pow(std::cos(Phi), (U)4) - (U)3.75*std::pow(std::cos(Phi), (U)2) + (U)0.375;
+    coeffs.set(l, m, n, normFactor*P*expMult);
+    
+    // Return
+    return coeffs;
+}
+
 // POLYCRYSTAL //
 /////////////////
 
@@ -1090,6 +1553,16 @@ std::vector<EulerAngles<U>> Polycrystal<U>::getEulerAnglesZXZActive() {
         angles[i] = crystal_list[i].getEulerAngles();
     }
     return angles;
+}
+
+template <typename U>
+GSHCoeffs<U> Polycrystal<U>::getGSHCoeffs() {
+    GSHCoeffs<U> coeffs;
+    for (const auto& crystal : crystal_list) {
+        coeffs += crystal.getGSHCoeffs();
+    }
+    coeffs /= (U)crystal_list.size();
+    return coeffs;
 }
 
 template <typename T>
