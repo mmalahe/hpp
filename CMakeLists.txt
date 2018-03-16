@@ -35,6 +35,11 @@ find_package(LAPACK REQUIRED)
 # BLAS
 find_package(BLAS REQUIRED)
 
+# Eigen
+find_package(Eigen REQUIRED)
+message("Eigen includes ${EIGEN_INCLUDE_DIRS}")
+include_directories(${EIGEN_INCLUDE_DIRS})
+
 # HDF5
 set(HDF5_PREFER_PARALLEL TRUE)
 find_package(HDF5 REQUIRED COMPONENTS C CXX)

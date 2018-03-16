@@ -20,6 +20,7 @@
 #include <hpp/mpiUtils.h>
 #include <hpp/hdfUtilsCpp.h>
 #include <hpp/hdfUtils.h>
+#include <unsupported/Eigen/MatrixFunctions>
 #include "mpi.h"
 
 #define HPP_ARRAY_LAYOUT LAPACK_ROW_MAJOR
@@ -382,7 +383,10 @@ class Tensor2
         
         // Inverse
         void invInPlace();
-        Tensor2<T> inv() const;      
+        Tensor2<T> inv() const;
+
+        // Exponential
+        Tensor2<T> exp() const;
         
         // Assert squareness
         void assertSquare() const;

@@ -331,7 +331,7 @@ void Tensor2<T>::writeToNewHDF5(const H5std_string& filename, const H5std_string
 
 // Assert squareness
 template <typename T>
-void Tensor2<T>::assertSquare() const{
+void Tensor2<T>::assertSquare() const {
     if (n1 != n2) {
         throw TensorError(std::string("Tensor is not square."));
     }
@@ -552,6 +552,30 @@ template <typename T>
 Tensor2<T> Tensor2<T>::abs() const {
     Tensor2<T> A(n1, n2, std::abs(vals));
     return A;
+}
+
+/**
+ * @brief The matrix exponential of the tensor
+ * @tparam T the scalar type
+ * @return The matrix exponential of the tensor, \f$ \exp(\mathbf{A}) \f$.
+ */
+template <typename T>
+Tensor2<T> Tensor2<T>::exp() const {
+    this->assertSquare();
+    Eigen::MatrixXd A(n1,n2);
+    for (unsigned int i=0 ; i<n1; i++) {
+        for (unsigned int j=0 ; j<n1; j++) {
+            A(i,j) = this->getVal(i,j);
+        }
+    }
+    auto expA = A.exp();
+    Tensor2<T> expATensor(n1, n2);
+    for (unsigned int i=0 ; i<n1; i++) {
+        for (unsigned int j=0 ; j<n1; j++) {
+            expATensor(i,j) = expA(i,j);
+        }
+    }
+    return expATensor;
 }
 
 /**
