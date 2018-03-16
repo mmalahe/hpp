@@ -361,7 +361,7 @@ void Crystal<U>::applyInitialConditions()
     F_p = init.F_p_0;
     
     // Derived initial conditions
-    Tensor2<U> F = identityTensor2<U>(3);
+    auto F = identityTensor2<U>(3);
     F_e = F*F_p.inv();
 
     // The most recent step (the reset) has been accepted
@@ -856,6 +856,7 @@ void Polycrystal<U>::applyInitialConditions()
     for (auto&& crystal : crystal_list) {
         crystal.applyInitialConditions();
     }
+    F = identityTensor2<U>(3);
     this->updateDerivedQuantities();
 }
 
@@ -922,10 +923,9 @@ U Polycrystal<U>::recommendNextTimestepSize(U dt) {
 }        
 
 template <typename U>
-void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp::Tensor2<U>(U t)> F_of_t) 
+void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<Tensor2<U>(U t)> F_of_t) 
 {
     // Initialize
-    this->applyInitialConditions();
     U t = t_start;
     U dt = dt_initial;
     
@@ -971,7 +971,10 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
             new_dt = this->recommendNextTimestepSize(dt);
             
             // If the step is not accepted, reduce the timestep
-            if (!step_good) {
+            if (step_good) {
+                F = F_next;
+            }
+            else {
                 // Use the adjusted timestep now
                 dt = new_dt;
                 
@@ -1001,6 +1004,29 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
             tNextTextureSave += outputConfig.textureHistoryTimeInterval;
         }
     }
+}
+
+template <typename U>
+void Polycrystal<U>::stepVelocityGradient(hpp::Tensor2<U> L_next, U DeltaT) {
+    // Time range
+    U tStart;
+    if (t_history.size() == 0) {
+        tStart = 0.0;
+    }
+    else{
+        tStart = t_history.back();
+    }
+    U tEnd = tStart + DeltaT;
+    
+    // Initial timestep
+    U dt_initial = 1e-3;
+    
+    // Determine function for next F
+    auto FInit = F;
+    std::function<Tensor2<U>(U t)> F_of_t= std::bind(deformationGradFromVelGrad<U>, tStart, FInit, L_next, std::placeholders::_1);
+    
+    // Evolve
+    this->evolve(tStart, tEnd, dt_initial, F_of_t);
 }
 
 template <typename U>

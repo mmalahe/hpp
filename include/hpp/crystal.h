@@ -463,11 +463,12 @@ public:
     // Getters
     const std::vector<U>& getTHistory() const {return t_history;}
     
-    // Higher level interface
+    // Higher level interface, meant for Python functionality
     void resetHistories();
     void resetRandomOrientations(U init_s, unsigned long int seed);
     void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);
     std::vector<EulerAngles<U>> getEulerAnglesZXZActive();
+    void stepVelocityGradient(hpp::Tensor2<U> L_next, U DeltaT);
     
 protected:
 
@@ -481,7 +482,10 @@ private:
 
     // Initializing
     void applyInitialConditions();
-
+    
+    // State
+    hpp::Tensor2<U> F;
+    
     // History
     std::vector<U> t_history;
     std::vector<Tensor2<U>> T_cauchy_history;

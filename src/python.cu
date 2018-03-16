@@ -76,8 +76,8 @@ BOOST_PYTHON_MODULE(hpppy) {
         boost::python::init<const std::vector<hpp::Crystal<float>>&>())
         .def("resetRandomOrientations", &hpp::Polycrystal<float>::resetRandomOrientations)
         .def("resetGivenOrientations", &hpp::Polycrystal<float>::resetGivenOrientations)
-        .def("getEulerAnglesZXZActive", &hpp::Polycrystal<float>::getEulerAnglesZXZActive);
-        //.def("step", step)
+        .def("getEulerAnglesZXZActive", &hpp::Polycrystal<float>::getEulerAnglesZXZActive)
+        .def("step", &hpp::Polycrystal<float>::stepVelocityGradient);
         //.def("getGSHCoeffs", &hpp::SpectralPolycrystalCUDA<float,12>::getGSHCoeffs)
         //.def("getPoleHistogram", getPoleHistogram)
     //;

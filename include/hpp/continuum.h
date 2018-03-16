@@ -18,6 +18,13 @@ namespace hpp
 {
 
 template <typename U>
+Tensor2<U> deformationGradFromVelGrad(U t_init, const Tensor2<U>& F_init, const Tensor2<U>& L, U t) {
+    U dt = t - t_init;
+    Tensor2<U> F = ((dt*L).exp())*F_init;
+    return F; 
+}
+    
+template <typename U>
 Tensor2<U> stretchingVelocityGradient(U theta, U eDot) {
     // D components
     std::vector<U> D_comps(3);
