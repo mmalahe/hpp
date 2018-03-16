@@ -1274,6 +1274,7 @@ GSHCoeffs<U> Crystal<U>::getGSHCoeffs() const {
 
 template <typename U>
 Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm, const PolycrystalOutputConfig& outputConfig) {
+    this->useMPI = true;
     this->crystal_list = crystal_list;
     this->comm = comm;
     int csize, crank;
@@ -1282,35 +1283,27 @@ Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Com
     this->comm_size = csize;
     this->comm_rank = crank;
     this->outputConfig = outputConfig;
+    this->applyInitialConditions();
 }
 
 template <typename U>
 Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list, MPI_Comm comm) {
+    this->useMPI = true;
     PolycrystalOutputConfig outputConfig;
     *this = Polycrystal(crystal_list, comm, outputConfig);
+    this->applyInitialConditions();
 }
 
 /**
  * @brief Constructor with no MPI communicator provided
  * @details Created mainly for the Python interface.
- * @todo Propagate the no MPI choice down throughout the class methods, which
- * will allow us to use no context and communicator at all.
  */
 template <typename U>
 Polycrystal<U>::Polycrystal(const std::vector<Crystal<U>>& crystal_list) {
-    int MPIHasBeenInitialized;
-    MPI_Initialized(&MPIHasBeenInitialized);
-    if (!MPIHasBeenInitialized) {
-        this->manageOwnMPIContext = true;
-    }
-    if (this->manageOwnMPIContext) {
-        int argc = 0;
-        char **argv = nullptr;
-        MPI_Init(&argc, &argv);
-    }    
-    this->comm = MPI_COMM_SELF;
-    PolycrystalOutputConfig outputConfig;
-    *this = Polycrystal(crystal_list, comm, outputConfig);
+    this->crystal_list = crystal_list;
+    this->useMPI = false;
+    this->outputConfig = PolycrystalOutputConfig();
+    this->applyInitialConditions();
 }
 
 template <typename U>
@@ -1334,11 +1327,17 @@ void Polycrystal<U>::updateDerivedQuantities()
         volume_local += crystal.getVolume();
     }
     
-    // Global volume
-    U volume_global = MPISum(volume_local, comm);  
-    
-    // Global Cauchy stress
-    hpp::Tensor2<U> T_cauchy_global = MPISum(T_cauchy_local, comm);
+    // Global volume and Cauchy stress
+    U volume_global;
+    Tensor2<U> T_cauchy_global;
+    if (useMPI) {
+        T_cauchy_global = MPISum(T_cauchy_local, comm);
+        volume_global = MPISum(volume_local, comm);
+    }
+    else {
+        T_cauchy_global = T_cauchy_local;
+        volume_global = volume_local;
+    }
     
     // Average cauchy stress
     T_cauchy = T_cauchy_global/volume_global;
@@ -1356,7 +1355,14 @@ bool Polycrystal<U>::step(hpp::Tensor2<U> F_next, U dt)
             break;
         }     
     }
-    bool step_good_global = MPIAllTrue(step_good, comm);
+    
+    bool step_good_global;
+    if (useMPI) {
+        step_good_global = MPIAllTrue(step_good, comm);
+    }
+    else {
+        step_good_global = step_good;
+    }
     
     // Accept or reject step
     if (step_good_global) {
@@ -1381,7 +1387,13 @@ U Polycrystal<U>::recommendNextTimestepSize(U dt) {
         U recommended_dt = crystal.recommendNextTimestepSize(dt);
         if (recommended_dt < new_dt) new_dt = recommended_dt;
     }
-    U new_dt_global = MPIMin(new_dt, comm);
+    U new_dt_global;
+    if (useMPI) {
+        new_dt_global = MPIMin(new_dt, comm);
+    }
+    else {
+        new_dt_global = new_dt;
+    }
     return new_dt_global;
 }        
 
@@ -1646,9 +1658,20 @@ void Polycrystal<U>::addTextureToHistory() {
     }
     
     // Gather on root
-    std::vector<U> alphasGlobalRoot = MPIConcatOnRoot(alphasLocal, comm);
-    std::vector<U> betasGlobalRoot = MPIConcatOnRoot(betasLocal, comm);
-    std::vector<U> gammasGlobalRoot = MPIConcatOnRoot(gammasLocal, comm);
+    std::vector<U> alphasGlobalRoot;
+    std::vector<U> betasGlobalRoot;
+    std::vector<U> gammasGlobalRoot;
+    if (useMPI) {
+        alphasGlobalRoot = MPIConcatOnRoot(alphasLocal, comm);
+        betasGlobalRoot = MPIConcatOnRoot(betasLocal, comm);
+        gammasGlobalRoot = MPIConcatOnRoot(gammasLocal, comm);        
+    }
+    else {
+        alphasGlobalRoot = alphasLocal;
+        betasGlobalRoot = betasLocal;
+        gammasGlobalRoot = gammasLocal;   
+    }
+    
     std::vector<EulerAngles<U>> anglesGlobalRoot(alphasGlobalRoot.size());
     for (unsigned int i=0; i<anglesGlobalRoot.size(); i++) {
         anglesGlobalRoot[i].alpha = alphasGlobalRoot[i];
