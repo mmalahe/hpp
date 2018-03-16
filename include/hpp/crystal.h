@@ -464,8 +464,9 @@ public:
     const std::vector<U>& getTHistory() const {return t_history;}
     
     // Higher level interface
-    void resetRandomOrientations(U init_s, unsigned long int seed);
     void resetHistories();
+    void resetRandomOrientations(U init_s, unsigned long int seed);
+    void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);  
     
 protected:
 

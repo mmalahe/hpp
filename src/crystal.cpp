@@ -1003,24 +1003,6 @@ void Polycrystal<U>::evolve(U t_start, U t_end, U dt_initial, std::function<hpp:
     }
 }
 
-// Reset function
-template <typename U>
-void Polycrystal<U>::resetRandomOrientations(U init_s, unsigned long int seed) {
-    // Create new initial orientations
-    Tensor2<U> R(3,3);
-    std::mt19937 randgen(seed);    
-    for (auto&& crystal : crystal_list) {        
-        randomRotationTensorArvo1992<U>(randgen, R);
-        crystal.init.crystalRotation = R;
-    }
-    
-    // Re-apply initial conditions
-    this->applyInitialConditions();
-
-    // Reset other dependent quantities
-    this->resetHistories();
-}
-
 template <typename U>
 void Polycrystal<U>::resetHistories() {
     t_history.clear();
@@ -1032,6 +1014,48 @@ void Polycrystal<U>::resetHistories() {
     poleHistogramHistory011.clear();    
 }
 
+// Reset function
+template <typename U>
+void Polycrystal<U>::resetRandomOrientations(U init_s, unsigned long int seed) {
+    // Create new initial orientations
+    Tensor2<U> R(3,3);
+    std::mt19937 randgen(seed);    
+    for (auto&& crystal : crystal_list) {        
+        randomRotationTensorArvo1992<U>(randgen, R);
+        crystal.init.s_0 = init_s;
+        crystal.init.crystalRotation = R;
+    }
+    
+    // Re-apply initial conditions
+    this->applyInitialConditions();
+
+    // Reset other dependent quantities
+    this->resetHistories();
+}
+
+template <typename U>
+void Polycrystal<U>::resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList) {
+    // Check sizes
+    if (angleList.size() != this->crystal_list.size()) {
+        std::cerr << "Number of angles supplied = " << angleList.size() << std::endl;
+        std::cerr << "Number of crystals = " << this->crystal_list.size() << std::endl;
+        throw std::runtime_error("Mismatch in angles supplied vs. number of crystals.");
+    }
+    
+    // Set initial rotations
+    Tensor2<U> R(3,3);
+    for (unsigned int i=0; i<this->crystal_list.size(); i++) {        
+        R = EulerZXZRotationMatrix(angleList[i]);
+        this->crystal_list[i].init.s_0 = init_s;
+        this->crystal_list[i].init.crystalRotation = R;
+    }
+    
+    // Re-apply initial conditions
+    this->applyInitialConditions();
+    
+    // Reset other dependent quantities
+    this->resetHistories();
+}
 template <typename T>
 std::vector<T> cartesianToSpherical(const std::vector<T>& cartVec) {
     // Magnitude
