@@ -1,3 +1,5 @@
+set -e
+
 while getopts 'v' flag; do
   case "${flag}" in
     v) ctest_verbose='-V' ;;
