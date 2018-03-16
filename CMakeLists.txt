@@ -83,6 +83,7 @@ CHECK_SYMBOL_EXISTS(aligned_alloc stdlib.h HPP_HAVE_ALIGNED_ALLOC)
 # CUDA
 option(HPP_USE_CUDA "Use CUDA." ${CUDA_FOUND})
 set(HPP_CUDA_ARCH_LIST ${CUDA_ARCHS_FOUND} CACHE string "List of CUDA architectures to use.")
+option(HPP_SHOW_PTX "Show PTX information when compiling CUDA. (Developers)" OFF)
 
 # CONFIGURATION HEADER #
 ########################
@@ -117,8 +118,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
 
 # CUDA flags
 if (${HPP_USE_CUDA})
-    # NVCC common flags
-    set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} -std=c++11 -Xptxas -v -Xcompiler -fPIC -lineinfo")
+    # NVCC common flags    
+    set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} -std=c++11")
+    if(${HPP_SHOW_PTX})
+        set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} -Xptxas -v")
+    endif(${HPP_SHOW_PTX})
+    set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} -Xcompiler -fPIC -lineinfo")
 
     # Lowest possible virtual architecture for generating PTX
     set(COMMON_NVCC_FLAGS "${COMMON_NVCC_FLAGS} --gpu-architecture=compute_30")
