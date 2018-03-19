@@ -568,10 +568,10 @@ Tensor2<T> Tensor2<T>::exp() const {
             A(i,j) = this->getVal(i,j);
         }
     }
-    auto expA = A.exp();
+    Eigen::MatrixXd expA = A.exp();
     Tensor2<T> expATensor(n1, n2);
-    for (unsigned int i=0 ; i<n1; i++) {
-        for (unsigned int j=0 ; j<n1; j++) {
+    for (unsigned int i=0; i<n1; i++) {
+        for (unsigned int j=0; j<n2; j++) {
             expATensor(i,j) = expA(i,j);
         }
     }
