@@ -1399,6 +1399,29 @@ unsigned long long int SpectralPolycrystalCUDA<T,N>::getNTermsComputedHardware()
     }
 }
 
+// SpectralPolycrystalGSHCUDA //
+////////////////////////////////
+template <typename T, unsigned int N>
+SpectralPolycrystalGSHCUDA<T,N>::SpectralPolycrystalGSHCUDA(unsigned int fzResolution, CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) :
+fzResolution(fzResolution) {
+    ;
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalGSHCUDA<T,N>::resetRandomOrientations(T init_s, unsigned long int seed) {
+    polycrystal.resetRandomOrientations(init_s, seed);
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalGSHCUDA<T,N>::resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
+    ;
+}
+
+template <typename T, unsigned int N>
+GSHCoeffsCUDA<T> SpectralPolycrystalGSHCUDA<T,N>::getGSHCoeffs() {
+    ;
+}
+
 // Explicit instantiations
 template class SpectralCrystalListCUDA<float>;
 template class SpectralCrystalListCUDA<double>;

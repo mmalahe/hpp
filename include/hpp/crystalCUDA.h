@@ -183,7 +183,9 @@ __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrysta
  * @date 06/04/17
  * @file crystalCUDA.h
  * @brief
- * @details Instances of this class only ever live on the host.
+ * @details Instances of this class only ever live on the host. As it stands
+ * this implementation isn't even remotely thread safe, and it is not safe
+ * to make and operate on multiple copies of these objects.
  * @tparam T scalar type
  * @tparam N number of slip systems
  */
@@ -286,6 +288,55 @@ private:
     // Profiling
     hpp::Timer solveTimer;
     double maxMemUsedGB = 0.0;
+};
+
+/**
+ * @class SpectralPolycrystalGSHCUDA
+ * @author Michael Malahe
+ * @date 27/03/18
+ * @file crystalCUDA.h
+ * @brief A class for simulating a polycrystal using a Fourier compressed database.
+ * @details The class presents an interface that allows it to be modified only
+ * through the Generalized Spherical Harmonic representation.
+ * 
+ * The implementation takes an approach where the polycrystal is composed of
+ * a number of single crystals that are evenly distributed in orientation space
+ * within the fundamental zone. Each crystal represents a volume in the 
+ * fundamental zone. Associated with each crystal is a density, with the summed 
+ * density for all of the crystals coming to 1.
+ * 
+ * Instances of this class only ever live on the host.
+ * @tparam T scalar type
+ * @tparam N number of slip systems in the polycrystal
+ */
+template <typename T, unsigned int N>
+class SpectralPolycrystalGSHCUDA
+{
+public:    
+    // Constructors
+    SpectralPolycrystalGSHCUDA(){;}    
+    SpectralPolycrystalGSHCUDA(unsigned int fzResolution, CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
+    
+    // Simulation
+    void resetRandomOrientations(T init_s, unsigned long int seed);
+    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs);
+    
+    // Output
+    GSHCoeffsCUDA<T> getGSHCoeffs();
+protected:
+
+private:
+    /// The underlying spectral polycrystal
+    SpectralPolycrystalGSHCUDA<T,N> polycrystal;
+    
+    /// The density of each of the crystals
+    std::vector<T> densities;
+    
+    /// The number of points in each dimension of the fundamental zone
+    unsigned int fzResolution;
+    
+    /// The number of crystals total
+    unsigned int nCrystals;
 };
 
 template <typename T>
