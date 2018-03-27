@@ -35,12 +35,39 @@ platforms., (January):785--798, 2014
 
 namespace hpp
 {
-
 #define HPP_POLE_FIG_HIST_DIM 512
-
+    
+class CrystalError: public std::runtime_error
+{
+public:
+    explicit CrystalError (const std::string &val) : std::runtime_error::runtime_error(val) {}
+};
+    
 enum CrystalType {
-    CRYSTAL_TYPE_FCC,
-    CRYSTAL_TYPE_NONE
+    CRYSTAL_TYPE_NONE,
+    CRYSTAL_TYPE_FCC    
+};
+
+constexpr int nSlipSystems(CrystalType crystalType) {
+    return crystalType==CRYSTAL_TYPE_FCC ? 12 : 0;
+}
+
+/**
+ * @class FundamentalZoneDiscrete
+ * @author Michael Malahe
+ * @date 27/03/18
+ * @file crystal.h
+ * @brief Representation of the fundamental zone (FZ) of crystal through a 
+ * discrete number of representative points in the FZ.
+ * @detail
+ */
+template <typename T>
+class FundamentalZoneDiscrete {
+public:
+    FundamentalZoneDiscrete(unsigned int resolution, CrystalType crystalType);
+private:
+    unsigned int resolution;
+    CrystalType crystalType;
 };
 
 enum HardeningLaw {
@@ -64,15 +91,7 @@ enum CrystalDatasetIdx {
     // Gamma
     GAMMA
 };
-
 std::vector<SpectralDatasetID> defaultCrystalSpectralDatasetIDs();
-
-class CrystalError: public std::runtime_error
-{
-public:
-    explicit CrystalError (const std::string &val) : std::runtime_error::runtime_error(val) {}
-};
-
 
 // Forward declarations are necessarry for some operations
 template <typename U>

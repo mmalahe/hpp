@@ -309,13 +309,13 @@ private:
  * @tparam T scalar type
  * @tparam N number of slip systems in the polycrystal
  */
-template <typename T, unsigned int N>
+template <typename T, CrystalType CRYSTAL_TYPE>
 class SpectralPolycrystalGSHCUDA
 {
 public:    
     // Constructors
     SpectralPolycrystalGSHCUDA(){;}    
-    SpectralPolycrystalGSHCUDA(unsigned int fzResolution, CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
+    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
     
     // Simulation
     void resetRandomOrientations(T init_s, unsigned long int seed);
@@ -327,13 +327,13 @@ protected:
 
 private:
     /// The underlying spectral polycrystal
-    SpectralPolycrystalGSHCUDA<T,N> polycrystal;
+    SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)> polycrystal;
     
     /// The density of each of the crystals
     std::vector<T> densities;
     
     /// The number of points in each dimension of the fundamental zone
-    unsigned int fzResolution;
+    FundamentalZoneDiscrete<T> FZ;
     
     /// The number of crystals total
     unsigned int nCrystals;

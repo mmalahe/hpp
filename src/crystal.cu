@@ -1401,24 +1401,24 @@ unsigned long long int SpectralPolycrystalCUDA<T,N>::getNTermsComputedHardware()
 
 // SpectralPolycrystalGSHCUDA //
 ////////////////////////////////
-template <typename T, unsigned int N>
-SpectralPolycrystalGSHCUDA<T,N>::SpectralPolycrystalGSHCUDA(unsigned int fzResolution, CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) :
-fzResolution(fzResolution) {
-    ;
+template <typename T, CrystalType CRYSTAL_TYPE>
+SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) {
+    unsigned int fzResolution = 10;
+    FZ = FundamentalZoneDiscrete<T>(fzResolution, CRYSTAL_TYPE);
 }
 
-template <typename T, unsigned int N>
-void SpectralPolycrystalGSHCUDA<T,N>::resetRandomOrientations(T init_s, unsigned long int seed) {
+template <typename T, CrystalType CRYSTAL_TYPE>
+void SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::resetRandomOrientations(T init_s, unsigned long int seed) {
     polycrystal.resetRandomOrientations(init_s, seed);
 }
 
-template <typename T, unsigned int N>
-void SpectralPolycrystalGSHCUDA<T,N>::resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
+template <typename T, CrystalType CRYSTAL_TYPE>
+void SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
     ;
 }
 
-template <typename T, unsigned int N>
-GSHCoeffsCUDA<T> SpectralPolycrystalGSHCUDA<T,N>::getGSHCoeffs() {
+template <typename T, CrystalType CRYSTAL_TYPE>
+GSHCoeffsCUDA<T> SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::getGSHCoeffs() {
     ;
 }
 
