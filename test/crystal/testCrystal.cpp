@@ -11,6 +11,18 @@
 namespace hpp{
 
 template <typename U>
+void testUtil() 
+{
+    hpp::SO3Discrete<U> so3(2);
+    isoi::Quaternion q = so3.getQuat(5);
+    std::cout << so3.size() << std::endl;
+    std::cout << q.a << std::endl;
+    std::cout << q.b << std::endl;
+    std::cout << q.c << std::endl;
+    std::cout << q.d << std::endl;
+}
+    
+template <typename U>
 void testCrystal() 
 {
     // Settings for both single and polycrystal tests
@@ -41,6 +53,8 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     
     // Test
+    hpp::testUtil<float>();
+    hpp::testUtil<double>();  
     hpp::testCrystal<float>();
     hpp::testCrystal<double>();  
     

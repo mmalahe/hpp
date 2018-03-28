@@ -69,8 +69,12 @@ template <typename T>
 class SO3Discrete {
 public:
     SO3Discrete(unsigned int resolution);
+    isoi::Quaternion getQuat(unsigned int i) {return quatList[i];}
+    EulerAngles<T> getEulerAngle(unsigned int i) {return eulerAngleList[i];}
+    unsigned int size() {return quatList.size();}
 private:
     std::vector<isoi::Quaternion> quatList;
+    std::vector<EulerAngles<T>> eulerAngleList;
 };
 
 enum HardeningLaw {
