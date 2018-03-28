@@ -11,7 +11,6 @@ add_subdirectory(external)
 ###############
 set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp crystal.cpp hdfUtils.cpp spectralUtils.cpp mpiUtils.cpp profUtils.cpp)
 set (HPP_CPP_SOURCES ${HPP_CPP_SOURCES} ${EXTERNAL_CPP_SOURCES})
-message(${EXTERNAL_CPP_SOURCES})
 set (HPP_CU_SOURCES cudaUtils.cu tensor.cu spectralUtils.cu crystal.cu)
 
 if (${HPP_USE_CUDA})

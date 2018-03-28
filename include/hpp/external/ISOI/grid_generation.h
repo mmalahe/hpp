@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <cmath>
 #include <vector>
+#include <stdexcept>
 
 #define SIMPLE_GRID 1
 #define LAYERED_GRID 2
@@ -43,11 +44,15 @@ extern "C"
 
 namespace isoi {
 
-std::vector <double> grid_s1(int);
+struct Quaternion {
+    double a, b, c, d;
+}; 
+
+std::vector<double> grid_s1(int);
 bool healpix_wrapper(int);
-bool hopf2quat(std::vector < std::vector<double> >);
-bool simple_grid(int);
-bool layered_grid(int);
+std::vector<Quaternion> hopf2quat(std::vector < std::vector<double> >);
+std::vector<Quaternion> simple_grid(int);
+std::vector<Quaternion> layered_grid(int);
 
 }
 

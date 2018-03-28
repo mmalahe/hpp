@@ -28,19 +28,18 @@
 
 namespace isoi {
 
-bool simple_grid(int resol)
+std::vector<Quaternion> simple_grid(int resol)
 {
 	std::vector <double> Psi_Points,temp;
 	std::vector < std::vector<double> > Healpix_Points;
 	std::vector < std::vector<double> > S3_Points;
 	long int Nside=0,numpixels=0;	
 	double theta=0,pfi=0;
-	bool result;
 		
 	Psi_Points.resize(0);
 	Psi_Points=grid_s1(resol);
 	if(Psi_Points.size()==0)
-		return false;
+		throw std::runtime_error("No points.");
 		
 	Nside=pow(2,resol);
 	numpixels=nside2npix(Nside);
@@ -67,8 +66,7 @@ bool simple_grid(int resol)
 		}
 	}
 
-	result=hopf2quat(S3_Points);	
-	return result;
+	return hopf2quat(S3_Points);	
 }
 
 }

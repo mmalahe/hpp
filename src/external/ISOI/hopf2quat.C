@@ -28,22 +28,19 @@
 
 namespace isoi {
 
-bool hopf2quat(std::vector < std::vector <double> > Points)
+std::vector<Quaternion> hopf2quat(std::vector < std::vector <double> > Points)
 {
-	double x1=0,x2=0,x3=0,x4=0;
-	std::ofstream output;
-	output.open("data.qua");
-	
+    std::vector<Quaternion> quatList(Points.size());
+    
 	for(int i=0;i<Points.size();i++)
 	{
-		x4=std::sin(Points[i][0]/2)*std::sin(Points[i][1]+Points[i][2]/2);
-		x1=std::cos(Points[i][0]/2)*std::cos(Points[i][2]/2);
-		x2=std::cos(Points[i][0]/2)*std::sin(Points[i][2]/2);
-		x3=std::sin(Points[i][0]/2)*std::cos(Points[i][1]+Points[i][2]/2);
-		output << x1 << "\t" << x2 << "\t" << x3 << "\t" << x4 << std::endl;
+		quatList[i].a = std::cos(Points[i][0]/2)*std::cos(Points[i][2]/2);
+		quatList[i].b = std::cos(Points[i][0]/2)*std::sin(Points[i][2]/2);
+		quatList[i].c = std::sin(Points[i][0]/2)*std::cos(Points[i][1]+Points[i][2]/2);
+        quatList[i].d = std::sin(Points[i][0]/2)*std::sin(Points[i][1]+Points[i][2]/2);
 	}
-	output.close();
-	return true;
+
+	return quatList;
 }
 
 }

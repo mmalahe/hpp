@@ -10,8 +10,12 @@ namespace hpp {
 
 template <typename T>
 SO3Discrete<T>::SO3Discrete(unsigned int resolution) {
-    this->resolution = resolution;
+    ;
 }  
+
+// SO3Discrete is restricted to these specific instantiations
+template struct SO3Discrete<float>;
+template struct SO3Discrete<double>;
 
 std::vector<SpectralDatasetID> defaultCrystalSpectralDatasetIDs() {
     std::vector<SpectralDatasetID> dsetIDs(9);

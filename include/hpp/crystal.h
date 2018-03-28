@@ -33,6 +33,8 @@ platforms., (January):785--798, 2014
 #include <hpp/spectralUtils.h>
 #include <hpp/profUtils.h>
 
+#include <hpp/external/ISOI/grid_generation.h>
+
 namespace hpp
 {
 #define HPP_POLE_FIG_HIST_DIM 512
@@ -68,7 +70,7 @@ class SO3Discrete {
 public:
     SO3Discrete(unsigned int resolution);
 private:
-    unsigned int resolution;
+    std::vector<isoi::Quaternion> quatList;
 };
 
 enum HardeningLaw {
