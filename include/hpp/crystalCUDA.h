@@ -333,7 +333,7 @@ private:
     std::vector<T> densities;
     
     /// The number of points in each dimension of the fundamental zone
-    FundamentalZoneDiscrete<T> FZ;
+    SO3Discrete<T> SO3;
     
     /// The number of crystals total
     unsigned int nCrystals;

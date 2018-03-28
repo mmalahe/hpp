@@ -53,21 +53,22 @@ constexpr int nSlipSystems(CrystalType crystalType) {
 }
 
 /**
- * @class FundamentalZoneDiscrete
+ * @class SO3Discrete
  * @author Michael Malahe
  * @date 27/03/18
  * @file crystal.h
- * @brief Representation of the fundamental zone (FZ) of crystal through a 
- * discrete number of representative points in the FZ.
- * @detail
+ * @brief A discrete and uniform sampling of SO(3)
+ * @detail Using the methods and implementations from the following work:
+ * Generating Uniform Incremental Grids on SO(3) Using the Hopf Fibration.
+   Anna Yershova, Swati Jain, Steven M. LaValle, and Julie C. Mitchell,
+   International Journal of Robotics Research, IJRR 2009 
  */
 template <typename T>
-class FundamentalZoneDiscrete {
+class SO3Discrete {
 public:
-    FundamentalZoneDiscrete(unsigned int resolution, CrystalType crystalType);
+    SO3Discrete(unsigned int resolution);
 private:
     unsigned int resolution;
-    CrystalType crystalType;
 };
 
 enum HardeningLaw {

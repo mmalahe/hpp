@@ -1,10 +1,16 @@
 # CMake modules
 include(HPPCommon)
 
+#######################################################
+# SOURCE FILES FROM INDEPENDENTLY DEVELOPED LIBRARIES #
+#######################################################
+add_subdirectory(external)
+
 ###############
 # C++ LIBRARY #
 ###############
 set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp crystal.cpp hdfUtils.cpp spectralUtils.cpp mpiUtils.cpp profUtils.cpp)
+set (HPP_CPP_SOURCES ${HPP_CPP_SOURCES} ${EXTERNAL_CPP_SOURCES})
 set (HPP_CU_SOURCES cudaUtils.cu tensor.cu spectralUtils.cu crystal.cu)
 
 if (${HPP_USE_CUDA})
@@ -19,6 +25,10 @@ target_include_directories(hpp
     $<INSTALL_INTERFACE:include>
 )
 
+# Internal libraries
+target_link_libraries(hpp)
+
+# External libraries
 target_link_libraries(hpp ${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 target_link_libraries(hpp ${FFTW_LIBRARIES} ${FFTW_MPI_LIBRARIES})
 target_link_libraries(hpp ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES})
@@ -55,7 +65,7 @@ install(
 )
 
 # Installation of main library
-install(TARGETS hpp 
+install(TARGETS hpp
         EXPORT hppTargets
         LIBRARY DESTINATION "lib"
         ARCHIVE DESTINATION "lib"

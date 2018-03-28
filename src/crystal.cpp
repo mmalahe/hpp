@@ -9,9 +9,8 @@
 namespace hpp {   
 
 template <typename T>
-FundamentalZoneDiscrete<T>::FundamentalZoneDiscrete(unsigned int resolution, CrystalType crystalType) {
+SO3Discrete<T>::SO3Discrete(unsigned int resolution) {
     this->resolution = resolution;
-    this->crystalType = crystalType;
 }  
 
 std::vector<SpectralDatasetID> defaultCrystalSpectralDatasetIDs() {

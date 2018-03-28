@@ -1404,7 +1404,7 @@ unsigned long long int SpectralPolycrystalCUDA<T,N>::getNTermsComputedHardware()
 template <typename T, CrystalType CRYSTAL_TYPE>
 SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) {
     unsigned int fzResolution = 10;
-    FZ = FundamentalZoneDiscrete<T>(fzResolution, CRYSTAL_TYPE);
+    SO3 = SO3Discrete<T>(fzResolution, CRYSTAL_TYPE);
 }
 
 template <typename T, CrystalType CRYSTAL_TYPE>
