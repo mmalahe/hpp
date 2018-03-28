@@ -26,11 +26,13 @@
 
 #include <hpp/external/ISOI/grid_generation.h>
 
-vector<double> grid_s1(int resol)
+namespace isoi {
+
+std::vector<double> grid_s1(int resol)
 {
 	int grids=6;
-	vector <double> Points;
-	vector <float>:: iterator temp,temp2,temp1;
+	std::vector <double> Points;
+	std::vector <float>:: iterator temp,temp2,temp1;
 	Points.resize(0);
 
 	int number_points=pow(2,resol)*grids;
@@ -39,4 +41,6 @@ vector<double> grid_s1(int resol)
 		Points.push_back(interval/2 + i*interval);
 
 	return Points;
+}
+
 }

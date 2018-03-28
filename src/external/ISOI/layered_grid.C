@@ -26,11 +26,13 @@
 
 #include <hpp/external/ISOI/grid_generation.h>
 
+namespace isoi {
+
 bool layered_grid(int resol)
 {
-	vector <double> Psi_Points,temp;
-	vector < vector<double> > Healpix_Points;
-	vector < vector<double> > S3_Points;
+	std::vector <double> Psi_Points,temp;
+	std::vector < std::vector<double> > Healpix_Points;
+	std::vector < std::vector<double> > S3_Points;
 	long int Nside=0,numpixels=0;
 	double theta=0,pfi=0;
 	bool result;
@@ -71,3 +73,4 @@ bool layered_grid(int resol)
 	return result;
 }
 
+}

@@ -26,20 +26,24 @@
 
 #include <hpp/external/ISOI/grid_generation.h>
 
-bool hopf2quat(vector < vector <double> > Points)
+namespace isoi {
+
+bool hopf2quat(std::vector < std::vector <double> > Points)
 {
 	double x1=0,x2=0,x3=0,x4=0;
-	ofstream output;
+	std::ofstream output;
 	output.open("data.qua");
 	
 	for(int i=0;i<Points.size();i++)
 	{
-		x4=sin(Points[i][0]/2)*sin(Points[i][1]+Points[i][2]/2);
-		x1=cos(Points[i][0]/2)*cos(Points[i][2]/2);
-		x2=cos(Points[i][0]/2)*sin(Points[i][2]/2);
-		x3=sin(Points[i][0]/2)*cos(Points[i][1]+Points[i][2]/2);
-		output << x1 << "\t" << x2 << "\t" << x3 << "\t" << x4 << endl;
+		x4=std::sin(Points[i][0]/2)*std::sin(Points[i][1]+Points[i][2]/2);
+		x1=std::cos(Points[i][0]/2)*std::cos(Points[i][2]/2);
+		x2=std::cos(Points[i][0]/2)*std::sin(Points[i][2]/2);
+		x3=std::sin(Points[i][0]/2)*std::cos(Points[i][1]+Points[i][2]/2);
+		output << x1 << "\t" << x2 << "\t" << x3 << "\t" << x4 << std::endl;
 	}
 	output.close();
 	return true;
+}
+
 }
