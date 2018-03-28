@@ -14,12 +14,9 @@ template <typename U>
 void testUtil() 
 {
     hpp::SO3Discrete<U> so3(2);
-    isoi::Quaternion q = so3.getQuat(5);
-    std::cout << so3.size() << std::endl;
-    std::cout << q.a << std::endl;
-    std::cout << q.b << std::endl;
-    std::cout << q.c << std::endl;
-    std::cout << q.d << std::endl;
+    for (unsigned int i=0; i<5; i++) {
+        std::cout << so3.getEulerAngle(i) << std::endl;
+    }
 }
     
 template <typename U>

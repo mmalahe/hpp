@@ -25,6 +25,10 @@ SO3Discrete<T>::SO3Discrete(unsigned int resolution) {
     quatList = isoi::simple_grid(resolution);
     
     // Create lists of other representations
+    eulerAngleList.resize(quatList.size());
+    for (unsigned int i=0; i<quatList.size(); i++) {
+        eulerAngleList[i] = quaternionToEulerAngles<T>(quatList[i]);
+    }
 }  
 
 // SO3Discrete is restricted to these specific instantiations
