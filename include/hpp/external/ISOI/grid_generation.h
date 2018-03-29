@@ -46,13 +46,36 @@ namespace isoi {
 
 struct Quaternion {
     double a, b, c, d;
-}; 
+};
+
+struct S2Point {
+    double theta, phi;
+};
+
+struct S3Point {
+    double theta, phi, psi;
+};
+
+struct HealpixPsiGrid {
+    std::vector<S2Point> Healpix_Points;
+    std::vector<double> Psi_Points;
+};
 
 std::vector<double> grid_s1(int);
 bool healpix_wrapper(int);
-std::vector<Quaternion> hopf2quat(std::vector < std::vector<double> >);
-std::vector<Quaternion> simple_grid(int);
-std::vector<Quaternion> layered_grid(int);
+std::vector<Quaternion> hopf2quat(const std::vector<S3Point>&);
+HealpixPsiGrid healpix_psi_grid(int);
+std::vector<Quaternion> simple_grid_quaternion(int);
+
+inline Quaternion hopf2quat(S3Point point)
+{
+    Quaternion q;
+    q.a = std::cos(point.theta/2)*std::cos(point.psi/2);
+    q.b = std::cos(point.theta/2)*std::sin(point.psi/2);
+    q.c = std::sin(point.theta/2)*std::cos(point.phi+point.psi/2);
+    q.d = std::sin(point.theta/2)*std::sin(point.phi+point.psi/2);
+	return q;
+}
 
 }
 

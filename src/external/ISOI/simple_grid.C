@@ -28,45 +28,65 @@
 
 namespace isoi {
 
-std::vector<Quaternion> simple_grid(int resol)
-{
-	std::vector <double> Psi_Points,temp;
-	std::vector < std::vector<double> > Healpix_Points;
-	std::vector < std::vector<double> > S3_Points;
+HealpixPsiGrid healpix_psi_grid(int resol) {
+    HealpixPsiGrid grid;
+
 	long int Nside=0,numpixels=0;	
-	double theta=0,pfi=0;
+	double theta=0,phi=0;
 		
-	Psi_Points.resize(0);
-	Psi_Points=grid_s1(resol);
-	if(Psi_Points.size()==0)
+	grid.Psi_Points=grid_s1(resol);
+	if(grid.Psi_Points.size()==0)
 		throw std::runtime_error("No points.");
-		
+    
 	Nside=pow(2,resol);
 	numpixels=nside2npix(Nside);
-	Healpix_Points.resize(0);
+	grid.Healpix_Points.resize(numpixels);
 	for(long int i=0;i<numpixels;i++)
-	{
-		temp.resize(0);
-		pix2ang_nest(Nside,i,&theta,&pfi);
-		temp.push_back(theta);
-		temp.push_back(pfi);
-		Healpix_Points.push_back(temp);
+	{		
+		pix2ang_nest(Nside,i,&theta,&phi);
+		grid.Healpix_Points[i].theta = theta;
+        grid.Healpix_Points[i].phi = phi;
 	}
-	
-	S3_Points.resize(0);
-	for(int i=0;i<Healpix_Points.size();i++)
+    return grid;
+}
+
+std::vector<Quaternion> simple_grid_quaternion(int resol)
+{
+    HealpixPsiGrid grid = healpix_psi_grid(resol);   
+    int nHealpix = grid.Healpix_Points.size();
+    int nPsi = grid.Psi_Points.size();
+    std::vector<Quaternion> quatList(nHealpix*nPsi);
+    std::cout << quatList.size() << std::endl;
+    
+    // Pre-computed things
+    std::vector<double> sinPsi(nPsi);
+    std::vector<double> cosPsi(nPsi);
+    for(int j=0;j<nPsi;j++) {
+        cosPsi[j] = std::cos(grid.Psi_Points[j]);
+        sinPsi[j] = std::sin(grid.Psi_Points[j]);        
+    }
+    
+    double thetaOver2, phi, psi;
+    double cosThetaOver2, sinThetaOver2;
+    double phiPlusPsiOver2;
+    for(int i=0;i<nHealpix;i++)
 	{
-		for(int j=0;j<Psi_Points.size();j++)
-		{
-			temp.resize(0);
-			temp.push_back(Healpix_Points[i][0]);
-			temp.push_back(Healpix_Points[i][1]);
-			temp.push_back(Psi_Points[j]);
-			S3_Points.push_back(temp);
+        thetaOver2 = grid.Healpix_Points[i].theta/2;
+        cosThetaOver2 = std::cos(thetaOver2);
+        sinThetaOver2 = std::sin(thetaOver2);
+        phi = grid.Healpix_Points[i].phi;        
+		for(int j=0;j<nPsi;j++)
+		{	
+            long int idx = i*nPsi + j;
+            psi = grid.Psi_Points[j];
+            phiPlusPsiOver2 = phi + psi/2;
+            quatList[idx].a = cosThetaOver2*cosPsi[j];
+            quatList[idx].b = cosThetaOver2*sinPsi[j];
+            quatList[idx].c = sinThetaOver2*std::cos(phiPlusPsiOver2);
+            quatList[idx].d = sinThetaOver2*std::sin(phiPlusPsiOver2);
 		}
 	}
-
-	return hopf2quat(S3_Points);	
+    return quatList;
 }
 
 }

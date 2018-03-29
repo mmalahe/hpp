@@ -28,17 +28,14 @@
 
 namespace isoi {
 
-std::vector<Quaternion> hopf2quat(std::vector < std::vector <double> > Points)
+std::vector<Quaternion> hopf2quat(const std::vector<S3Point>& Points)
 {
     std::vector<Quaternion> quatList(Points.size());
     
 	for(int i=0;i<Points.size();i++)
 	{
-		quatList[i].a = std::cos(Points[i][0]/2)*std::cos(Points[i][2]/2);
-		quatList[i].b = std::cos(Points[i][0]/2)*std::sin(Points[i][2]/2);
-		quatList[i].c = std::sin(Points[i][0]/2)*std::cos(Points[i][1]+Points[i][2]/2);
-        quatList[i].d = std::sin(Points[i][0]/2)*std::sin(Points[i][1]+Points[i][2]/2);
-	}
+		quatList[i] = hopf2quat(Points[i]);
+    }
 
 	return quatList;
 }
