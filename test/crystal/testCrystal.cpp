@@ -11,15 +11,6 @@
 namespace hpp{
 
 template <typename U>
-void testUtil() 
-{
-    hpp::SO3Discrete<U> so3(2);
-    for (unsigned int i=0; i<5; i++) {
-        std::cout << so3.getEulerAngle(i) << std::endl;
-    }
-}
-    
-template <typename U>
 void testCrystal() 
 {
     // Settings for both single and polycrystal tests
@@ -49,9 +40,7 @@ int main(int argc, char *argv[])
     // MPI init
     MPI_Init(&argc, &argv);
     
-    // Test
-    hpp::testUtil<float>();
-    hpp::testUtil<double>();  
+    // Test 
     hpp::testCrystal<float>();
     hpp::testCrystal<double>();  
     

@@ -28,12 +28,11 @@ platforms., (January):785--798, 2014
 #include <hpp/config.h>
 #include <hpp/tensor.h>
 #include <hpp/continuum.h>
+#include <hpp/rotation.h>
 #include <hpp/gsh.h>
 #include <hpp/mpiUtils.h>
 #include <hpp/spectralUtils.h>
 #include <hpp/profUtils.h>
-
-#include <hpp/external/ISOI/grid_generation.h>
 
 namespace hpp
 {
@@ -53,42 +52,6 @@ enum CrystalType {
 constexpr int nSlipSystems(CrystalType crystalType) {
     return crystalType==CRYSTAL_TYPE_FCC ? 12 : 0;
 }
-
-template <typename T>
-EulerAngles<T> quaternionToEulerAngles(isoi::Quaternion& q) {
-    EulerAngles<T> angles;
-    auto q0 = q.a;
-    auto q1 = q.b;
-    auto q2 = q.c;
-    auto q3 = q.d;
-    angles.alpha = std::atan2(2*(q0*q1+q2*q3), 1-2*(std::pow(q1,2.)+std::pow(q2,2.)));
-    angles.beta = std::asin(2*(q0*q2-q3*q1));
-    angles.gamma = std::atan2(2*(q0*q3+q1*q2), 1-2*(std::pow(q2,2.)+std::pow(q3,2.)));
-    return angles;
-}
-
-/**
- * @class SO3Discrete
- * @author Michael Malahe
- * @date 27/03/18
- * @file crystal.h
- * @brief A discrete and uniform sampling of SO(3)
- * @detail Using the methods and implementations from the following work:
- * Generating Uniform Incremental Grids on SO(3) Using the Hopf Fibration.
-   Anna Yershova, Swati Jain, Steven M. LaValle, and Julie C. Mitchell,
-   International Journal of Robotics Research, IJRR 2009 
- */
-template <typename T>
-class SO3Discrete {
-public:
-    SO3Discrete(unsigned int resolution);
-    isoi::Quaternion getQuat(unsigned int i) {return quatList[i];}
-    EulerAngles<T> getEulerAngle(unsigned int i) {return eulerAngleList[i];}
-    unsigned int size() {return quatList.size();}
-private:
-    std::vector<isoi::Quaternion> quatList;
-    std::vector<EulerAngles<T>> eulerAngleList;
-};
 
 enum HardeningLaw {
     HARDENING_LAW_BROWN,
@@ -636,6 +599,5 @@ private:
 };
 
 }//END NAMESPACE HPP
-
 
 #endif /* HPP_CRYSTAL_H */

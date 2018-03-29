@@ -9,6 +9,7 @@
 
 #include <hpp/config.h>
 #include <hpp/tensor.h>
+#include <hpp/rotation.h>
 #include <functional>
 #include <stdexcept>
 #include <memory>

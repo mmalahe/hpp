@@ -9,7 +9,7 @@
 
 #include <type_traits>
 #include <hpp/config.h>
-#include <hpp/crystal.h>
+#include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/tensorCUDA.h>
 #include <hpp/spectralUtilsCUDA.h>

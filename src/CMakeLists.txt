@@ -9,7 +9,7 @@ add_subdirectory(external)
 ###############
 # C++ LIBRARY #
 ###############
-set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp crystal.cpp hdfUtils.cpp spectralUtils.cpp mpiUtils.cpp profUtils.cpp)
+set (HPP_CPP_SOURCES casesUtils.cpp tensor.cpp rotation.cpp crystal.cpp hdfUtils.cpp spectralUtils.cpp mpiUtils.cpp profUtils.cpp)
 set (HPP_CPP_SOURCES ${HPP_CPP_SOURCES} ${EXTERNAL_CPP_SOURCES})
 set (HPP_CU_SOURCES cudaUtils.cu tensor.cu spectralUtils.cu crystal.cu)
 

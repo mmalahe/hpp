@@ -1,7 +1,7 @@
 /** @file tensorCUDA.h
 * @author Michael Malahe
 * @brief Header file for tensor classes CUDA implementations.
-* @details Note that for all of these implementations, dynamic memory is not used.
+* @detail Note that for all of these implementations, dynamic memory is not used.
 * All of the memory lives on whichever architecture the class is instantiated on.
 * That is, the "CUDA" suffix indicates nothing about where the memory is, but
 * just indicates that it's in a format that's most suitable for a CUDA implementation.
@@ -13,6 +13,7 @@
 #include <initializer_list>
 #include <hpp/config.h>
 #include <hpp/tensor.h>
+#include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/hdfUtilsCpp.h>
 
