@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
     hpp::testConversions<double>();
     hpp::testRandom<float>();
     hpp::testRandom<double>();
-    hpp::testSpaces<float>();
+    //hpp::testSpaces<float>();
     hpp::testSpaces<double>();
     return 0;
 }
