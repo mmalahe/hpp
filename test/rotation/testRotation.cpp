@@ -91,7 +91,7 @@ void testRandom() {
 template <typename U>
 void testSpaces() 
 {
-    hpp::SO3Discrete<U> so3(2);
+    hpp::SO3Discrete<U> so3(6);
     for (unsigned int i=0; i<5; i++) {
         std::cout << so3.getEulerAngle(i) << std::endl;
     }
