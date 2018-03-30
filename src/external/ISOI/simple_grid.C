@@ -59,11 +59,11 @@ std::vector<Quaternion> simple_grid_quaternion(int resol)
     std::cout << quatList.size() << std::endl;
     
     // Pre-computed things
-    std::vector<double> sinPsi(nPsi);
-    std::vector<double> cosPsi(nPsi);
+    std::vector<double> cosPsiOver2(nPsi);
+    std::vector<double> sinPsiOver2(nPsi);    
     for(int j=0;j<nPsi;j++) {
-        cosPsi[j] = std::cos(grid.Psi_Points[j]);
-        sinPsi[j] = std::sin(grid.Psi_Points[j]);        
+        cosPsiOver2[j] = std::cos(grid.Psi_Points[j]/2);
+        sinPsiOver2[j] = std::sin(grid.Psi_Points[j]/2);        
     }
     
     double thetaOver2, phi, psi;
@@ -80,8 +80,8 @@ std::vector<Quaternion> simple_grid_quaternion(int resol)
             long int idx = i*nPsi + j;
             psi = grid.Psi_Points[j];
             phiPlusPsiOver2 = phi + psi/2;
-            quatList[idx].a = cosThetaOver2*cosPsi[j];
-            quatList[idx].b = cosThetaOver2*sinPsi[j];
+            quatList[idx].a = cosThetaOver2*cosPsiOver2[j];
+            quatList[idx].b = cosThetaOver2*sinPsiOver2[j];
             quatList[idx].c = sinThetaOver2*std::cos(phiPlusPsiOver2);
             quatList[idx].d = sinThetaOver2*std::sin(phiPlusPsiOver2);
 		}
