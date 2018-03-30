@@ -1,8 +1,9 @@
+#include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/cudaUtils.h>
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 /**
  * @brief Get the maximum number of resident warps per multiprocessor
@@ -107,5 +108,4 @@ __global__ void TEST_I2F(int *a, float *b) {
     b[threadIdx.x] = (float)a[threadIdx.x];
 }
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP

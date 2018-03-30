@@ -5,16 +5,13 @@
 #define HPP_GSHCUDA_H
 
 #include <hpp/config.h>
-
-#ifdef HPP_USE_CUDA
-    #include <cuComplex.h>
-    #include <hpp/cudaUtils.h>
-#endif
+HPP_CHECK_CUDA_ENABLED_BUILD
+#include <cuComplex.h>
+#include <hpp/cudaUtils.h>
 
 namespace hpp
 {
 
-#ifdef HPP_USE_CUDA
 /**
  * @class GSHCoeffsCUDA
  * @author Michael Malahe
@@ -357,8 +354,6 @@ __global__ void BLOCK_REDUCE_KEPLER_GSH_COEFFS(GSHCoeffsCUDA<T> *in, GSHCoeffsCU
         out[blockIdx.x]=sum;
     }
 }
-
-#endif /* HPP_USE_CUDA*/
     
 } //END NAMESPACE HPP
 #endif /* HPP_GSHCUDA_H */

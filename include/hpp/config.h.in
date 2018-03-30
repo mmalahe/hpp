@@ -39,3 +39,9 @@
 #else
     #define HPP_NVCC_ONLY(x)
 #endif
+
+#ifdef HPP_USE_CUDA
+    #define HPP_CHECK_CUDA_ENABLED_BUILD
+#else
+    #define HPP_CHECK_CUDA_ENABLED_BUILD #error This file should not be included unless CUDA is enabled.
+#endif

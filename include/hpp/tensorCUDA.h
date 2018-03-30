@@ -10,8 +10,9 @@
 #ifndef HPP_TENSOR_CUDA_H
 #define HPP_TENSOR_CUDA_H
 
-#include <initializer_list>
 #include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
+#include <initializer_list>
 #include <hpp/tensor.h>
 #include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
@@ -19,7 +20,6 @@
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 // Forward declarations
 template <typename U, unsigned int N>
@@ -919,7 +919,6 @@ Tensor4CUDA<U,M,N,P,Q>::Tensor4CUDA(const Tensor4<U>& in) {
     std::copy(&(in.vals[0]), &(in.vals[0])+M*N*P*Q, &(vals[0][0][0][0]));    
 }
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
 #endif /* HPP_TENSOR_CUDA_H */

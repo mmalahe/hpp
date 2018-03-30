@@ -1,15 +1,13 @@
+#include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/tensorCUDA.h>
 #include <hpp/crystalCUDA.h>
-
 #include <hpp/spectralUtilsCUDA.h>
-
 #include <hpp/hdfUtilsCpp.h>
-
 #include <hpp/cudaUtils.h>
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 template <typename T, unsigned int N>
 CrystalPropertiesCUDA<T,N>::CrystalPropertiesCUDA(const CrystalProperties<T>& in) {
@@ -1430,5 +1428,4 @@ template class CrystalPropertiesCUDA<double,12>;
 template class SpectralPolycrystalCUDA<float,12>;
 template class SpectralPolycrystalCUDA<double,12>;
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP

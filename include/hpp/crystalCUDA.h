@@ -7,8 +7,10 @@
 #ifndef HPP_CRYSTAL_CUDA_H
 #define HPP_CRYSTAL_CUDA_H
 
-#include <type_traits>
+
 #include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
+#include <type_traits>
 #include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/tensorCUDA.h>
@@ -17,7 +19,6 @@
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 // Forward declarations
 template <typename T, unsigned int N> class SpectralPolycrystalCUDA;
@@ -344,7 +345,6 @@ __device__ Tensor2CUDA<T,3,3> EulerZXZRotationMatrixCUDA(EulerAngles<T> angles) 
     return EulerZXZRotationMatrixCUDA(angles.alpha, angles.beta, angles.gamma);
 }
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
 #endif /* HPP_CRYSTAL_CUDA_H */
