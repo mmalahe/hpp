@@ -39,6 +39,10 @@ struct EulerAngles {
     T beta = 0;
     T gamma = 0;
     
+    HPP_NVCC_ONLY(__host__ __device__) EulerAngles() {;}
+    HPP_NVCC_ONLY(__host__ __device__) EulerAngles(T alpha, T beta, T gamma) :
+    alpha(alpha), beta(beta), gamma(gamma) {;}
+    
     // Getters/setters (mainly intended for Python interface)
     T getAlpha() const {return alpha;}
     T getBeta() const {return beta;}

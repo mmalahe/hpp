@@ -56,7 +56,6 @@ std::vector<Quaternion> simple_grid_quaternion(int resol)
     int nHealpix = grid.Healpix_Points.size();
     int nPsi = grid.Psi_Points.size();
     std::vector<Quaternion> quatList(nHealpix*nPsi);
-    std::cout << quatList.size() << std::endl;
     
     // Pre-computed things
     std::vector<double> cosPsiOver2(nPsi);

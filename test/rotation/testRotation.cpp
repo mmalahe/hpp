@@ -33,7 +33,7 @@ void testConversions(){
                 if (!angleGood) {
                     std::cerr << "Input: " << angle.alpha << " " << angle.beta << " " << angle.gamma << std::endl;
                     std::cerr << "Output: " << angleRestored.alpha << " " << angleRestored.beta << " " << angleRestored.gamma << std::endl;
-                    throw TensorError("Angles don't match.");
+                    throw std::runtime_error("Angles don't match.");
                 }
             }
         }
@@ -81,19 +81,37 @@ void testRandom() {
     meanErrorTheta /= histErrorTheta.size();
     if (meanErrorTheta > 0.03) {
         std::cerr << "Mean error: " << meanErrorTheta << std::endl;
-        throw TensorError("Mean error in random rotation is too large.");
+        throw std::runtime_error("Mean error in random rotation is too large.");
     }
 }
 
 /**
- * @brief Not an actual test yet, just for observing
+ * @brief Checks known correct angles are produced by the discrete orientation spaces.
  */
 template <typename U>
 void testSpaces() 
 {
-    hpp::SO3Discrete<U> so3(6);
-    for (unsigned int i=0; i<5; i++) {
-        std::cout << so3.getEulerAngle(i) << std::endl;
+    std::vector<int> indices = {0,12345,23456};
+    std::vector<EulerAngles<U>> knownValuesResolution3(3);
+    knownValuesResolution3[0] = EulerAngles<U>(0.712446,0.716902,1.46003);
+    knownValuesResolution3[1] = EulerAngles<U>(1.58868,0.197944,2.10593);
+    knownValuesResolution3[2] = EulerAngles<U>(-2.60062,-0.521592,1.66706);
+
+    hpp::SO3Discrete<U> so3(3);
+    for (unsigned int i=0; i<3; i++) {
+        auto knownAngle = knownValuesResolution3[i];
+        auto producedAngle = so3.getEulerAngle(indices[i]);
+        U err = 0.0;
+        err += std::pow(knownAngle.alpha - producedAngle.alpha, 2.0);
+        err += std::pow(knownAngle.beta - producedAngle.beta, 2.0);
+        err += std::pow(knownAngle.gamma - producedAngle.gamma, 2.0);
+        err = std::sqrt(err);
+        if (err > 1e-5) {
+            std::cerr << "known angle = " << knownAngle << std::endl;
+            std::cerr << "produced angle = " << producedAngle << std::endl;
+            std::cerr << "error = " << err << std::endl;
+            throw std::runtime_error("Produced angle doesn't match known angle.");
+        }
     }
 }
 
@@ -104,7 +122,7 @@ int main(int argc, char *argv[]) {
     hpp::testConversions<double>();
     hpp::testRandom<float>();
     hpp::testRandom<double>();
-    //hpp::testSpaces<float>();
+    hpp::testSpaces<float>();
     hpp::testSpaces<double>();
     return 0;
 }

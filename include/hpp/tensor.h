@@ -23,14 +23,6 @@
 #include <unsupported/Eigen/MatrixFunctions>
 #include "mpi.h"
 
-#define HPP_ARRAY_LAYOUT LAPACK_ROW_MAJOR
-
-#ifdef DEBUG_BUILD
-    #define DEBUG_ONLY(x) x
-#else
-    #define DEBUG_ONLY(x)
-#endif
-
 namespace hpp
 {
 
