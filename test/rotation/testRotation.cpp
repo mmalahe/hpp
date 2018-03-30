@@ -91,6 +91,7 @@ void testRandom() {
 template <typename U>
 void testSpaces() 
 {
+    // Full SO(3)
     std::vector<int> indices = {0,12345,23456};
     std::vector<EulerAngles<U>> knownValuesResolution3(3);
     knownValuesResolution3[0] = EulerAngles<U>(0.712446,0.716902,1.46003);
@@ -113,6 +114,13 @@ void testSpaces()
             throw std::runtime_error("Produced angle doesn't match known angle.");
         }
     }
+    
+    // Four-fold symmetric slice of SO(3)
+//    hpp::SO3Discrete<U> so3C4(3, hpp::SYMMETRY_TYPE_C4);
+//    std::cout << so3.size() << " " << so3C4.size() << std::endl;
+//    for (unsigned int i=0; i<20; i++) {
+//        std::cout << so3.getEulerAngle(i) << so3C4.getEulerAngle(i) << std::endl;
+//    }
 }
 
 } //END NAMESPACE HPP

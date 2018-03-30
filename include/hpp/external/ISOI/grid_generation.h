@@ -65,7 +65,8 @@ std::vector<double> grid_s1(int);
 bool healpix_wrapper(int);
 std::vector<Quaternion> hopf2quat(const std::vector<S3Point>&);
 HealpixPsiGrid healpix_psi_grid(int);
-std::vector<Quaternion> simple_grid_quaternion(int);
+std::vector<Quaternion> full_grid_quaternion(int);
+std::vector<Quaternion> fourfold_symmetry_grid_quaternion(int);
 
 inline Quaternion hopf2quat(S3Point point)
 {

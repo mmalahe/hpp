@@ -13,6 +13,12 @@
 namespace hpp
 {
 
+// Types of symmetry in Schoenflies notation
+enum SymmetryType {
+    SYMMETRY_TYPE_NONE,
+    SYMMETRY_TYPE_C4
+};
+    
 /**
  * @class EulerAngles
  * @author Michael Malahe
@@ -369,11 +375,12 @@ EulerAngles<T> quaternionToEulerAngles(isoi::Quaternion& q) {
 template <typename T>
 class SO3Discrete {
 public:
-    SO3Discrete(unsigned int resolution);
+    SO3Discrete(unsigned int resolution, SymmetryType symmetryType = SYMMETRY_TYPE_NONE);
     isoi::Quaternion getQuat(unsigned int i) {return quatList[i];}
     EulerAngles<T> getEulerAngle(unsigned int i) {return eulerAngleList[i];}
     unsigned int size() {return quatList.size();}
 private:
+    SymmetryType symmetryType;
     std::vector<isoi::Quaternion> quatList;
     std::vector<EulerAngles<T>> eulerAngleList;
 };

@@ -50,9 +50,7 @@ HealpixPsiGrid healpix_psi_grid(int resol) {
     return grid;
 }
 
-std::vector<Quaternion> simple_grid_quaternion(int resol)
-{
-    HealpixPsiGrid grid = healpix_psi_grid(resol);   
+std::vector<Quaternion> healpix_psi_grid_to_quaternion(const HealpixPsiGrid& grid) {
     int nHealpix = grid.Healpix_Points.size();
     int nPsi = grid.Psi_Points.size();
     std::vector<Quaternion> quatList(nHealpix*nPsi);
@@ -86,6 +84,25 @@ std::vector<Quaternion> simple_grid_quaternion(int resol)
 		}
 	}
     return quatList;
+}
+
+std::vector<Quaternion> full_grid_quaternion(int resol)
+{
+    HealpixPsiGrid grid = healpix_psi_grid(resol);
+    return healpix_psi_grid_to_quaternion(grid);
+}
+
+std::vector<Quaternion> fourfold_symmetry_grid_quaternion(int resol)
+{
+    HealpixPsiGrid grid = healpix_psi_grid(resol);
+    std::vector<double> reducedPsiPoints;
+    for (const auto& psi : grid.Psi_Points) {
+        if (psi < M_PI/2) {
+            reducedPsiPoints.push_back(psi);
+        }
+    }
+    grid.Psi_Points = reducedPsiPoints;
+    return healpix_psi_grid_to_quaternion(grid);
 }
 
 }
