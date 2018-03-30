@@ -1397,29 +1397,6 @@ unsigned long long int SpectralPolycrystalCUDA<T,N>::getNTermsComputedHardware()
     }
 }
 
-// SpectralPolycrystalGSHCUDA //
-////////////////////////////////
-template <typename T, CrystalType CRYSTAL_TYPE>
-SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) {
-    unsigned int fzResolution = 10;
-    SO3 = SO3Discrete<T>(fzResolution, CRYSTAL_TYPE);
-}
-
-template <typename T, CrystalType CRYSTAL_TYPE>
-void SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::resetRandomOrientations(T init_s, unsigned long int seed) {
-    polycrystal.resetRandomOrientations(init_s, seed);
-}
-
-template <typename T, CrystalType CRYSTAL_TYPE>
-void SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
-    ;
-}
-
-template <typename T, CrystalType CRYSTAL_TYPE>
-GSHCoeffsCUDA<T> SpectralPolycrystalGSHCUDA<T,CRYSTAL_TYPE>::getGSHCoeffs() {
-    ;
-}
-
 // Explicit instantiations
 template class SpectralCrystalListCUDA<float>;
 template class SpectralCrystalListCUDA<double>;
@@ -1427,5 +1404,7 @@ template class CrystalPropertiesCUDA<float,12>;
 template class CrystalPropertiesCUDA<double,12>;
 template class SpectralPolycrystalCUDA<float,12>;
 template class SpectralPolycrystalCUDA<double,12>;
+template class SpectralPolycrystalGSHCUDA<float, CRYSTAL_TYPE_FCC>;
+template class SpectralPolycrystalGSHCUDA<double, CRYSTAL_TYPE_FCC>;
 
 }//END NAMESPACE HPP

@@ -375,6 +375,7 @@ EulerAngles<T> quaternionToEulerAngles(isoi::Quaternion& q) {
 template <typename T>
 class SO3Discrete {
 public:
+    SO3Discrete() {;}
     SO3Discrete(unsigned int resolution, SymmetryType symmetryType = SYMMETRY_TYPE_NONE);
     isoi::Quaternion getQuat(unsigned int i) {return quatList[i];}
     EulerAngles<T> getEulerAngle(unsigned int i) {return eulerAngleList[i];}

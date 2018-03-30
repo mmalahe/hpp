@@ -316,14 +316,30 @@ class SpectralPolycrystalGSHCUDA
 public:    
     // Constructors
     SpectralPolycrystalGSHCUDA(){;}    
-    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
+    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) {
+        // Number of points in the orientation space = 72*8^{r}, where r is the resolution
+        unsigned int orientationSpaceResolution = 6; 
+        switch (CRYSTAL_TYPE) {
+            case CRYSTAL_TYPE_NONE:
+                SO3 = SO3Discrete<T>(orientationSpaceResolution);
+                break;
+            case CRYSTAL_TYPE_FCC:
+                SO3 = SO3Discrete<T>(orientationSpaceResolution, SYMMETRY_TYPE_C4);
+                break;
+            default:
+                std::cerr << "No implementation for crystal type = " << CRYSTAL_TYPE << std::endl;
+                throw std::runtime_error("No implementation.");
+        }
+    }    
     
     // Simulation
-    void resetRandomOrientations(T init_s, unsigned long int seed);
-    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs);
+    void resetRandomOrientations(T init_s, unsigned long int seed) {
+        polycrystal.resetRandomOrientations(init_s, seed);
+    }
+    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {;}
     
     // Output
-    GSHCoeffsCUDA<T> getGSHCoeffs();
+    GSHCoeffsCUDA<T> getGSHCoeffs() {;}
 protected:
 
 private:
@@ -333,7 +349,7 @@ private:
     /// The density of each of the crystals
     std::vector<T> densities;
     
-    /// The number of points in each dimension of the fundamental zone
+    /// A dicrete colelction of points determining the orientation space for the crystal
     SO3Discrete<T> SO3;
     
     /// The number of crystals total
