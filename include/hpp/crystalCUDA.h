@@ -316,29 +316,43 @@ class SpectralPolycrystalGSHCUDA
 public:    
     // Constructors
     SpectralPolycrystalGSHCUDA(){;}    
-    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn) {
+    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, T init_s) {
         // Number of points in the orientation space = 72*8^{r}, where r is the resolution
         unsigned int orientationSpaceResolution = 6; 
         switch (CRYSTAL_TYPE) {
             case CRYSTAL_TYPE_NONE:
-                SO3 = SO3Discrete<T>(orientationSpaceResolution);
+                orientationSpace = SO3Discrete<T>(orientationSpaceResolution);
                 break;
             case CRYSTAL_TYPE_FCC:
-                SO3 = SO3Discrete<T>(orientationSpaceResolution, SYMMETRY_TYPE_C4);
+                orientationSpace = SO3Discrete<T>(orientationSpaceResolution, SYMMETRY_TYPE_C4);
                 break;
             default:
                 std::cerr << "No implementation for crystal type = " << CRYSTAL_TYPE << std::endl;
                 throw std::runtime_error("No implementation.");
         }
+        
+        // Generate representative crystals
+        auto crystals = std::vector<SpectralCrystalCUDA<T>>(orientationSpace.size());
+        for (unsigned int i=0; i<orientationSpace.size(); i++) {
+            crystals[i].s = init_s;
+            crystals[i].angles = orientationSpace.getEulerAngle(i);            
+        }
+        polycrystal = SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)>(crystals, crystalProps, dbIn);
+        
+        // Initialize densities to a uniform distribution
+        densities = std::vector<T>(orientationSpace.size(), 1.0/orientationSpace.size());
     }    
     
     // Simulation
     void resetRandomOrientations(T init_s, unsigned long int seed) {
         polycrystal.resetRandomOrientations(init_s, seed);
     }
-    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {;}
+    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
+        ;
+    }
     
     // Output
+    // need to do a density-weighted GSH calculation here
     GSHCoeffsCUDA<T> getGSHCoeffs() {;}
 protected:
 
@@ -350,10 +364,7 @@ private:
     std::vector<T> densities;
     
     /// A dicrete colelction of points determining the orientation space for the crystal
-    SO3Discrete<T> SO3;
-    
-    /// The number of crystals total
-    unsigned int nCrystals;
+    SO3Discrete<T> orientationSpace;
 };
 
 template <typename T>
