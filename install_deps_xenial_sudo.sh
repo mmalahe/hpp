@@ -4,16 +4,20 @@ set -e
 # This script installs the dependencies for Ubuntu 16.04
 
 # Install the dependencies available from the package manager
-sudo apt install build-essential
-sudo apt install cmake
-sudo apt install python3 python3-dev libpython3-dev
-sudo apt install libopenmpi-dev
-sudo apt install libblas-dev
-sudo apt install liblapack-dev liblapacke-dev
-sudo apt install libeigen3-dev
-sudo apt install libhdf5-serial-dev libhdf5-openmpi-dev
-sudo apt install libtclap-dev
-sudo apt install libboost-python-dev
+sudo apt update
+sudo apt install tar --yes
+sudo apt install wget --yes
+sudo apt install make --yes
+sudo apt install build-essential --yes
+sudo apt install cmake --yes
+sudo apt install python3 python3-dev libpython3-dev --yes
+sudo apt install libopenmpi-dev --yes
+sudo apt install libblas-dev --yes
+sudo apt install liblapack-dev liblapacke-dev --yes
+sudo apt install libeigen3-dev --yes
+sudo apt install libhdf5-serial-dev libhdf5-openmpi-dev --yes
+sudo apt install libtclap-dev --yes
+sudo apt install libboost-python-dev --yes
 
 # Install the dependencies that require a manual installation
 mkdir -p deps

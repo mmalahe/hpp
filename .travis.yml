@@ -10,10 +10,10 @@ services:
 compiler: gcc
 
 before_install:
-    - docker pull ubuntu
+    - docker build -t hpp .
 
 install: 
-    - docker run ubuntu /bin/sh -c "./install_deps_xenial_sudo.sh; ./testAll -v"
+    - docker run hpp /bin/sh -c "/app/testAll.sh -v"
 
 script:
-    - ls
+    - pwd

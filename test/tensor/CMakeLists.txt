@@ -6,7 +6,7 @@ add_test(testTensor2 testTensor2)
 # Tensor2 parallel tests
 add_executable(testTensor2Parallel testTensor2Parallel.cpp)
 target_link_libraries(testTensor2Parallel hpp)
-add_test(testTensor2Parallel mpirun -np 4 testTensor2Parallel)
+add_test(testTensor2Parallel mpirun -np 4 --allow-run-as-root testTensor2Parallel)
 
 # Tensor4 tests
 add_executable(testTensor4 testTensor4.cpp)
