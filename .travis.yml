@@ -4,12 +4,16 @@ dist: trusty
 
 sudo: required
 
+services:
+    - docker
+
 compiler: gcc
 
 before_install:
-    - pyenv global system 3.6
+    - docker pull ubuntu
 
-install: ./install_deps_trusty_sudo.sh
+install: 
+    - docker run ubuntu /bin/sh -c "./install_deps_xenial_sudo.sh; ./testAll -v"
 
 script:
-    - ./testAll.sh -v
+    - ls

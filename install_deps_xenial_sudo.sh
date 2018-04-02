@@ -1,9 +1,11 @@
 #!/bin/sh
 set -e
 
-# This script installs the dependencies for Ubuntu 14.04
+# This script installs the dependencies for Ubuntu 16.04
 
 # Install the dependencies available from the package manager
+sudo apt install build-essential
+sudo apt install cmake
 sudo apt install python3 python3-dev libpython3-dev
 sudo apt install libopenmpi-dev
 sudo apt install libblas-dev
@@ -29,10 +31,6 @@ cd fftw-3.3.7
 make
 sudo make install
 cd ..
-
-# Sufficient CMake version
-wget -O cmake.sh https://cmake.org/files/v3.10/cmake-3.10.0-rc1-Linux-x86_64.sh 
-sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
 
 # Exit deps folder
 cd ..
