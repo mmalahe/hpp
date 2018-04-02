@@ -30,5 +30,9 @@ make
 sudo make install
 cd ..
 
+# Sufficient CMake version
+- wget -O cmake.sh https://cmake.org/files/v3.10/cmake-3.10.0-rc1-Linux-x86_64.sh 
+- sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
+
 # Exit deps folder
 cd ..
