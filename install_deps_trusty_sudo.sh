@@ -19,7 +19,7 @@ cd deps
 
 # FFTW
 wget www.fftw.org/fftw-3.3.7.tar.gz
-tar -xczf fftw-3.3.7.tar.gz
+tar -xzf fftw-3.3.7.tar.gz
 cd fftw-3.3.7
 ./configure \
 --enable-shared \
