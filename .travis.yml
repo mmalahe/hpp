@@ -9,4 +9,4 @@ compiler: gcc
 install: ./install_deps_trusty_sudo.sh
 
 script:
-    - ./release.sh
+    - ./testAll.sh -v

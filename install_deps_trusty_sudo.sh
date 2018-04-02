@@ -36,3 +36,7 @@ sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
 
 # Exit deps folder
 cd ..
+
+# Ensure libs can be found and linked correctly
+export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
