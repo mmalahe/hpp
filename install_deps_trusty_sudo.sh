@@ -27,7 +27,7 @@ cd fftw-3.3.7
 --enable-openmp \
 --enable-threads
 make
-make install
+sudo make install
 cd ..
 
 # Exit deps folder
