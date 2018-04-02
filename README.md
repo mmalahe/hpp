@@ -1,3 +1,7 @@
+Docs:
+-----
+[FFTW](mmalahe.com/hpp/doc)
+
 Mandatory dependencies:
 -----------------------
 C/C++ dependencies:
