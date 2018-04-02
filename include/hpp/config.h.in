@@ -1,3 +1,7 @@
+/////////////////////////////////////
+// Configuration-dependent defines //
+/////////////////////////////////////
+
 // GPU APIs
 #cmakedefine HPP_USE_CUDA
 
@@ -14,3 +18,30 @@
 
 // Building Python interface
 #cmakedefine HPP_BUILD_PYTHON
+
+////////////////////////
+// Hard-coded defines //
+////////////////////////
+#define HPP_ARRAY_LAYOUT LAPACK_ROW_MAJOR
+
+///////////////////////
+// Dependent defines //
+///////////////////////
+
+#ifdef DEBUG_BUILD
+    #define DEBUG_ONLY(x) x
+#else
+    #define DEBUG_ONLY(x)
+#endif
+
+#ifdef __CUDACC__
+    #define HPP_NVCC_ONLY(x) x
+#else
+    #define HPP_NVCC_ONLY(x)
+#endif
+
+#ifdef HPP_USE_CUDA
+    #define HPP_CHECK_CUDA_ENABLED_BUILD
+#else
+    #define HPP_CHECK_CUDA_ENABLED_BUILD #error This file should not be included unless CUDA is enabled.
+#endif

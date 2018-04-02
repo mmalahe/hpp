@@ -9,6 +9,7 @@
 #include <random>
 
 #include <hpp/continuum.h>
+#include <hpp/rotation.h>
 
 namespace hpp
 {

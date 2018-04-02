@@ -1,7 +1,7 @@
 /** @file tensorCUDA.h
 * @author Michael Malahe
 * @brief Header file for tensor classes CUDA implementations.
-* @details Note that for all of these implementations, dynamic memory is not used.
+* @detail Note that for all of these implementations, dynamic memory is not used.
 * All of the memory lives on whichever architecture the class is instantiated on.
 * That is, the "CUDA" suffix indicates nothing about where the memory is, but
 * just indicates that it's in a format that's most suitable for a CUDA implementation.
@@ -10,15 +10,16 @@
 #ifndef HPP_TENSOR_CUDA_H
 #define HPP_TENSOR_CUDA_H
 
-#include <initializer_list>
 #include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
+#include <initializer_list>
 #include <hpp/tensor.h>
+#include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/hdfUtilsCpp.h>
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 // Forward declarations
 template <typename U, unsigned int N>
@@ -918,7 +919,6 @@ Tensor4CUDA<U,M,N,P,Q>::Tensor4CUDA(const Tensor4<U>& in) {
     std::copy(&(in.vals[0]), &(in.vals[0])+M*N*P*Q, &(vals[0][0][0][0]));    
 }
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
 #endif /* HPP_TENSOR_CUDA_H */

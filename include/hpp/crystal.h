@@ -28,6 +28,7 @@ platforms., (January):785--798, 2014
 #include <hpp/config.h>
 #include <hpp/tensor.h>
 #include <hpp/continuum.h>
+#include <hpp/rotation.h>
 #include <hpp/gsh.h>
 #include <hpp/mpiUtils.h>
 #include <hpp/spectralUtils.h>
@@ -35,13 +36,22 @@ platforms., (January):785--798, 2014
 
 namespace hpp
 {
-
 #define HPP_POLE_FIG_HIST_DIM 512
-
-enum CrystalType {
-    CRYSTAL_TYPE_FCC,
-    CRYSTAL_TYPE_NONE
+    
+class CrystalError: public std::runtime_error
+{
+public:
+    explicit CrystalError (const std::string &val) : std::runtime_error::runtime_error(val) {}
 };
+    
+enum CrystalType {
+    CRYSTAL_TYPE_NONE,
+    CRYSTAL_TYPE_FCC    
+};
+
+constexpr int nSlipSystems(CrystalType crystalType) {
+    return crystalType==CRYSTAL_TYPE_FCC ? 12 : 0;
+}
 
 enum HardeningLaw {
     HARDENING_LAW_BROWN,
@@ -64,15 +74,7 @@ enum CrystalDatasetIdx {
     // Gamma
     GAMMA
 };
-
 std::vector<SpectralDatasetID> defaultCrystalSpectralDatasetIDs();
-
-class CrystalError: public std::runtime_error
-{
-public:
-    explicit CrystalError (const std::string &val) : std::runtime_error::runtime_error(val) {}
-};
-
 
 // Forward declarations are necessarry for some operations
 template <typename U>
@@ -597,6 +599,5 @@ private:
 };
 
 }//END NAMESPACE HPP
-
 
 #endif /* HPP_CRYSTAL_H */

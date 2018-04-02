@@ -5,11 +5,11 @@
 */
 
 #include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/spectralUtilsCUDA.h>
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 template <typename T, unsigned int N>
 SpectralDatabaseCUDA<T,N>::SpectralDatabaseCUDA(){
@@ -176,5 +176,4 @@ template class SpectralDatabaseCUDA<double, 4>;
 template class SpectralDatabaseUnifiedCUDA<float, 4, 9>;
 template class SpectralDatabaseUnifiedCUDA<double, 4, 9>;
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP

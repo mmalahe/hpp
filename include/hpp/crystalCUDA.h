@@ -7,9 +7,11 @@
 #ifndef HPP_CRYSTAL_CUDA_H
 #define HPP_CRYSTAL_CUDA_H
 
-#include <type_traits>
+
 #include <hpp/config.h>
-#include <hpp/crystal.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
+#include <type_traits>
+#include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/tensorCUDA.h>
 #include <hpp/spectralUtilsCUDA.h>
@@ -17,7 +19,6 @@
 
 namespace hpp
 {
-#ifdef HPP_USE_CUDA
 
 // Forward declarations
 template <typename T, unsigned int N> class SpectralPolycrystalCUDA;
@@ -183,7 +184,9 @@ __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrysta
  * @date 06/04/17
  * @file crystalCUDA.h
  * @brief
- * @details Instances of this class only ever live on the host.
+ * @details Instances of this class only ever live on the host. As it stands
+ * this implementation isn't even remotely thread safe, and it is not safe
+ * to make and operate on multiple copies of these objects.
  * @tparam T scalar type
  * @tparam N number of slip systems
  */
@@ -288,12 +291,87 @@ private:
     double maxMemUsedGB = 0.0;
 };
 
+/**
+ * @class SpectralPolycrystalGSHCUDA
+ * @author Michael Malahe
+ * @date 27/03/18
+ * @file crystalCUDA.h
+ * @brief A class for simulating a polycrystal using a Fourier compressed database.
+ * @details The class presents an interface that allows it to be modified only
+ * through the Generalized Spherical Harmonic representation.
+ * 
+ * The implementation takes an approach where the polycrystal is composed of
+ * a number of single crystals that are evenly distributed in orientation space
+ * within the fundamental zone. Each crystal represents a volume in the 
+ * fundamental zone. Associated with each crystal is a density, with the summed 
+ * density for all of the crystals coming to 1.
+ * 
+ * Instances of this class only ever live on the host.
+ * @tparam T scalar type
+ * @tparam N number of slip systems in the polycrystal
+ */
+template <typename T, CrystalType CRYSTAL_TYPE>
+class SpectralPolycrystalGSHCUDA
+{
+public:    
+    // Constructors
+    SpectralPolycrystalGSHCUDA(){;}    
+    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, T init_s) {
+        // Number of points in the orientation space = 72*8^{r}, where r is the resolution
+        unsigned int orientationSpaceResolution = 6; 
+        switch (CRYSTAL_TYPE) {
+            case CRYSTAL_TYPE_NONE:
+                orientationSpace = SO3Discrete<T>(orientationSpaceResolution);
+                break;
+            case CRYSTAL_TYPE_FCC:
+                orientationSpace = SO3Discrete<T>(orientationSpaceResolution, SYMMETRY_TYPE_C4);
+                break;
+            default:
+                std::cerr << "No implementation for crystal type = " << CRYSTAL_TYPE << std::endl;
+                throw std::runtime_error("No implementation.");
+        }
+        
+        // Generate representative crystals
+        auto crystals = std::vector<SpectralCrystalCUDA<T>>(orientationSpace.size());
+        for (unsigned int i=0; i<orientationSpace.size(); i++) {
+            crystals[i].s = init_s;
+            crystals[i].angles = orientationSpace.getEulerAngle(i);            
+        }
+        polycrystal = SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)>(crystals, crystalProps, dbIn);
+        
+        // Initialize densities to a uniform distribution
+        densities = std::vector<T>(orientationSpace.size(), 1.0/orientationSpace.size());
+    }    
+    
+    // Simulation
+    void resetRandomOrientations(T init_s, unsigned long int seed) {
+        polycrystal.resetRandomOrientations(init_s, seed);
+    }
+    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
+        ;
+    }
+    
+    // Output
+    // need to do a density-weighted GSH calculation here
+    GSHCoeffsCUDA<T> getGSHCoeffs() {;}
+protected:
+
+private:
+    /// The underlying spectral polycrystal
+    SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)> polycrystal;
+    
+    /// The density of each of the crystals
+    std::vector<T> densities;
+    
+    /// A dicrete colelction of points determining the orientation space for the crystal
+    SO3Discrete<T> orientationSpace;
+};
+
 template <typename T>
 __device__ Tensor2CUDA<T,3,3> EulerZXZRotationMatrixCUDA(EulerAngles<T> angles) {
     return EulerZXZRotationMatrixCUDA(angles.alpha, angles.beta, angles.gamma);
 }
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
 #endif /* HPP_CRYSTAL_CUDA_H */

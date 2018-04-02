@@ -1,10 +1,4 @@
-#include <hpp/tensor.h>
 #include <hpp/crystal.h>
-#include <cmath>
-#include <iostream>
-#include <fstream>
-#include <limits>
-#include <math.h>
 
 namespace hpp {   
 

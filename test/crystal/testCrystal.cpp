@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     // MPI init
     MPI_Init(&argc, &argv);
     
-    // Test
+    // Test 
     hpp::testCrystal<float>();
     hpp::testCrystal<double>();  
     

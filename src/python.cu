@@ -2,6 +2,8 @@
 /// @author Michael Malahe
 /// @brief The Python interface to the library.
 
+#include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
 #include <boost/python.hpp>
 #include <hpp/tensor.h>
 #include <hpp/casesUtils.h>

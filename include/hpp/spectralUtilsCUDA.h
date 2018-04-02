@@ -8,13 +8,13 @@
 #define HPP_SPECTRAL_UTILS_CUDA_H
 
 #include <hpp/config.h>
+HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/crystal.h>
 #include <hpp/cudaUtils.h>
 
 namespace hpp
 {
 
-#ifdef HPP_USE_CUDA
 /**
  * @class SpectralData
  * @author Michael Malahe
@@ -540,7 +540,6 @@ __device__ void SpectralDatabaseUnifiedCUDA<T,N,P>::getIDFTRealDSharedPair(unsig
     }
 }
 
-#endif /* HPP_USE_CUDA */
 }//END NAMESPACE HPP
 
 #endif /* HPP_SPECTRAL_UTILS_CUDA_H */
