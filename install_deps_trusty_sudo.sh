@@ -8,6 +8,7 @@ sudo apt install python3 python3-dev libpython3-dev
 sudo apt install libopenmpi-dev
 sudo apt install libblas-dev
 sudo apt install liblapack-dev
+sudo apt install liblapacke-dev
 sudo apt install libeigen3-dev
 sudo apt install libhdf5-dev 
 sudo apt install libhdf5-mpi-dev
