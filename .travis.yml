@@ -6,7 +6,7 @@ sudo: required
 
 compiler: gcc
 
-install: ./install-deps-trusty-sudo.sh
+install: ./install_deps_trusty_sudo.sh
 
 script:
     - ./release.sh

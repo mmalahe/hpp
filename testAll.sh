@@ -1,3 +1,4 @@
+#!/bin/sh
 set -e
 
 while getopts 'v' flag; do

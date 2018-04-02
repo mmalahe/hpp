@@ -1,5 +1,7 @@
-# This script installs the dependencies for Ubuntu 14.04
+#!/bin/sh
 set -e
+
+# This script installs the dependencies for Ubuntu 14.04
 
 # Install the dependencies available from the package manager
 sudo apt install libopenmpi-dev
