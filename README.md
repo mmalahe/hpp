@@ -94,3 +94,7 @@ Optionally also include instructions available on your machine:
 --enable-fma
 ~~~~
 
+Continuous integration status
+-----------------------------
+[![Build Status](https://travis-ci.org/mmalahe/hpp.png)](https://travis-ci.org/mmalahe/hpp)
+
