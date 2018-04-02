@@ -178,8 +178,8 @@ void testFFTW2DReal()
     // Compare
     for (int idx=0; idx<NReal; idx++) {
         std::cerr << "In testFFTW2DReal" << std::endl;
-        std::cerr << "in = " << in[i] << std::endl;
-        std::cerr << "backin = " << backin[i] << std::endl;
+        std::cerr << "in = " << in[idx] << std::endl;
+        std::cerr << "backin = " << backin[idx] << std::endl;
         if (std::abs(in[idx]-backin[idx]) > closeEnough) throw std::runtime_error("Real part didn't match.");
     }
     
@@ -244,8 +244,8 @@ void testFFTWNDReal(int rank)
     // Compare
     for (int idx=0; idx<NReal; idx++) {
         std::cerr << "In testFFTWNDReal" << std::endl;
-        std::cerr << "in = " << in[i] << std::endl;
-        std::cerr << "backin = " << backin[i] << std::endl;
+        std::cerr << "in = " << in[idx] << std::endl;
+        std::cerr << "backin = " << backin[idx] << std::endl;
         if (std::abs(in[idx]-backin[idx]) > closeEnough) throw std::runtime_error("Real part didn't match.");
     }
     
