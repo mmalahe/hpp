@@ -11,7 +11,7 @@
 #include <fftw3.h>
 #include <hpp/spectralUtils.h>
 
-const double closeEnough = 10*std::numeric_limits<double>::epsilon();
+const double closeEnough = 100*std::numeric_limits<double>::epsilon();
 
 /**
  * @brief Computes a 1D complex FFT, followed by IFFT and checks that the
@@ -55,8 +55,16 @@ void testFFTW1DComplex()
     
     // Compare
     for (int i=0; i<N; i++) {
-        if (std::abs(in[i][0]-backin[i][0]) > closeEnough) throw std::runtime_error("Real part didn't match.");
-        if (std::abs(in[i][1]-backin[i][1]) > closeEnough) throw std::runtime_error("Complex part didn't match.");
+        if (std::abs(in[i][0]-backin[i][0]) > closeEnough) {
+            std::cerr << "Re(in) = " << in[i][0] << std::endl;
+            std::cerr << "Re(backin) = " << backin[i][0] << std::endl;
+            throw std::runtime_error("Real parts didn't match.");
+        }
+        if (std::abs(in[i][1]-backin[i][1]) > closeEnough) {
+            std::cerr << "Im(in) = " << in[i][1] << std::endl;
+            std::cerr << "Im(backin) = " << backin[i][1] << std::endl;
+            throw std::runtime_error("Imaginary parts didn't match.");
+        }
     }
     
     // Free
