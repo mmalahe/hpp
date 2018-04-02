@@ -1,6 +1,6 @@
 Docs:
 -----
-[Documentation](mmalahe.com/hpp/doc)
+[Documentation](https://mmalahe.com/hpp/doc)
 
 Mandatory dependencies:
 -----------------------
