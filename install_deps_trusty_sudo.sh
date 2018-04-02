@@ -4,6 +4,7 @@ set -e
 # This script installs the dependencies for Ubuntu 14.04
 
 # Install the dependencies available from the package manager
+sudo apt install python3 python3-dev libpython3-dev
 sudo apt install libopenmpi-dev
 sudo apt install libblas-dev
 sudo apt install liblapack-dev
