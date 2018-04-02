@@ -11,7 +11,7 @@
 #include <fftw3.h>
 #include <hpp/spectralUtils.h>
 
-const double closeEnough = 100*std::numeric_limits<double>::epsilon();
+const double closeEnough = 10000*std::numeric_limits<double>::epsilon();
 
 /**
  * @brief Computes a 1D complex FFT, followed by IFFT and checks that the
