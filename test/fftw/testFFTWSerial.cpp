@@ -117,10 +117,12 @@ void testFFTW1DReal()
     
     // Compare
     for (int i=0; i<N; i++) {
-        std::cerr << "In testFFTW1DReal" << std::endl;
-        std::cerr << "in = " << in[i] << std::endl;
-        std::cerr << "backin = " << backin[i] << std::endl;
-        if (std::abs(in[i]-backin[i]) > closeEnough) throw std::runtime_error("Real part didn't match.");
+        if (std::abs(in[i]-backin[i]) > closeEnough) {
+            std::cerr << "In testFFTW1DReal" << std::endl;
+            std::cerr << "in = " << in[i] << std::endl;
+            std::cerr << "backin = " << backin[i] << std::endl;
+            throw std::runtime_error("Real part didn't match.");
+        }
     }
     
     // Free
@@ -177,10 +179,12 @@ void testFFTW2DReal()
     
     // Compare
     for (int idx=0; idx<NReal; idx++) {
-        std::cerr << "In testFFTW2DReal" << std::endl;
-        std::cerr << "in = " << in[idx] << std::endl;
-        std::cerr << "backin = " << backin[idx] << std::endl;
-        if (std::abs(in[idx]-backin[idx]) > closeEnough) throw std::runtime_error("Real part didn't match.");
+        if (std::abs(in[idx]-backin[idx]) > closeEnough) {
+            std::cerr << "In testFFTW2DReal" << std::endl;
+            std::cerr << "in = " << in[idx] << std::endl;
+            std::cerr << "backin = " << backin[idx] << std::endl;
+            throw std::runtime_error("Real part didn't match.");
+        }
     }
     
     // Free
@@ -243,10 +247,12 @@ void testFFTWNDReal(int rank)
     
     // Compare
     for (int idx=0; idx<NReal; idx++) {
-        std::cerr << "In testFFTWNDReal" << std::endl;
-        std::cerr << "in = " << in[idx] << std::endl;
-        std::cerr << "backin = " << backin[idx] << std::endl;
-        if (std::abs(in[idx]-backin[idx]) > closeEnough) throw std::runtime_error("Real part didn't match.");
+        if (std::abs(in[idx]-backin[idx]) > closeEnough) {
+            std::cerr << "In testFFTWNDReal" << std::endl;
+            std::cerr << "in = " << in[idx] << std::endl;
+            std::cerr << "backin = " << backin[idx] << std::endl;
+            throw std::runtime_error("Real part didn't match.");
+        }
     }
     
     // Free
