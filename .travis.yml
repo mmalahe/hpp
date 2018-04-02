@@ -1,0 +1,12 @@
+language: C++
+
+dist: trusty
+
+sudo: required
+
+compiler: gcc
+
+install: ./install-deps-trusty-sudo.sh
+
+script:
+    - ./release.sh
