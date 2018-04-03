@@ -13,7 +13,7 @@ before_install:
     - docker build -t hpp .
 
 install: 
-    - docker run hpp /bin/sh -c "/app/testAll.sh -v"
+    - docker run hpp /bin/sh -c "/app/scripts/testAll.sh -v"
 
 script:
     - pwd

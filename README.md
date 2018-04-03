@@ -12,8 +12,8 @@ For comparisons, it also contains implementations of the test cases from:
 - [Installation](doc/install.md)
 	- tl;dr If you have root priveleges on Ubuntu 16.04 this should be sufficient:
 	~~~~
-	./install_deps_xenial_sudo.sh
-	./release.sh
+	scripts/install_deps_xenial_sudo.sh
+	scripts/release.sh
 	cd build-release
 	sudo make install
 	~~~~

@@ -4,4 +4,4 @@ WORKDIR /app
 
 ADD . /app
 
-RUN /app/install_deps_xenial.sh
+RUN /app/scripts/install_deps_xenial.sh
