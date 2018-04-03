@@ -39,7 +39,7 @@ On older distributions, e.g. Ubuntu 14.04, there is no way to simultaneously ins
 ~~~~
 /usr/include/hdf5/serial
 /usr/include/hdf5/openmpi
-~~~
+~~~~
 We assume this folder structure, so for older distributions you will need to create this yourself with custom HDF5 installs.
 
 # Recommended dependencies
