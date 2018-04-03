@@ -1,0 +1,12 @@
+tar 
+wget 
+make 
+build-essential 
+cmake 
+libopenmpi-dev 
+libblas-dev 
+liblapack-dev 
+liblapacke-dev
+libhdf5-serial-dev
+libhdf5-openmpi-dev
+libtclap-dev
