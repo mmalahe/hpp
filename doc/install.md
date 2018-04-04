@@ -106,25 +106,25 @@ make -j 8
 ~~~~
 where 8 represents the number of cores available for building.
 
-# Installing
-Enter the build directory, which will be "build-release" if you followed the above instructions or executed `scripts/release.sh`. Run
-~~~~
-make install
-~~~~
-optionally with root if the install prefix requires root access.
-
-# Custom build options
+## Custom build options
 At the configuration step there are a number of options available, which are automatically selected based on your system's attributes but may be overridden. The options are all preceded by `HPP_` and can be overriden by adding
 ~~~~
 -DHPP_SETTING_NAME=SETTING_VALUE
 ~~~~
 to the CMake command, or modified using the CMake gui.
 
-## What to build
+### What to build
 - `HPP_BUILD_PYTHON` (OFF/ON): build the Python interface to the library. Default depends on if you have Python and Boost on your system.
 - `HPP_USE_CUDA` (OFF/ON): build the GPU-accelerated functionality for the library. Default depends on whether or not you have CUDA installed on your system.
 
-## Developer options
+### Developer options
 - `HPP_SHOW_PTX` (OFF/ON): display the PTX info (register counts, shared memory usage etc.) while building CUDA source files. Default is OFF.
 - `HPP_CUDA_ARCH_LIST`: a semi-colon separated list of CUDA architectures to build SASS for. Default is the architectures currently attached to your system.
+
+# Installing
+Enter the build directory, which will be "build-release" if you followed the above instructions or executed `scripts/release.sh`. Run
+~~~~
+make install
+~~~~
+optionally with root if the install prefix requires root access.
 
