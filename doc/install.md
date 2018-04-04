@@ -1,3 +1,15 @@
+# Installation
+
+To install both the mandatory and recommended dependencies and build and install the library on Ubuntu 16.04 with root:
+~~~~
+scripts/install_deps_xenial_sudo.sh
+scripts/release.sh
+cd build-release
+sudo make install
+~~~~
+
+Otherwise we provide more detailed instructions below.
+
 # Mandatory dependencies
 The library cannot be built without these. Most of the mandatory dependencies are available from standard package managers. The others may require manual installation. We provide a script for installing both kinds under Ubuntu 16.04 with root at `scripts/install_deps_mandatory_xenial_sudo.sh`.
 
@@ -12,6 +24,7 @@ These are easy to install through package managers or installers on most platfor
 - [Eigen 3](http://eigen.tuxfamily.org/)
 - [HDF5](https://portal.hdfgroup.org/display/support/Downloads) serial and openmpi versions
 - [TCLAP](https://github.com/eile/tclap)
+- [FFTW](http://www.fftw.org)
 
 ## Requiring manual work
 
