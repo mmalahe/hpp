@@ -172,7 +172,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T eD
 
 // GSH kernel
 template<typename T>
-__global__ void GET_GSH_COEFFS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
+__global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
 
 // Average kernel
 template<typename T>
@@ -297,7 +297,7 @@ private:
  * @date 27/03/18
  * @file crystalCUDA.h
  * @brief A class for simulating a polycrystal using a Fourier compressed database.
- * @details The class presents an interface that allows it to be modified only
+ * @detail The class presents an interface that allows it to be modified only
  * through the Generalized Spherical Harmonic representation.
  * 
  * The implementation takes an approach where the polycrystal is composed of
@@ -344,9 +344,14 @@ public:
     }    
     
     // Simulation
-    void resetRandomOrientations(T init_s, unsigned long int seed) {
-        polycrystal.resetRandomOrientations(init_s, seed);
+    void resetUniformRandomOrientations(T init_s) {
+        std::vector<EulerAngles<T>> angleList(orientationSpace.size());
+        for (unsigned int i=0; i<orientationSpace.size(); i++) {
+            angleList[i] = orientationSpace.getEulerAngle(i);            
+        }
+        polycrystal.resetGivenOrientations(init_s, angleList);
     }
+    
     void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
         ;
     }
