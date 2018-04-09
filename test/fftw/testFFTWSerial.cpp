@@ -11,7 +11,7 @@
 #include <fftw3.h>
 #include <hpp/spectralUtils.h>
 
-const double closeEnough = 10*std::numeric_limits<double>::epsilon();
+const double closeEnough = 10000*std::numeric_limits<double>::epsilon();
 
 /**
  * @brief Computes a 1D complex FFT, followed by IFFT and checks that the
@@ -55,8 +55,16 @@ void testFFTW1DComplex()
     
     // Compare
     for (int i=0; i<N; i++) {
-        if (std::abs(in[i][0]-backin[i][0]) > closeEnough) throw std::runtime_error("Real part didn't match.");
-        if (std::abs(in[i][1]-backin[i][1]) > closeEnough) throw std::runtime_error("Complex part didn't match.");
+        if (std::abs(in[i][0]-backin[i][0]) > closeEnough) {
+            std::cerr << "Re(in) = " << in[i][0] << std::endl;
+            std::cerr << "Re(backin) = " << backin[i][0] << std::endl;
+            throw std::runtime_error("Real parts didn't match.");
+        }
+        if (std::abs(in[i][1]-backin[i][1]) > closeEnough) {
+            std::cerr << "Im(in) = " << in[i][1] << std::endl;
+            std::cerr << "Im(backin) = " << backin[i][1] << std::endl;
+            throw std::runtime_error("Imaginary parts didn't match.");
+        }
     }
     
     // Free
@@ -109,7 +117,12 @@ void testFFTW1DReal()
     
     // Compare
     for (int i=0; i<N; i++) {
-        if (std::abs(in[i]-backin[i]) > closeEnough) throw std::runtime_error("Real part didn't match.");
+        if (std::abs(in[i]-backin[i]) > closeEnough) {
+            std::cerr << "In testFFTW1DReal" << std::endl;
+            std::cerr << "in = " << in[i] << std::endl;
+            std::cerr << "backin = " << backin[i] << std::endl;
+            throw std::runtime_error("Real part didn't match.");
+        }
     }
     
     // Free
@@ -166,7 +179,12 @@ void testFFTW2DReal()
     
     // Compare
     for (int idx=0; idx<NReal; idx++) {
-        if (std::abs(in[idx]-backin[idx]) > closeEnough) throw std::runtime_error("Real part didn't match.");
+        if (std::abs(in[idx]-backin[idx]) > closeEnough) {
+            std::cerr << "In testFFTW2DReal" << std::endl;
+            std::cerr << "in = " << in[idx] << std::endl;
+            std::cerr << "backin = " << backin[idx] << std::endl;
+            throw std::runtime_error("Real part didn't match.");
+        }
     }
     
     // Free
@@ -229,7 +247,12 @@ void testFFTWNDReal(int rank)
     
     // Compare
     for (int idx=0; idx<NReal; idx++) {
-        if (std::abs(in[idx]-backin[idx]) > closeEnough) throw std::runtime_error("Real part didn't match.");
+        if (std::abs(in[idx]-backin[idx]) > closeEnough) {
+            std::cerr << "In testFFTWNDReal" << std::endl;
+            std::cerr << "in = " << in[idx] << std::endl;
+            std::cerr << "backin = " << backin[idx] << std::endl;
+            throw std::runtime_error("Real part didn't match.");
+        }
     }
     
     // Free

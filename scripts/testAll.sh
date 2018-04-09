@@ -1,4 +1,8 @@
+#!/bin/sh
 set -e
+
+# The directory this script is in
+DIR=`dirname "$(readlink -f "$0")"`
 
 while getopts 'v' flag; do
   case "${flag}" in
@@ -6,12 +10,12 @@ while getopts 'v' flag; do
   esac
 done
 
-sh debug.sh
+${DIR}/debug.sh
 cd build-debug
 ctest ${ctest_verbose}
 cd ..
 
-sh release.sh
+${DIR}/release.sh
 cd build-release
 ctest ${ctest_verbose}
 cd ..

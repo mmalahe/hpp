@@ -1,92 +1,23 @@
-Mandatory dependencies:
------------------------
-C/C++ dependencies:
-- [FFTW](http://www.fftw.org/download.html) 3.3.5 or greater
+# Overview
 
-CUDA:
-- Toolkit version 7.5 or higher.
+High Performance Plasticity is a library of optimised crystal plasticity implementations for high-performance hardware. It has been primarily developed as a reference implementation for the GPU-accelerated spectral crystal plasticity approach presented in [An efficient spectral crystal plasticity solver for GPU architectures](https://doi.org/10.1007/s00466-018-1565-x). If you use this implementation in your research, please cite that work.
 
-Python modules:
-- scipy
-- numpy
-- recordclass
-- matplotlib
+It also contains an optimised implementation and the test cases for the iterative crystal plasticity approach in Kalidindi SR, Bronkhorst CA, Anand L (1992) Crystallographic texture evolution in bulk deformation processing of FCC metals. *J Mech Phys Solids* 40(3):537–569.
 
-Optional dependencies
----------------------
+For comparisons, it also contains implementations of the test cases from:
+- Mihaila B, Knezevic M, Cardenas A (2014) Three orders of magnitude improved efficiency with high-performance spectral crystal plasticity on GPU platforms. *Int J Numer Meth Eng* 97(11):785–798.
+- Savage DJ, Knezevic M (2015) Computer implementations of iterative and non-iterative crystal plasticity solvers on high performance graphics hardware. *Comput Mech* 56(4):677–690.
 
-Boost.Python:
-- Allows for the Python interface to the library to be built.
+## Installation
+- [Installation instructions](doc/install.md)
 
-Doxygen and doxypypy:
-- Allow for generation of documentation
-- Doxygen: "sudo apt-get install doxygen"
-- doxypypy: "conda install doxypypy". Likely that there won't be an official one. In that case, pick a channel from the list. e.g. "conda install -c chen doxypypy".
+## Documentation
+- [API Documentation](https://mmalahe.com/hpp/doc)
+	- If you have Doxygen, you can also generate this yourself by going into the doc folder and running `doxygen`.
+- [Examples](doc/examples.md)
 
-ffmpeg:
-- Allows for creation of videos
+## License
+- [License](./LICENSE). This library uses the LGPL version 2.1. that requires that derived works be licensed under the same license, but works that only link to this project (as e.g. a shared library) do not fall under that restriction. Roughly-speaking, if you're using it for research purposes all is peachy, and if you're using it for commercial purposes you need to make sure the code in this library stays separated from your core code. This library also contains individual files acquired from other projects with different licenses displayed prominently at the top of those files.
 
-Default building instructions
------------------------------
-We recommend an out of source CMake build. The easiest is to run
-~~~~
-sh release.sh
-~~~~
-which will create the build in the directory build-release. This build script does the following steps, which you can do manually for a more precise configuration.
-
-Make the build directory and enter it:
-~~~~
-mkdir -p build-release
-cd build-release
-~~~~
-
-Configure the build
-~~~~
-cmake .. -DCMAKE_BUILD_TYPE=Release
-~~~~
-You may want to provide a custom installation directory, in which case instead run
-~~~~
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/my/custom/install/dir
-~~~~
-
-Build:
-~~~~
-make -j 8
-~~~~
-
-Default installation instructions
----------------------------------
-Enter the build directory, which will be "build-release" for the default settings, and run
-~~~~
-make install
-~~~~
-
-Custom build options
---------------------
-At the configuration step there are a number of options available.
-
-Installing custom FFTW
-----------------------
-You may need to build your own FFTW (http://www.fftw.org/download.html) if your package manager doesn't provide 3.3.5 and above.
-
-Configure it like this (assuming you want a non-default path, otherwise leave off "--prefix=..."):
-~~~~
-./configure --prefix=/your/install/prefix \
---enable-shared \
---enable-mpi \
---enable-openmp \
---enable-threads
-~~~~
-Optionally also include instructions available on your machine:
-~~~~
-./configure --prefix=/your/install/prefix \
---enable-shared \
---enable-mpi \
---enable-openmp \
---enable-threads \
---enable-sse2 \
---enable-avx \
---enable-avx2 \
---enable-fma
-~~~~
-
+## Continuous integration status
+[![Build Status](https://travis-ci.org/mmalahe/hpp.png)](https://travis-ci.org/mmalahe/hpp)

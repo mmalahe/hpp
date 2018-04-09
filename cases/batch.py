@@ -16,7 +16,7 @@ setPlotDefaults('journal')
 do_iterative_solve = False
 do_spectral_solve = True
 
-do_iterative_solve_plot = True
+do_iterative_solve_plot = False
 do_spectral_solve_plot = True
 
 error_study_type = None
@@ -45,15 +45,15 @@ general_params['do_profile'] = False
 # Problem parameters
 problem_params = OrderedDict()
 problem_params['default_seed'] = True
-#~ problem_params['n_crystals'] = 390000000
+problem_params['n_crystals'] = 300000000
 #~ problem_params['n_crystals'] = 2*22*768*2**5
-problem_params['n_crystals'] = 2**16
+#~ problem_params['n_crystals'] = 2**16
 #~ problem_params['n_crystals'] = 2*768
 #~ problem_params['n_crystals'] = [33*2**i for i in range(7,18,1)]
 problem_params['experiment_name'] = []
 #~ problem_params['experiment_name'].append('plane_strain_compression_grid_texture')
 #~ problem_params['experiment_name'].append('simple_shear_grid_texture')
-problem_params['experiment_name'].append('mihaila2014_simple_shear')
+#~ problem_params['experiment_name'].append('mihaila2014_simple_shear')
 problem_params['experiment_name'].append('mihaila2014_plane_strain_compression')
 #~ problem_params['experiment_name'].append('savage2015_plane_strain_compression')
 #~ problem_params['experiment_name'].append('kalidindi1992_simple_shear')
@@ -73,9 +73,9 @@ spectral_db_params['use_unified_coeff_order'] = True
 # Plotting parameters
 ss_figure_title = None
 plotting_params = OrderedDict()
-plotting_params['do_plot_pole_figures'] = False
-plotting_params['histogram_smoothing_per_pixel'] = 0.01
-plotting_params['pole_figure_timestep_selection'] = [50]
+plotting_params['do_plot_pole_figures'] = True
+plotting_params['histogram_smoothing_per_pixel'] = 0.00
+plotting_params['pole_figure_timestep_selection'] = list(range(51))
 
 # Iterative solve parameters
 iterative_solve_verbose = True

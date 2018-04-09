@@ -29,11 +29,11 @@ find_package(OpenMP REQUIRED)
 find_package(MPI REQUIRED)
 include_directories(${MPI_CXX_INCLUDE_PATH})
 
-# LAPACK
-find_package(LAPACK REQUIRED)
-
 # BLAS
 find_package(BLAS REQUIRED)
+
+# LAPACK
+find_package(LAPACK REQUIRED)
 
 # Eigen
 find_package(Eigen REQUIRED)

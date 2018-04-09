@@ -4,8 +4,8 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Spectral Crystal Plasticity"
-PROJECT_NUMBER         = 0.01
+PROJECT_NAME           = "High Performance Plasticity"
+PROJECT_NUMBER         = 0.5.0
 PROJECT_BRIEF          = 
 PROJECT_LOGO           = 
 OUTPUT_DIRECTORY       = 
@@ -114,11 +114,15 @@ WARN_LOGFILE           =
 INPUT                  = ../src \
                          ../test \
                          ../include/hpp \
-                         ../test
+                         ../test \
+						 mainpage.md \
+						 install.md \
+						 examples.md
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
+                         *.cu \
                          *.cpp \
                          *.c++ \
                          *.java \
@@ -172,7 +176,7 @@ INPUT_FILTER           =
 FILTER_PATTERNS        = *.py=py_filter 
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS = 
-USE_MDFILE_AS_MAINPAGE = 
+USE_MDFILE_AS_MAINPAGE = mainpage.md
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
@@ -233,7 +237,7 @@ QHG_LOCATION           =
 GENERATE_ECLIPSEHELP   = NO
 ECLIPSE_DOC_ID         = org.doxygen.Project
 DISABLE_INDEX          = NO
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO

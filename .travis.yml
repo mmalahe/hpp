@@ -1,0 +1,19 @@
+language: C++
+
+dist: trusty
+
+sudo: required
+
+services:
+    - docker
+
+compiler: gcc
+
+before_install:
+    - docker build -t hpp .
+
+install: 
+    - docker run hpp /bin/sh -c "/app/scripts/testAll.sh -v"
+
+script:
+    - pwd
