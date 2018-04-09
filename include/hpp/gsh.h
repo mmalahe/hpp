@@ -194,17 +194,26 @@ class GSHCoeffs {
             return vals;
         }
         
-        int nl0 = 2*0*(0+1)+1;
-        int nl1 = 2*1*(1+1)+1;
-        int nl2 = 2*2*(2+1)+1;
-        int nl3 = 2*3*(3+1)+1;
-        int nl4 = 2*4*(4+1)+1;
+        int nl0 = 2*0*(0+1)+1;//1
+        int nl1 = 2*1*(1+1)+1;//5
+        int nl2 = 2*2*(2+1)+1;//13
+        int nl3 = 2*3*(3+1)+1;//25
+        int nl4 = 2*4*(4+1)+1;//41
         std::complex<T> l0[2*0*(0+1)+1];
         std::complex<T> l1[2*1*(1+1)+1];
         std::complex<T> l2[2*2*(2+1)+1];
         std::complex<T> l3[2*3*(3+1)+1];
         std::complex<T> l4[2*4*(4+1)+1];
 };
+
+constexpr int nGSHReals(unsigned int nLevels) {
+    return nLevels == 1 ? 2 : 
+    (nLevels == 2 ? 12  : 
+    (nLevels == 3 ? 38 : 
+    (nLevels == 4 ? 88 : 
+    (nLevels == 5 ? 129 : -1 
+    ))));
+}
 
 template <typename T>
 GSHCoeffs<T> operator+(const GSHCoeffs<T>& coeffs1, const GSHCoeffs<T>& coeffs2) {

@@ -197,6 +197,31 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
+        __host__ std::vector<T> getReals(unsigned int nLevels) {
+            if (nLevels < 1 || nLevels > 5) {
+                std::cerr << "nLevels = " << nLevels << std::endl;
+                throw std::runtime_error("Number of levels should be betweeen 1 and 5.");
+            }
+            std::vector<T> reals = this->getl0Reals();
+            if (nLevels >= 2) {
+                auto level = this->getl1Reals();
+                reals.insert(reals.end(), level.begin(), level.end());
+            }
+            if (nLevels >= 3) {
+                auto level = this->getl2Reals();
+                reals.insert(reals.end(), level.begin(), level.end());
+            }
+            if (nLevels >= 4) {
+                auto level = this->getl3Reals();
+                reals.insert(reals.end(), level.begin(), level.end());
+            }
+            if (nLevels >= 5) {
+                auto level = this->getl4Reals();
+                reals.insert(reals.end(), level.begin(), level.end());
+            }
+            return reals;
+        }
+        
         int nl0 = 2*0*(0+1)+1;
         int nl1 = 2*1*(1+1)+1;
         int nl2 = 2*2*(2+1)+1;
