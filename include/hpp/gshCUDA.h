@@ -236,6 +236,27 @@ __host__ __device__ void operator+=(GSHCoeffsCUDA<T>& A, const GSHCoeffsCUDA<T>&
 }
 
 template <typename T>
+__host__ __device__ GSHCoeffsCUDA<T> operator*(T val, const GSHCoeffsCUDA<T>& coeffs) {
+    GSHCoeffsCUDA<T> res;
+    for (int i=0; i<res.nl0; i++) {
+        res.l0[i] = val*coeffs.l0[i];
+    }
+    for (int i=0; i<res.nl1; i++) {
+        res.l1[i] = val*coeffs.l1[i];
+    }
+    for (int i=0; i<res.nl2; i++) {
+        res.l2[i] = val*coeffs.l2[i];
+    }
+    for (int i=0; i<res.nl3; i++) {
+        res.l3[i] = val*coeffs.l3[i];
+    }
+    for (int i=0; i<res.nl4; i++) {
+        res.l4[i] = val*coeffs.l4[i];
+    }
+    return res;
+}
+
+template <typename T>
 __host__ __device__ GSHCoeffsCUDA<T> operator/(const GSHCoeffsCUDA<T>& coeffs, T val) {
     GSHCoeffsCUDA<T> res;
     for (int i=0; i<res.nl0; i++) {

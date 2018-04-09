@@ -170,7 +170,10 @@ template<typename T, unsigned int N, unsigned int P>
 __global__ void SPECTRAL_POLYCRYSTAL_STEP_UNIFIED(unsigned int nCrystals, SpectralCrystalCUDA<T>* crystals, CrystalPropertiesCUDA<T,N>* props, 
 Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T eDot,  T dt, SpectralDatabaseUnifiedCUDA<T,4,P>* db, Tensor2CUDA<T,3,3> *TCauchyPerBlockSums);
 
-// GSH kernel
+// GSH conversions
+template<typename T>
+__global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, T* densities);
+
 template<typename T>
 __global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
 
@@ -218,6 +221,8 @@ public:
     // Output
     std::vector<EulerAngles<T>> getEulerAnglesZXZActive();
     GSHCoeffsCUDA<T> getGSHCoeffs();
+    GSHCoeffsCUDA<T> getDensityWeightedGSH(const std::vector<T>& densities);
+    std::vector<T> getDensitiesFromGSH(const GSHCoeffsCUDA<T> coeffs);    
     Tensor2<T> getPoleHistogram(int p0, int p1, int p2);
     void writeResultHDF5(std::string filename);
     
@@ -343,8 +348,7 @@ public:
         densities = std::vector<T>(orientationSpace.size(), 1.0/orientationSpace.size());
     }    
     
-    // Simulation
-    void resetUniformRandomOrientations(T init_s) {
+    void resetSamplingOrientations(T init_s) {
         std::vector<EulerAngles<T>> angleList(orientationSpace.size());
         for (unsigned int i=0; i<orientationSpace.size(); i++) {
             angleList[i] = orientationSpace.getEulerAngle(i);            
@@ -352,13 +356,33 @@ public:
         polycrystal.resetGivenOrientations(init_s, angleList);
     }
     
+    // Simulation
+    void resetUniformRandomOrientations(T init_s) {
+        // Orientation sampling points remain uniform
+        this->resetSamplingOrientations(init_s);
+        
+        // Density at each point is uniform
+        for (auto& density : densities) {
+            density = 1.0/orientationSpace.size();
+        }
+    }
+    
     void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
-        ;
+        // Orientation sampling points remain uniform
+        this->resetSamplingOrientations(init_s);
+        
+        // Density at each point is determined by GSH coefficients
+        densities = polycrystal.getDensitiesFromGSH(coeffs);
+    }
+    
+    void step(const hpp::Tensor2<T>& L_next, T dt) {
+        polycrystal.step(L_next, dt);
     }
     
     // Output
-    // need to do a density-weighted GSH calculation here
-    GSHCoeffsCUDA<T> getGSHCoeffs() {;}
+    GSHCoeffsCUDA<T> getGSHCoeffs() {
+        return polycrystal.getDensityWeightedGSH(densities);
+    }
 protected:
 
 private:

@@ -339,6 +339,16 @@ __inline__ __host__ __device__ cuDoubleComplex operator+(cuDoubleComplex z, cuDo
     return cuCadd(z, w);
 }
 
+__inline__ __host__ __device__ void operator+=(cuFloatComplex& z, const cuFloatComplex& w) {
+    z.x = z.x + w.x;
+    z.y = z.y + w.y;
+}
+
+__inline__ __host__ __device__ void operator+=(cuDoubleComplex& z, const cuDoubleComplex& w) {
+    z.x = z.x + w.x;
+    z.y = z.y + w.y;
+}
+
 template<typename T>
 __inline__ __host__ __device__ typename cuTypes<T>::complex operator/(const typename cuTypes<T>::complex z, T a) {
     return make_cuComplex(z.x/a, z.y/a);
@@ -362,6 +372,12 @@ __inline__ __host__ __device__ typename cuTypes<T>::complex operator-(const type
 template<typename T>
 __inline__ __host__ __device__ typename cuTypes<T>::complex operator+(const typename cuTypes<T>::complex& z, T a) {
     return make_cuComplex(z.x+a, z.y);
+}
+
+template <typename T>
+__inline__ __host__ __device__ void operator+=(typename cuTypes<T>::complex& z, const typename cuTypes<T>::complex& w) {
+    z.x += w.x;
+    z.y += w.y;
 }
 
 __inline__ __host__ __device__ cuFloatComplex operator-(const cuFloatComplex& z) {
