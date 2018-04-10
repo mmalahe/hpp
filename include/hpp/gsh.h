@@ -206,6 +206,10 @@ class GSHCoeffs {
         std::complex<T> l4[2*4*(4+1)+1];
 };
 
+constexpr int nGSHCoeffsInLevel(unsigned int iLevel) {
+    return 2*iLevel*(iLevel+1)+1;
+}
+
 constexpr int nGSHReals(unsigned int nLevels) {
     return nLevels == 1 ? 2 : 
     (nLevels == 2 ? 12  : 

@@ -8,6 +8,7 @@
 HPP_CHECK_CUDA_ENABLED_BUILD
 #include <cuComplex.h>
 #include <hpp/cudaUtils.h>
+#include <hpp/gsh.h>
 
 namespace hpp
 {
@@ -197,6 +198,62 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
+        __host__ GSHCoeffsCUDA(const std::vector<T>& inputReals, int nLevels) {
+            // Checks
+            if (nLevels < 1 || nLevels > 5) {
+                std::cerr << "nLevels = " << nLevels << std::endl;
+                throw std::runtime_error("Number of levels should be betweeen 1 and 5.");
+            }
+            int nReals = inputReals.size()
+            if (nReals != nGSHReals(nLevels)) {
+                std::cerr << "inputReals.size() = " << nReals;
+                std::cerr << "nGSHReals(nLevels) = " << nGSHReals(nLevels);
+                throw std::runtime_error("Mismatch in number of real values for the number of GSH levels.");
+            }            
+            
+            // Populate
+            int offset = 0;
+            if (nLevels >= 1) {
+                for (int i=0; i<nl0; i++) {
+                    int idx = offset+2*i;
+                    l0[i].x = inputReals[idx];
+                    l0[i].y = inputReals[idx+1];
+                }
+            }
+            if (nLevels >= 2) {
+                offset += nl0*2;
+                for (int i=0; i<nl1; i++) {
+                    int idx = offset+2*i;
+                    l1[i].x = inputReals[idx];
+                    l1[i].y = inputReals[idx+1];
+                }
+            }
+            if (nLevels >= 3) {
+                offset += nl1*2;
+                for (int i=0; i<nl2; i++) {
+                    int idx = offset+2*i;
+                    l2[i].x = inputReals[idx];
+                    l2[i].y = inputReals[idx+1];
+                }
+            }
+            if (nLevels >= 4) {
+                offset += nl2*2;
+                for (int i=0; i<nl3; i++) {
+                    int idx = offset+2*i;
+                    l3[i].x = inputReals[idx];
+                    l3[i].y = inputReals[idx+1];
+                }
+            }
+            if (nLevels >= 5) {
+                offset += nl3*2;
+                for (int i=0; i<nl4; i++) {
+                    int idx = offset+2*i;
+                    l4[i].x = inputReals[idx];
+                    l4[i].y = inputReals[idx+1];
+                }
+            }
+        } 
+        
         __host__ std::vector<T> getReals(unsigned int nLevels) {
             if (nLevels < 1 || nLevels > 5) {
                 std::cerr << "nLevels = " << nLevels << std::endl;
@@ -222,16 +279,16 @@ class GSHCoeffsCUDA {
             return reals;
         }
         
-        int nl0 = 2*0*(0+1)+1;
-        int nl1 = 2*1*(1+1)+1;
-        int nl2 = 2*2*(2+1)+1;
-        int nl3 = 2*3*(3+1)+1;
-        int nl4 = 2*4*(4+1)+1;
-        typename cuTypes<T>::complex l0[2*0*(0+1)+1];
-        typename cuTypes<T>::complex l1[2*1*(1+1)+1];
-        typename cuTypes<T>::complex l2[2*2*(2+1)+1];
-        typename cuTypes<T>::complex l3[2*3*(3+1)+1];
-        typename cuTypes<T>::complex l4[2*4*(4+1)+1];
+        static const int nl0 = nGSHCoeffsInLevel(0);
+        static const int nl1 = nGSHCoeffsInLevel(1);
+        static const int nl2 = nGSHCoeffsInLevel(2);
+        static const int nl3 = nGSHCoeffsInLevel(3);
+        static const int nl4 = nGSHCoeffsInLevel(4);
+        typename cuTypes<T>::complex l0[nl0];
+        typename cuTypes<T>::complex l1[nl1];
+        typename cuTypes<T>::complex l2[nl2];
+        typename cuTypes<T>::complex l3[nl3];
+        typename cuTypes<T>::complex l4[nl4];
 };
 
 template <typename T>
