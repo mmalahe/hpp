@@ -204,7 +204,7 @@ class GSHCoeffsCUDA {
                 std::cerr << "nLevels = " << nLevels << std::endl;
                 throw std::runtime_error("Number of levels should be betweeen 1 and 5.");
             }
-            int nReals = inputReals.size()
+            int nReals = inputReals.size();
             if (nReals != nGSHReals(nLevels)) {
                 std::cerr << "inputReals.size() = " << nReals;
                 std::cerr << "nGSHReals(nLevels) = " << nGSHReals(nLevels);
