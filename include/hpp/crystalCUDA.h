@@ -324,7 +324,7 @@ public:
     SpectralPolycrystalGSHCUDA(){;}    
     SpectralPolycrystalGSHCUDA(const CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, const T init_s) {
         // Number of points in the orientation space = 72*8^{r}, where r is the resolution
-        unsigned int orientationSpaceResolution = 6; 
+        unsigned int orientationSpaceResolution = 5; 
         switch (CRYSTAL_TYPE) {
             case CRYSTAL_TYPE_NONE:
                 orientationSpace = SO3Discrete<T>(orientationSpaceResolution);
