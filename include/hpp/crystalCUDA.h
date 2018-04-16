@@ -7,9 +7,10 @@
 #ifndef HPP_CRYSTAL_CUDA_H
 #define HPP_CRYSTAL_CUDA_H
 
-
 #include <hpp/config.h>
 HPP_CHECK_CUDA_ENABLED_BUILD
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
 #include <type_traits>
 #include <hpp/rotation.h>
 #include <hpp/cudaUtils.h>
@@ -239,7 +240,7 @@ private:
     // List of crystals
     unsigned int nCrystals;
     unsigned int nCrystalPairs;
-    std::shared_ptr<SpectralCrystalCUDA<T>> crystalsD;
+    thrust::device_vector<SpectralCrystalCUDA<T>> crystalsD;
     
     // Crystal properties
     std::shared_ptr<CrystalPropertiesCUDA<T,N>> crystalPropsD;
@@ -259,7 +260,7 @@ private:
     
     // Global
     Tensor2CUDA<T,3,3> TCauchyGlobalH;
-    std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyGlobalD;
+    thrust::device_vector<Tensor2CUDA<T,3,3>> TCauchyGlobalD;
     
     // Hardware configuration
     int deviceID;
@@ -272,10 +273,10 @@ private:
     CudaKernelConfig gshReduceKernelLevel1Cfg;
     
     // Working memory
-    std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyPerBlockSums;
-    std::shared_ptr<Tensor2CUDA<T,3,3>> TCauchyLevel0Sums;
-    std::shared_ptr<GSHCoeffsCUDA<T>> gshPerBlockSums;
-    std::shared_ptr<GSHCoeffsCUDA<T>> gshLevel0Sums;
+    thrust::device_vector<Tensor2CUDA<T,3,3>> TCauchyPerBlockSums;
+    thrust::device_vector<Tensor2CUDA<T,3,3>> TCauchyLevel0Sums;
+    thrust::device_vector<GSHCoeffsCUDA<T>> gshPerBlockSums;
+    thrust::device_vector<GSHCoeffsCUDA<T>> gshLevel0Sums;
     
     // Stress-strain history
     std::vector<T> tHistory;
