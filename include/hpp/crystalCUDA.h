@@ -322,7 +322,7 @@ class SpectralPolycrystalGSHCUDA
 public:    
     // Constructors
     SpectralPolycrystalGSHCUDA(){;}    
-    SpectralPolycrystalGSHCUDA(CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, T init_s) {
+    SpectralPolycrystalGSHCUDA(const CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, const T init_s) {
         // Number of points in the orientation space = 72*8^{r}, where r is the resolution
         unsigned int orientationSpaceResolution = 6; 
         switch (CRYSTAL_TYPE) {

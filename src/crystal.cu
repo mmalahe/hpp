@@ -2502,7 +2502,5 @@ template class CrystalPropertiesCUDA<float,12>;
 template class CrystalPropertiesCUDA<double,12>;
 template class SpectralPolycrystalCUDA<float,12>;
 template class SpectralPolycrystalCUDA<double,12>;
-template class SpectralPolycrystalGSHCUDA<float, CRYSTAL_TYPE_FCC>;
-template class SpectralPolycrystalGSHCUDA<double, CRYSTAL_TYPE_FCC>;
 
 }//END NAMESPACE HPP
