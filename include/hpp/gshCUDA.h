@@ -153,7 +153,7 @@ class GSHCoeffsCUDA {
             }
         }
         
-        __host__ std::vector<T> getl0Reals() {
+        __host__ std::vector<T> getl0Reals() const {
             std::vector<T> vals(2*nl0);
             for (int i=0; i<nl0; i++) {
                 vals[2*i] = l0[i].x;
@@ -162,7 +162,7 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
-        __host__ std::vector<T> getl1Reals() {
+        __host__ std::vector<T> getl1Reals() const {
             std::vector<T> vals(2*nl1);
             for (int i=0; i<nl1; i++) {
                 vals[2*i] = l1[i].x;
@@ -171,7 +171,7 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
-        __host__ std::vector<T> getl2Reals() {
+        __host__ std::vector<T> getl2Reals() const {
             std::vector<T> vals(2*nl2);
             for (int i=0; i<nl2; i++) {
                 vals[2*i] = l2[i].x;
@@ -180,7 +180,7 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
-        __host__ std::vector<T> getl3Reals() {
+        __host__ std::vector<T> getl3Reals() const {
             std::vector<T> vals(2*nl3);
             for (int i=0; i<nl3; i++) {
                 vals[2*i] = l3[i].x;
@@ -189,7 +189,7 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
-        __host__ std::vector<T> getl4Reals() {
+        __host__ std::vector<T> getl4Reals() const {
             std::vector<T> vals(2*nl4);
             for (int i=0; i<nl4; i++) {
                 vals[2*i] = l4[i].x;
@@ -254,7 +254,7 @@ class GSHCoeffsCUDA {
             }
         } 
         
-        __host__ std::vector<T> getReals(unsigned int nLevels) {
+        __host__ std::vector<T> getReals(unsigned int nLevels) const {
             if (nLevels < 1 || nLevels > 5) {
                 std::cerr << "nLevels = " << nLevels << std::endl;
                 throw std::runtime_error("Number of levels should be betweeen 1 and 5.");
