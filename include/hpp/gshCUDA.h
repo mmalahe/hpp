@@ -279,6 +279,10 @@ class GSHCoeffsCUDA {
             return reals;
         }
         
+        __host__ std::vector<T> getReals() const {
+            return this->getReals(5);
+        }
+        
         static const int nl0 = nGSHCoeffsInLevel(0);
         static const int nl1 = nGSHCoeffsInLevel(1);
         static const int nl2 = nGSHCoeffsInLevel(2);
@@ -357,6 +361,13 @@ __host__ __device__ GSHCoeffsCUDA<T> operator/(const GSHCoeffsCUDA<T>& coeffs, T
         res.l4[i] = coeffs.l4[i]/val;
     }
     return res;
+}
+
+template <typename T>
+__host__ std::ostream& operator<<(std::ostream& out, const GSHCoeffsCUDA<T>& gsh)
+{
+    out << gsh.getReals();
+    return out;
 }
 
 // PARALLEL REDUCTION //
