@@ -546,7 +546,6 @@ __global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const Spectr
     
     // Dummy variables
     int l;
-    T normFactor;
     int m, n;
     typename cuTypes<T>::complex expMult;
     typename cuTypes<T>::complex P;    
@@ -2326,8 +2325,9 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
 }
 
 template <typename T, unsigned int N>
-GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getDensityWeightedGSH(const std::vector<T>& densities) { 
+GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getDensityWeightedGSH(const std::vector<T>& densitiesIn) { 
     // Check densities
+    auto densities = densitiesIn;
     if (densities.size() != nCrystals) {
         std::cerr << "nDensities = " << densities.size() << std::endl;
         std::cerr << "nCrystals = " << nCrystals << std::endl;
@@ -2339,7 +2339,15 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getDensityWeightedGSH(const std::
     }
     if (std::abs(densitySum-1.0) > 1000.0*std::numeric_limits<T>::epsilon()) {
         std::cerr << "Density sum = " << densitySum << std::endl;
-        throw std::runtime_error("Densities don't sum to 1.0.");
+        if (std::abs(densitySum-1.0) > 0.1) {
+            std::runtime_error("ERROR: Major deviation in density sum, should be 1.0.");
+        }
+        else {
+            std::cerr << "WARNING: Minor deviation in density sum, adjusting them internally.";
+            for (auto& density : densities) {
+                density /= densitySum;
+            }
+        }
     }
     
     // Device and host memory
