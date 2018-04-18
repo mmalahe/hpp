@@ -15,6 +15,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include "mpi.h"
 #include <hpp/config.h>
@@ -325,6 +326,11 @@ void writeSingleHDF5Value(hid_t dset_id, hid_t plist_id, std::vector<hsize_t> gr
 }
 
 std::vector<hsize_t> getDatasetDims(hid_t dset_id);
+
+inline bool fileExists(const std::string& name) {
+    std::ifstream f(name.c_str());
+    return f.good();
+}
 
 /**
  * @class HDF5Handler

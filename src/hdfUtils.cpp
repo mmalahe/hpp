@@ -74,7 +74,12 @@ HDF5Handler::HDF5Handler(std::string filename, MPI_Comm comm, bool doCreate) {
     if (doCreate) {
         hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, this->plist_id_file_access);
         HDFCHECK(H5Fclose(file));
-    }    
+    }
+    else {
+        if (!fileExists(filename)) {
+            throw std::runtime_error(std::string("Can't find HDF5 file ")+filename);
+        }
+    }
 
     // Open file collectively with parallel I/O access    
     file_id = H5Fopen(filename.c_str(), H5F_ACC_RDWR, this->plist_id_file_access);
@@ -114,7 +119,12 @@ HDF5Handler::HDF5Handler(std::string filename, bool doCreate) {
     if (doCreate) {
         hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, this->plist_id_file_access);
         HDFCHECK(H5Fclose(file));
-    }    
+    }
+    else {
+        if (!fileExists(filename)) {
+            throw std::runtime_error(std::string("Can't find HDF5 file ")+filename);
+        }
+    }
 
     // Open file   
     file_id = H5Fopen(filename.c_str(), H5F_ACC_RDWR, this->plist_id_file_access);
