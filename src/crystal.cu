@@ -2324,6 +2324,27 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() {
     return coeffsH;
 }
 
+template <typename T>
+void ensureUnitDensitySum(std::vector<T>& densities) {
+    T densitySum = 0.0;
+    for (const auto& density : densities) {
+        densitySum += density;
+    }
+    if (std::abs(densitySum-1.0) > densities.size()*std::numeric_limits<T>::epsilon()) {
+        std::cerr << "Density sum = " << densitySum << std::endl;
+        if (std::abs(densitySum-1.0) > 0.1) {
+            std::runtime_error("ERROR: Major deviation in density sum, should be 1.0.");
+        }
+        else {
+            std::cerr << "WARNING: Minor deviation in density sum, adjusting them internally." << std::endl;
+            for (auto& density : densities) {
+                density /= densitySum;
+            }
+        }
+        ensureUnitDensitySum<T>(densities);
+    }    
+}
+
 template <typename T, unsigned int N>
 GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getDensityWeightedGSH(const std::vector<T>& densitiesIn) { 
     // Check densities
@@ -2333,22 +2354,7 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getDensityWeightedGSH(const std::
         std::cerr << "nCrystals = " << nCrystals << std::endl;
         throw std::runtime_error("Mismatch between number of densities provided and number of crystals.");
     }
-    T densitySum = 0.0;
-    for (const auto& density : densities) {
-        densitySum += density;
-    }
-    if (std::abs(densitySum-1.0) > 1000.0*std::numeric_limits<T>::epsilon()) {
-        std::cerr << "Density sum = " << densitySum << std::endl;
-        if (std::abs(densitySum-1.0) > 0.1) {
-            std::runtime_error("ERROR: Major deviation in density sum, should be 1.0.");
-        }
-        else {
-            std::cerr << "WARNING: Minor deviation in density sum, adjusting them internally.";
-            for (auto& density : densities) {
-                density /= densitySum;
-            }
-        }
-    }
+    ensureUnitDensitySum(densities);
     
     // Device and host memory
     auto coeffsSumD = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>();

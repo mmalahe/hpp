@@ -23,7 +23,7 @@ void testGSHCUDA()
     gshRealsIn[0] = 1.0;
     gshRealsIn[1] = 0.0;
     for (int i=2; i<nReals; i++) {
-        gshRealsIn[i] = i; 
+        gshRealsIn[i] = i;
     }
     GSHCoeffsCUDA<T> gsh(gshRealsIn, nGSHLevels);
     auto gshRealsOut = gsh.getReals(nGSHLevels);
