@@ -163,6 +163,7 @@ enable_testing()
 # Things added after these will not be propagated down
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/cases)
 
 # Report
 message(STATUS "Options:")
@@ -176,6 +177,7 @@ if (${HPP_USE_CUDA})
 else()
     message(STATUS "    CUDA: ${HPP_USE_CUDA}")
 endif()
+
 # Installation of cmake configuration information
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
