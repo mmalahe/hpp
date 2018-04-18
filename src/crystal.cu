@@ -2333,7 +2333,7 @@ void ensureUnitDensitySum(std::vector<T>& densities) {
     if (std::abs(densitySum-1.0) > densities.size()*std::numeric_limits<T>::epsilon()) {
         std::cerr << "Density sum = " << densitySum << std::endl;
         if (std::abs(densitySum-1.0) > 0.1) {
-            std::runtime_error("ERROR: Major deviation in density sum, should be 1.0.");
+            throw std::runtime_error("ERROR: Major deviation in density sum, should be 1.0.");
         }
         else {
             std::cerr << "WARNING: Minor deviation in density sum, adjusting them internally." << std::endl;
