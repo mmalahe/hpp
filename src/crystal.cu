@@ -1565,9 +1565,12 @@ GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystal
     if (reduceKernelCfg.dG.x <= 1) {
         BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<reduceKernelCfg.dG, reduceKernelCfg.dB>>>(gshPerBlockSums.get(), gshFullSumD.get(), nComputeBlocks);
     }
-    else {
-        std::cerr << "Too many blocks for reduce kernel. Need multiple reductions." << std::endl;
-        throw std::runtime_error("Not configured for this many blocks.");
+    // Two level reduction
+    else{
+        auto reduceKernelLevel1Cfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_KEPLER_GSH_COEFFS<T>, reduceKernelCfg.dG.x);
+        auto gshLevel0Sums = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>(reduceKernelCfg.dG.x);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<reduceKernelCfg.dG, reduceKernelCfg.dB>>>(gshPerBlockSums.get(), gshLevel0Sums.get(), nComputeBlocks);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<reduceKernelLevel1Cfg.dG, reduceKernelLevel1Cfg.dB>>>(gshLevel0Sums.get(), gshFullSumD.get(), reduceKernelCfg.dG.x);
     }
     
     // Return

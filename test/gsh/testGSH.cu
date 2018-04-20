@@ -9,6 +9,7 @@ HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/rotation.h>
 #include <hpp/crystalCUDA.h>
 #include <hpp/gshCUDA.h>
+#include <hpp/rotation.h>
 #include <stdexcept>
 #include <iostream>
 #include <limits>
@@ -25,6 +26,19 @@ std::vector<SpectralCrystalCUDA<T>> generateUniformlyOrientedCrystals(unsigned i
     for (unsigned int i=0; i<orientationSpace.size(); i++) {
         crystals[i].s = initS;
         crystals[i].angles = orientationSpace.getEulerAngle(i);            
+    }
+    return crystals;
+}
+
+template <typename T>
+std::vector<SpectralCrystalCUDA<T>> generateRandomlyOrientedCrystals(unsigned int ncrystals) {
+    std::vector<SpectralCrystalCUDA<T>> crystals(ncrystals);
+    T initS = 0.0; //immaterial what this is, we only care about the angles
+    auto R = randomRotationTensor<T>(3);
+    for (unsigned int i=0; i<ncrystals; i++) {
+        randomRotationTensorInPlace(3, R);
+        crystals[i].s = initS;
+        crystals[i].angles = getEulerZXZAngles(R);
     }
     return crystals;
 }
@@ -62,7 +76,8 @@ void testGSHCUDAVectorInOut() {
 template <typename T>
 void testGSHCUDAUniformOrientation() {
     // Generate crystals to draw orientations from
-    auto crystals = generateUniformlyOrientedCrystals<T>();
+//    auto crystals = generateUniformlyOrientedCrystals<T>();
+    auto crystals = generateRandomlyOrientedCrystals<T>(std::pow(2, 20));
     std::cout << getGSHFromCrystalOrientations(crystals) << std::endl;
 }
 
