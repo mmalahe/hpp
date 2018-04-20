@@ -9,6 +9,8 @@ HPP_CHECK_CUDA_ENABLED_BUILD
 #include <cuComplex.h>
 #include <hpp/cudaUtils.h>
 #include <hpp/gsh.h>
+#include <limits>
+#include <iomanip>
 
 namespace hpp
 {
@@ -51,7 +53,7 @@ class GSHCoeffsCUDA {
             }
         }
         
-        __host__ __device__ bool isInSymmetrizedSection(int l, int m, int n) {
+        __host__ __device__ bool isInSymmetrizedSection(int l, int m, int n) const {
             int L = 2*l+1;
             int nElements = (L*L+1)/2;
             int mIdx = m+l;
@@ -64,7 +66,7 @@ class GSHCoeffsCUDA {
             }
         }
         
-        __host__ __device__ unsigned int getFlatIdx(int l, int m, int n) {
+        __host__ __device__ unsigned int getFlatIdx(int l, int m, int n) const {
             // If lower triangular, switch to upper triangular section
             if (this->isInSymmetrizedSection(l,m,n)) {
                 n = -n;
@@ -81,7 +83,7 @@ class GSHCoeffsCUDA {
         }
         
         ///@todo a way of indicating failure on l too large
-        __host__ __device__ typename cuTypes<T>::complex get(int l, int m, int n) {
+        __host__ __device__ typename cuTypes<T>::complex get(int l, int m, int n) const {
             unsigned int flatIdx = this->getFlatIdx(l,m,n);
             
             // Fetch the value
@@ -103,7 +105,7 @@ class GSHCoeffsCUDA {
                     val = l4[flatIdx];
                     break;
                 default:
-                    return;
+                    return make_cuComplex((T)0.0, (T)0.0);
             }
             
             // Modify for symmetry if in symmetrized section
@@ -198,8 +200,27 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
+        __host__ T getMass() {
+            T mass = 0.0;
+            for (int i=0; i<nl0; i++) mass += real(l0[i])/(2*0+1);
+            for (int i=0; i<nl1; i++) mass += real(l1[i])/(2*1+1);
+            for (int i=0; i<nl2; i++) mass += real(l2[i])/(2*2+1);
+            for (int i=0; i<nl3; i++) mass += real(l3[i])/(2*3+1);
+            for (int i=0; i<nl4; i++) mass += real(l4[i])/(2*4+1);
+            return mass;
+        }
+        
+        __host__ void assertUnitMass() {
+            T mass = this->getMass();
+            T closeEnough = 100*std::numeric_limits<T>::epsilon();
+            if (std::abs(mass - 1.0) > closeEnough) {
+                std::cerr << "Mass = " << mass << std::endl;
+                //throw std::runtime_error("Not unit mass.");
+            }
+        }
+        
         __host__ GSHCoeffsCUDA(const std::vector<T>& inputReals, int nLevels) {
-            // Checks
+            // Input checks
             if (nLevels < 1 || nLevels > 5) {
                 std::cerr << "nLevels = " << nLevels << std::endl;
                 throw std::runtime_error("Number of levels should be betweeen 1 and 5.");
@@ -252,6 +273,9 @@ class GSHCoeffsCUDA {
                     l4[i].y = inputReals[idx+1];
                 }
             }
+            
+            // Output checks
+            this->assertUnitMass();
         } 
         
         __host__ std::vector<T> getReals(unsigned int nLevels) const {
@@ -366,7 +390,21 @@ __host__ __device__ GSHCoeffsCUDA<T> operator/(const GSHCoeffsCUDA<T>& coeffs, T
 template <typename T>
 __host__ std::ostream& operator<<(std::ostream& out, const GSHCoeffsCUDA<T>& gsh)
 {
-    out << gsh.getReals();
+    auto originalPrecision = out.precision();
+    out << std::scientific;
+    out << std::showpos;
+    out.precision(1);    
+    for (int l=0; l<5; l++) {
+        out << "l = " << l << std::endl;
+        for (int m=-l; m<=l; m++) {
+            for (int n=-l; n<=l; n++) {
+                out << gsh.get(l,m,n);
+                out << " ";
+            }
+            out << std::endl;
+        }
+    }
+    out.precision(originalPrecision);
     return out;
 }
 

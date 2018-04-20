@@ -1542,6 +1542,38 @@ __global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals
     }
 }
 
+template <typename T>
+GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<T>>& crystals) {
+    auto ncrystals = crystals.size();
+    auto crystalsD = makeDeviceCopyVecSharedPtr<SpectralCrystalCUDA<T>>(crystals);
+    
+    // Grid and block dimensions
+    int deviceID = 0;
+    cudaDeviceProp devProp;
+    CUDA_CHK(cudaGetDeviceProperties(&devProp, deviceID));
+    std::cout << "Using " << devProp.name << std::endl;
+    auto computeKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)GET_GSH_FROM_ORIENTATIONS<T>, ncrystals);
+    auto nComputeBlocks = computeKernelCfg.dG.x;
+    auto reduceKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)BLOCK_REDUCE_KEPLER_GSH_COEFFS<T>, nComputeBlocks);
+    
+    // Get GSH coefficients
+    auto gshPerBlockSums = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>(nComputeBlocks);
+    GET_GSH_FROM_ORIENTATIONS<<<computeKernelCfg.dG, computeKernelCfg.dB>>>(crystalsD.get(), ncrystals, gshPerBlockSums.get());
+    
+    // Single level reduction
+    auto gshFullSumD = allocDeviceMemorySharedPtr<GSHCoeffsCUDA<T>>(1);
+    if (reduceKernelCfg.dG.x <= 1) {
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<reduceKernelCfg.dG, reduceKernelCfg.dB>>>(gshPerBlockSums.get(), gshFullSumD.get(), nComputeBlocks);
+    }
+    else {
+        std::cerr << "Too many blocks for reduce kernel. Need multiple reductions." << std::endl;
+        throw std::runtime_error("Not configured for this many blocks.");
+    }
+    
+    // Return
+    return getHostValue(gshFullSumD)/(T)ncrystals;
+}
+
 /**
  * @brief Get the generalized spherical harmonic coefficients from crystal orientations
  * @detail Weighted with some crystal densities. That is, the density associated
@@ -2331,6 +2363,7 @@ void ensureUnitDensitySum(std::vector<T>& densities) {
         densitySum += density;
     }
     if (std::abs(densitySum-1.0) > densities.size()*std::numeric_limits<T>::epsilon()) {
+        std::cerr << "Densities = " << densities << std::endl;
         std::cerr << "Density sum = " << densitySum << std::endl;
         if (std::abs(densitySum-1.0) > 0.1) {
             throw std::runtime_error("ERROR: Major deviation in density sum, should be 1.0.");
@@ -2516,5 +2549,7 @@ template class CrystalPropertiesCUDA<float,12>;
 template class CrystalPropertiesCUDA<double,12>;
 template class SpectralPolycrystalCUDA<float,12>;
 template class SpectralPolycrystalCUDA<double,12>;
+template GSHCoeffsCUDA<float> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<float>>& crystals);
+template GSHCoeffsCUDA<double> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<double>>& crystals);
 
 }//END NAMESPACE HPP

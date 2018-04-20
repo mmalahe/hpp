@@ -323,6 +323,22 @@ __inline__ __device__ cuDoubleComplex expIntr(cuDoubleComplex z) {
     return make_cuComplex(expx*cy, expx*sy);
 }
 
+__inline__ __host__ float abs(cuFloatComplex& z) {
+    return std::sqrt(std::pow(z.x,2.0)+std::pow(z.y,2.0));
+}
+
+__inline__ __host__ double abs(cuDoubleComplex& z) {
+    return std::sqrt(std::pow(z.x,2.0)+std::pow(z.y,2.0));
+}
+
+__inline__ __host__ float real(cuFloatComplex& z) {
+    return z.x;
+}
+
+__inline__ __host__ double real(cuDoubleComplex& z) {
+    return z.x;
+}
+
 __inline__ __host__ __device__ cuFloatComplex operator*(cuFloatComplex z, cuFloatComplex w) {
     return cuCmulf(z, w);
 }
@@ -386,6 +402,16 @@ __inline__ __host__ __device__ cuFloatComplex operator-(const cuFloatComplex& z)
 
 __inline__ __host__ __device__ cuDoubleComplex operator-(const cuDoubleComplex& z) {
     return make_cuComplex(-z.x, -z.y);
+}
+
+__inline__ __host__ std::ostream& operator<<(std::ostream& out, const cuFloatComplex& z) {
+    out << "(" << z.x << "," << z.y << "i)" ;
+    return out;
+}
+
+__inline__ __host__ std::ostream& operator<<(std::ostream& out, const cuDoubleComplex& z) {
+    out << "(" << z.x << "," << z.y << "i)" ;
+    return out;
 }
 
 /**

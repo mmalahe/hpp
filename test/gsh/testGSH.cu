@@ -6,24 +6,39 @@
 #include <hpp/config.h>
 HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/tensor.h>
+#include <hpp/rotation.h>
+#include <hpp/crystalCUDA.h>
 #include <hpp/gshCUDA.h>
 #include <stdexcept>
 #include <iostream>
 #include <limits>
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
 
 namespace hpp{
-    
+
 template <typename T>
-void testGSHCUDA() 
-{
-    // In/out test
+std::vector<SpectralCrystalCUDA<T>> generateUniformlyOrientedCrystals(unsigned int orientationSpaceResolution = 2) {
+    SO3Discrete<T> orientationSpace(orientationSpaceResolution);
+    std::vector<SpectralCrystalCUDA<T>> crystals(orientationSpace.size());
+    T initS = 0.0; //immaterial what this is, we only care about the angles
+    for (unsigned int i=0; i<orientationSpace.size(); i++) {
+        crystals[i].s = initS;
+        crystals[i].angles = orientationSpace.getEulerAngle(i);            
+    }
+    return crystals;
+}
+
+template <typename T>
+void testGSHCUDAVectorInOut() {
+    // In/out test from std::vector
     int nGSHLevels = 5;
     int nReals = nGSHReals(nGSHLevels);
     std::vector<T> gshRealsIn(nReals);
     gshRealsIn[0] = 1.0;
     gshRealsIn[1] = 0.0;
     for (int i=2; i<nReals; i++) {
-        gshRealsIn[i] = i;
+        gshRealsIn[i] = 0;
     }
     GSHCoeffsCUDA<T> gsh(gshRealsIn, nGSHLevels);
     auto gshRealsOut = gsh.getReals(nGSHLevels);
@@ -42,6 +57,20 @@ void testGSHCUDA()
         std::cerr << "Error in GSH in/out = " << err << std::endl;
         throw std::runtime_error("Error in GSH in/out is too high");
     }
+}
+
+template <typename T>
+void testGSHCUDAUniformOrientation() {
+    // Generate crystals to draw orientations from
+    auto crystals = generateUniformlyOrientedCrystals<T>();
+    std::cout << getGSHFromCrystalOrientations(crystals) << std::endl;
+}
+
+template <typename T>
+void testGSHCUDA() 
+{
+    testGSHCUDAVectorInOut<T>();
+    testGSHCUDAUniformOrientation<T>();    
 }
 
 } //END NAMESPACE HPP
