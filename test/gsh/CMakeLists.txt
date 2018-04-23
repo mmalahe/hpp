@@ -1,0 +1,5 @@
+if (${HPP_USE_CUDA})
+    CUDA_ADD_EXECUTABLE(testGSHCUDA testGSH.cu)
+    target_link_libraries(testGSHCUDA hpp)
+    target_link_libraries(testGSHCUDA cudart)
+endif()

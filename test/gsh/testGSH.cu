@@ -25,7 +25,7 @@ std::vector<SpectralCrystalCUDA<T>> generateUniformlyOrientedCrystals(unsigned i
     T initS = 0.0; //immaterial what this is, we only care about the angles
     for (unsigned int i=0; i<orientationSpace.size(); i++) {
         crystals[i].s = initS;
-        crystals[i].angles = orientationSpace.getEulerAngle(i);            
+        crystals[i].angles = orientationSpace.getEulerAngle(i);
     }
     return crystals;
 }
@@ -38,7 +38,7 @@ std::vector<SpectralCrystalCUDA<T>> generateRandomlyOrientedCrystals(unsigned in
     for (unsigned int i=0; i<ncrystals; i++) {
         randomRotationTensorInPlace(3, R);
         crystals[i].s = initS;
-        crystals[i].angles = getEulerZXZAngles(R);
+        crystals[i].angles = toEulerAngles(R);
     }
     return crystals;
 }
@@ -75,9 +75,13 @@ void testGSHCUDAVectorInOut() {
 
 template <typename T>
 void testGSHCUDAUniformOrientation() {
-    // Generate crystals to draw orientations from
-//    auto crystals = generateUniformlyOrientedCrystals<T>();
-    auto crystals = generateRandomlyOrientedCrystals<T>(std::pow(2, 20));
+    auto crystals = generateUniformlyOrientedCrystals<T>();
+    std::cout << getGSHFromCrystalOrientations(crystals) << std::endl;
+}
+
+template <typename T>
+void testGSHCUDARandomOrientation() {
+    auto crystals = generateRandomlyOrientedCrystals<T>(std::pow(2, 13));
     std::cout << getGSHFromCrystalOrientations(crystals) << std::endl;
 }
 
@@ -85,7 +89,8 @@ template <typename T>
 void testGSHCUDA() 
 {
     testGSHCUDAVectorInOut<T>();
-    testGSHCUDAUniformOrientation<T>();    
+    testGSHCUDAUniformOrientation<T>();
+    testGSHCUDARandomOrientation<T>(); 
 }
 
 } //END NAMESPACE HPP
