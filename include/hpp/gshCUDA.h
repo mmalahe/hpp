@@ -200,22 +200,30 @@ class GSHCoeffsCUDA {
             return vals;
         }
         
-        __host__ T getMass() {
-            T mass = 0.0;
-            for (int i=0; i<nl0; i++) mass += real(l0[i])/(2*0+1);
-            for (int i=0; i<nl1; i++) mass += real(l1[i])/(2*1+1);
-            for (int i=0; i<nl2; i++) mass += real(l2[i])/(2*2+1);
-            for (int i=0; i<nl3; i++) mass += real(l3[i])/(2*3+1);
-            for (int i=0; i<nl4; i++) mass += real(l4[i])/(2*4+1);
-            return mass;
+        /**
+         * @brief The weight of the coefficients providing a non-uniform distribution of orientations
+         * @param tol
+         * @return 
+         */
+        __host__ T offUniformMass() {
+            T offUniformMass = 0.0;
+            for (int i=0; i<nl1; i++) offUniformMass += real(l1[i])/(2*1+1);
+            for (int i=0; i<nl2; i++) offUniformMass += real(l2[i])/(2*2+1);
+            for (int i=0; i<nl3; i++) offUniformMass += real(l3[i])/(2*3+1);
+            for (int i=0; i<nl4; i++) offUniformMass += real(l4[i])/(2*4+1);
+            return offUniformMass;
         }
         
-        __host__ void assertUnitMass() {
-            T mass = this->getMass();
-            T closeEnough = 100*std::numeric_limits<T>::epsilon();
-            if (std::abs(mass - 1.0) > closeEnough) {
-                std::cerr << "Mass = " << mass << std::endl;
-                //throw std::runtime_error("Not unit mass.");
+        /**
+         * @brief Test if these coefficients correspond to a uniform distribution of orientations
+         * @return 
+         */
+        __host__ bool isUniform(T tol) {
+            if (std::abs(this->offUniformMass()) < tol) {
+                return true;
+            }
+            else {
+                return false;
             }
         }
         
@@ -273,9 +281,6 @@ class GSHCoeffsCUDA {
                     l4[i].y = inputReals[idx+1];
                 }
             }
-            
-            // Output checks
-            this->assertUnitMass();
         } 
         
         __host__ std::vector<T> getReals(unsigned int nLevels) const {

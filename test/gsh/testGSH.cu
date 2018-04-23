@@ -75,14 +75,31 @@ void testGSHCUDAVectorInOut() {
 
 template <typename T>
 void testGSHCUDAUniformOrientation() {
-    auto crystals = generateUniformlyOrientedCrystals<T>();
-    std::cout << getGSHFromCrystalOrientations(crystals) << std::endl;
+    auto crystals = generateUniformlyOrientedCrystals<T>(2);
+    auto gsh = getGSHFromCrystalOrientations(crystals);
+    T tol = 5e-3;
+    if (!gsh.isUniform(tol)) {
+        std::cerr << "Coefficients = " << std::endl;
+        std::cerr << gsh << std::endl;
+        std::cerr << "Off uniform mass = " << std::endl;
+        std::cerr << gsh.offUniformMass() << std::endl;
+        throw std::runtime_error("Coefficients in non-uniform components are too high for this to be regarded as a uniform distribution of orientations.");
+    }
+    
 }
 
 template <typename T>
 void testGSHCUDARandomOrientation() {
-    auto crystals = generateRandomlyOrientedCrystals<T>(std::pow(2, 13));
-    std::cout << getGSHFromCrystalOrientations(crystals) << std::endl;
+    auto crystals = generateRandomlyOrientedCrystals<T>(std::pow(2, 15));
+    auto gsh = getGSHFromCrystalOrientations(crystals);
+    T tol = 1e-1;
+    if (!gsh.isUniform(tol)) {
+        std::cerr << "Coefficients = " << std::endl;
+        std::cerr << gsh << std::endl;
+        std::cerr << "Off uniform mass = " << std::endl;
+        std::cerr << gsh.offUniformMass() << std::endl;
+        throw std::runtime_error("Coefficients in non-uniform components are too high for this to be regarded as a random distribution of orientations.");
+    }
 }
 
 template <typename T>
