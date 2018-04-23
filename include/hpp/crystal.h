@@ -312,8 +312,8 @@ struct CrystalInitialConditions {
     // Getters/setters (mainly intended for Python interface)
     U getS0() const {return s_0;}
     void setS0(const U& s_0) {this->s_0 = s_0;}
-    EulerAngles<U> getEulerAngles() const {return getEulerZXZAngles<U>(this->crystalRotation);}
-    void setEulerAngles(const EulerAngles<U>& angles) {this->crystalRotation = EulerZXZRotationMatrix<U>(angles);}    
+    EulerAngles<U> getEulerAngles() const {return toEulerAngles<U>(this->crystalRotation);}
+    void setEulerAngles(const EulerAngles<U>& angles) {this->crystalRotation = toRotationMatrix<U>(angles);}    
 };
 template <typename U>
 CrystalInitialConditions<U> defaultCrystalInitialConditions()
@@ -335,7 +335,7 @@ template <typename T>
 EulerAngles<T> getEulerAnglesFromDeformationGradient(const hpp::Tensor2<T>& F_star)
 {
     PolarDecomposition<T> decomp = F_star.polarDecomposition();
-    EulerAngles<T> EAngles = hpp::getEulerZXZAngles(decomp.R);
+    EulerAngles<T> EAngles = hpp::toEulerAngles(decomp.R);
     return EAngles;
 }
 

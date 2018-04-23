@@ -507,7 +507,7 @@ __global__ void BLOCK_REDUCE_KEPLER_TENSOR2(Tensor2CUDA<T,M,N> *in, Tensor2CUDA<
  * @return the angles
  */
 template <typename T, unsigned int M, unsigned int N>
-__device__ EulerAngles<T> getEulerZXZAngles(const Tensor2CUDA<T, M, N>& R)
+__device__ EulerAngles<T> toEulerAngles(const Tensor2CUDA<T, M, N>& R)
 {      
     EulerAngles<T> angle;
     

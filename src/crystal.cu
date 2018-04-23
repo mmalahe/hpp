@@ -291,7 +291,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     R = RStretchingTensor.trans()*R;
     
     // Euler angles
-    EulerAngles<T> angles = getEulerZXZAngles(R);
+    EulerAngles<T> angles = toEulerAngles(R);
     
     // There are possible branches in getEulerZXZAngles, so sync threads here
     // to head off divergence.
@@ -352,7 +352,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     Tensor2CUDA<T,3,3> RStarNext = RStar + WStarNext*RStar*dt;
     
     // Update crystal rotations
-    crystal.angles = getEulerZXZAngles(RStarNext);
+    crystal.angles = toEulerAngles(RStarNext);
     
     // There are possible branches in getEulerZXZAngles, so sync threads here
     // to head off divergence.
@@ -452,10 +452,10 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T st
     Tensor2CUDA<T,3,3> RStarNext1 = RStar1 + WStarNext1*RStar1*dt;
     
     // Update crystal rotations
-    crystal0.angles = getEulerZXZAngles(RStarNext0);
-    crystal1.angles = getEulerZXZAngles(RStarNext1);
+    crystal0.angles = toEulerAngles(RStarNext0);
+    crystal1.angles = toEulerAngles(RStarNext1);
     
-    // There are possible branches in getEulerZXZAngles, so sync threads here
+    // There are possible branches in toEulerAngles, so sync threads here
     // to head off divergence.
     __syncthreads();
     
@@ -2127,7 +2127,7 @@ void SpectralPolycrystalCUDA<T,N>::resetRandomOrientations(T init_s, unsigned lo
         // Initial slip-system deformation resistance and angles
         crystal.s = init_s;
         randomRotationTensorArvo1992<T>(randgen, R);
-        crystal.angles = getEulerZXZAngles(R);
+        crystal.angles = toEulerAngles(R);
     }
     
     // Copy to device

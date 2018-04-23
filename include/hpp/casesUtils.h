@@ -178,7 +178,7 @@ class OrientationGenerator {
         virtual void generateNext(EulerAngles<U>& angles) {
             Tensor2<U> rotMatrix(3,3);
             this->generateNext(rotMatrix);
-            angles = getEulerZXZAngles(rotMatrix);
+            angles = toEulerAngles(rotMatrix);
         }
         /**
          * @brief Default destructor
@@ -257,7 +257,7 @@ class GridOrientationGenerator : public OrientationGenerator<U> {
         virtual void generateNext(Tensor2<U>& rotMatrix) {
             EulerAngles<U> angles;
             this->generateNext(angles);
-            rotMatrix = EulerZXZRotationMatrix(angles);
+            rotMatrix = toRotationMatrix(angles);
         };
         
     private:        

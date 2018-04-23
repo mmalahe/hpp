@@ -66,7 +66,7 @@ void replicate(std::string output_filename, unsigned int ncrystalsGlobal, std::s
     hpp::Tensor2<U> rotTensor(3,3);
     for (unsigned int i=0; i<crystal_list.size(); i++) {
         // Generate rotation
-        rotTensor = hpp::EulerZXZRotationMatrix(anglesLocal[i]);
+        rotTensor = hpp::toRotationMatrix(anglesLocal[i]);
         
         // Add initial rotation
         hpp::CrystalInitialConditions<U> initRotated = init;

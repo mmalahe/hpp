@@ -31,7 +31,7 @@ SO3Discrete<T>::SO3Discrete(unsigned int resolution, SymmetryType symmetryType) 
     // Convert to other representations        
     eulerAngleList.resize(quatList.size());
     for (unsigned int i=0; i<quatList.size(); i++) {
-        eulerAngleList[i] = quaternionToEulerAngles<T>(quatList[i]);
+        eulerAngleList[i] = toEulerAngles<T>(quatList[i]);
     }
 }  
 

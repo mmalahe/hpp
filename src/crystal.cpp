@@ -797,7 +797,7 @@ Tensor2<U> Crystal<U>::getPlasticSpinTensor() {
 template <typename U>
 EulerAngles<U> Crystal<U>::getEulerAngles() const {
     PolarDecomposition<U> F_e_decomp = F_e.polarDecomposition();
-    return getEulerZXZAngles(F_e_decomp.R*init.crystalRotation);
+    return toEulerAngles(F_e_decomp.R*init.crystalRotation);
 }
 
 template <typename U>
@@ -1540,7 +1540,7 @@ void Polycrystal<U>::resetGivenOrientations(U init_s, const std::vector<EulerAng
     // Set initial rotations
     Tensor2<U> R(3,3);
     for (unsigned int i=0; i<this->crystal_list.size(); i++) {        
-        R = EulerZXZRotationMatrix(angleList[i]);
+        R = toRotationMatrix(angleList[i]);
         this->crystal_list[i].init.s_0 = init_s;
         this->crystal_list[i].init.crystalRotation = R;
     }
@@ -1604,7 +1604,7 @@ Tensor2<T> histogramPoleEqualArea(const std::vector<EulerAngles<T>>& angles, con
     Tensor2<T> hist(HPP_POLE_FIG_HIST_DIM, HPP_POLE_FIG_HIST_DIM);
     for (const auto& angle : angles) {
         // Get orientation of the crystal
-        Tensor2<T> ROrientation = EulerZXZRotationMatrix(angle);
+        Tensor2<T> ROrientation = toRotationMatrix(angle);
         
         // Active rotation
         std::vector<T> pole = ROrientation*planeNormal;
@@ -1794,7 +1794,7 @@ void SpectralCrystal<U>::step(const hpp::Tensor2<U>& F_next, const hpp::Tensor2<
     Tensor2<U> R = RStretchingTensor.trans()*ROrientation;
     
     // Euler angles
-    EulerAngles<U> angle = hpp::getEulerZXZAngles(R);
+    EulerAngles<U> angle = hpp::toEulerAngles(R);
     
     // Database coordinate
     std::vector<U> gridPos = {angle.alpha, angle.beta, angle.gamma, theta};

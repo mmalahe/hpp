@@ -12,6 +12,8 @@ template<typename T> void getAxisAngle(Tensor2<T> R, std::vector<T>& u, T& theta
     theta = std::atan2(r, t-1);
 }
 
+
+
 template<typename T>
 void testConversions(){
    // Rotations
@@ -24,8 +26,8 @@ void testConversions(){
             angle.beta = j*(M_PI/NPointsPerAngle)+0.001;
             for (int k=0; k<NPointsPerAngle; k++) {
                 angle.gamma = k*(2*M_PI/NPointsPerAngle);
-                Tensor2<T> R = EulerZXZRotationMatrix(angle);
-                EulerAngles<T> angleRestored = getEulerZXZAngles(R);
+                Tensor2<T> R = toRotationMatrix(angle);
+                EulerAngles<T> angleRestored = toEulerAngles(R);
                 bool angleGood = true;
                 if (std::abs(angle.alpha-angleRestored.alpha) > angleEquiv) angleGood = false;
                 if (std::abs(angle.beta-angleRestored.beta) > angleEquiv) angleGood = false;
@@ -94,9 +96,9 @@ void testSpaces()
     // Full SO(3)
     std::vector<int> indices = {0,12345,23456};
     std::vector<EulerAngles<U>> knownValuesResolution3(3);
-    knownValuesResolution3[0] = EulerAngles<U>(0.712446,0.716902,1.46003);
-    knownValuesResolution3[1] = EulerAngles<U>(1.58868,0.197944,2.10593);
-    knownValuesResolution3[2] = EulerAngles<U>(-2.60062,-0.521592,1.66706);
+    knownValuesResolution3[0] = EulerAngles<U>(2.11031,0.963702,5.35588);
+    knownValuesResolution3[1] = EulerAngles<U>(2.10241,1.58833,6.08521);
+    knownValuesResolution3[2] = EulerAngles<U>(4.11624,2.40867,2.30145);
 
     hpp::SO3Discrete<U> so3(3);
     for (unsigned int i=0; i<3; i++) {

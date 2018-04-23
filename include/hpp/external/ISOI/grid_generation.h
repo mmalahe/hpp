@@ -34,7 +34,7 @@
 #define SIMPLE_GRID 1
 #define LAYERED_GRID 2
 
-//these two functions were taekn from the HEALPIX source code written in C
+//these two functions were taken from the HEALPIX source code written in C
 extern "C"
 {
 	long nside2npix(const long); 
@@ -44,6 +44,14 @@ extern "C"
 
 namespace isoi {
 
+/**
+ * @class Quaternion
+ * @author Michael Malahe
+ * @date 23/04/18
+ * @file grid_generation.h
+ * @brief A Hamilton quaternion
+ * @detail \f$ q = a + bi + cj + dk \f$ with \f$ i^2 = j^2 = k^2 = ijk = -1 \f$ 
+ */
 struct Quaternion {
     double a, b, c, d;
 };

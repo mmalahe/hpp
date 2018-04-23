@@ -148,7 +148,7 @@ __device__ void getSpectralCrystalDatabaseCoordinate(SpectralCrystalCUDA<T>& cry
     Tensor2CUDA<T,3,3> RInStretchingTensorFrame = RStretchingTensor.trans()*RLab;
     
     // Euler angles
-    EulerAngles<T> angles = getEulerZXZAngles(RInStretchingTensorFrame);   
+    EulerAngles<T> angles = toEulerAngles(RInStretchingTensorFrame);   
 
     // Database coordinate
     T gridPos[4] = {angles.alpha, angles.beta, angles.gamma, theta};    
@@ -296,6 +296,9 @@ private:
     hpp::Timer solveTimer;
     double maxMemUsedGB = 0.0;
 };
+
+template <typename T>
+GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<T>>& crystals);
 
 /**
  * @class SpectralPolycrystalGSHCUDA

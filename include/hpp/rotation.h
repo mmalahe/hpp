@@ -9,6 +9,7 @@
 #include <hpp/tensor.h>
 #include <hpp/mpiUtils.h>
 #include <hpp/external/ISOI/grid_generation.h>
+#include <algorithm>
 
 namespace hpp
 {
@@ -115,7 +116,7 @@ bool operator!=(const EulerAngles<T>& l, const EulerAngles<T>& r) {
 }
 
 template <typename T>
-Tensor2<T> EulerZXZRotationMatrix(T alpha, T beta, T gamma) {
+Tensor2<T> toRotationMatrix(T alpha, T beta, T gamma) {
     Tensor2<T> R(3,3);
     T c1 = std::cos(alpha);
     T c2 = std::cos(beta);
@@ -136,8 +137,8 @@ Tensor2<T> EulerZXZRotationMatrix(T alpha, T beta, T gamma) {
 }
 
 template <typename T>
-Tensor2<T> EulerZXZRotationMatrix(EulerAngles<T> angle) {
-    return EulerZXZRotationMatrix(angle.alpha, angle.beta, angle.gamma);
+Tensor2<T> toRotationMatrix(EulerAngles<T> angle) {
+    return toRotationMatrix(angle.alpha, angle.beta, angle.gamma);
 }
 
 /**
@@ -146,7 +147,7 @@ Tensor2<T> EulerZXZRotationMatrix(EulerAngles<T> angle) {
  * @return the angles
  */
 template <typename T>
-EulerAngles<T> getEulerZXZAngles(Tensor2<T> R)
+EulerAngles<T> toEulerAngles(Tensor2<T> R)
 {      
     EulerAngles<T> angle;
     
@@ -174,6 +175,90 @@ EulerAngles<T> getEulerZXZAngles(Tensor2<T> R)
     
     // Return
     return angle;
+}
+
+/**
+ * @brief Convert from quaternion to rotation matrix
+ * @param q
+ * @return 
+ */
+template <typename T>
+Tensor2<T> toRotationMatrix(const isoi::Quaternion& q) {
+    Tensor2<T> R(3,3);
+    auto q1 = q.a;
+    auto q2 = q.b;
+    auto q3 = q.c;
+    auto q4 = q.d;
+    R(0,0) = 1.0 - 2.0*std::pow(q3,2.0) - 2.0*std::pow(q4,2.0);
+    R(0,1) = 2.0*q2*q3 - 2.0*q4*q1;
+    R(0,2) = 2.0*q2*q4 + 2.0*q3*q1;
+    R(1,0) = 2.0*q2*q3 + 2.0*q4*q1;
+    R(1,1) = 1.0 - 2.0*std::pow(q2,2.0) - 2.0*std::pow(q4,2.0);
+    R(1,2) = 2.0*q3*q4 - 2.0*q2*q1;
+    R(2,0) = 2.0*q2*q4 - 2.0*q3*q1;
+    R(2,1) = 2.0*q3*q4 + 2.0*q2*q1;
+    R(2,2) = 1.0 - 2.0*std::pow(q2,2.0) - 2.0*std::pow(q3,2.0);
+    return R;
+}
+
+/**
+ * @brief Convert from rotation matrix to quaternion
+ * @param R
+ * @return 
+ */
+template <typename T>
+EulerAngles<T> toQuaternion(const Tensor2<T>& R) {
+    auto t = R.tr();
+    isoi::Quaternion q;
+    if (t > 0) {
+        auto r = std::sqrt((T)1.0 + t);
+        auto s = (T)1.0/((T)2.0*r);
+        q.a = (T)0.5*r;
+        q.b = (R(2,1) - R(1,2))*s;
+        q.c = (R(0,2) - R(2,0))*s;
+        q.d = (R(1,0) - R(0,1))*s;
+    }
+    else {
+        // sqrtArg must be the largest diagonal element minus the other two
+        std::vector<T> diag = {R(0,0), R(1,1), R(2,2)};
+        auto diagArgmax = std::distance(diag.begin(), std::max_element(diag.begin(), diag.end()));
+        T sqrtArg = diag[diagArgmax];
+        for (int i=0; i<3; i++) {
+            if (i != diagArgmax) sqrtArg -= diag[i];
+        }
+        auto r = std::sqrt(sqrtArg);
+        auto s = (T)1.0/((T)2.0*r);
+        q.a = (T)0.5*r;
+        q.b = (R(2,1) - R(1,2))*s;
+        q.c = (R(0,2) - R(2,0))*s;
+        q.d = (R(1,0) - R(0,1))*s;
+        switch (diagArgmax) {
+            case 0:
+                std::swap(q.a, q.b);
+                break;
+            case 1:
+                std::swap(q.a, q.c);
+                break;
+            case 2:
+                std::swap(q.a, q.d);
+                break;
+            default:
+                throw std::runtime_error("Argmax of the diagonal should be either 0, 1 or 2.");
+        }
+    }
+    
+    // Return
+    return q;    
+}
+
+template <typename T>
+EulerAngles<T> toEulerAngles(const isoi::Quaternion& q) {
+    return toEulerAngles(toRotationMatrix<T>(q));
+}
+
+template <typename T>
+isoi::Quaternion toQuaternion(const EulerAngles<T>& angles) {
+    return toQuaternion(toRotationMatrix(angles));
 }
 
 //////////////////////
@@ -347,19 +432,6 @@ Tensor2<T> randomRotationTensor(unsigned int dim, bool defaultSeed=false) {
 /////////////////////
 // ROTATION SPACES //
 /////////////////////
-
-template <typename T>
-EulerAngles<T> quaternionToEulerAngles(isoi::Quaternion& q) {
-    EulerAngles<T> angles;
-    auto q0 = q.a;
-    auto q1 = q.b;
-    auto q2 = q.c;
-    auto q3 = q.d;
-    angles.alpha = std::atan2(2*(q0*q1+q2*q3), 1-2*(std::pow(q1,2.)+std::pow(q2,2.)));
-    angles.beta = std::asin(2*(q0*q2-q3*q1));
-    angles.gamma = std::atan2(2*(q0*q3+q1*q2), 1-2*(std::pow(q2,2.)+std::pow(q3,2.)));
-    return angles;
-}
 
 /**
  * @class SO3Discrete
