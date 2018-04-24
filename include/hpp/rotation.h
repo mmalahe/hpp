@@ -458,6 +458,24 @@ private:
     std::vector<EulerAngles<T>> eulerAngleList;
 };
 
+inline int orientationSpaceResolutionRequiredForNumberOfPoints(long int nPointsInt, SymmetryType symmetryType = SYMMETRY_TYPE_NONE) {
+    double nPoints = nPointsInt;
+    double nPointsSymm;
+    switch case(symmetryType) {
+        case SYMMETRY_TYPE_NONE:
+            nPointsSymm = nPoints;
+            break;
+        case SYMMETRY_TYPE_C4:
+            nPointsSymm = nPoints/4;
+            break;
+        case default;
+            throw std::runtime_error("Don't know about symmetry type "+std::string(symmetryType)+".")
+    }
+    double res = std::log(npoints*72)/std::log(8.0);
+    int resInt = std::ceil(res);
+    return resInt;
+}
+
 } //END NAMESPACE HPP
 
 #endif /* HPP_ROTATION_H */

@@ -12,7 +12,7 @@ HPP_CHECK_CUDA_ENABLED_BUILD
 namespace hpp{
     
 template <typename T>
-void testPolycrystalGSHCUDA() 
+void testSpectralPolycrystalGSHCUDA() 
 {
     // Crystal properties and database
     CrystalInitialConditions<T> init = defaultCrystalInitialConditions<T>();
@@ -26,9 +26,12 @@ void testPolycrystalGSHCUDA()
     int refinementMultiplier = 128;    
     SpectralDatabaseUnified<T> db(dbFilename, dsetIDs, nTerms, refinementMultiplier);
     
-    // Polycrystal
-    auto polycrystal = SpectralPolycrystalGSHCUDA<T, crystalType>(props, db, init.s_0);
-    polycrystal.resetUniformRandomOrientations(init.s_0);
+    // Polycrystals
+    auto polycrystalGSH = SpectralPolycrystalGSHCUDA<T, crystalType>(props, db, init.s_0);
+    polycrystalGSH.resetUniformRandomOrientations(init.s_0);
+    auto ncrystals = polycrystalGSH.getNumRepresentativeCrystals();
+    std::cout << "Comparison being done with " << ncrystals << " crystals" << std::endl;
+    auto polycrystalSpectral = SpectralPolycrystalCUDA<T, nSlipSystems(crystalType)>(ncrystals, init.s_0, props, db);
     
     // Applied deformation
     T t = 0.0;
@@ -36,11 +39,19 @@ void testPolycrystalGSHCUDA()
     auto L = planeStrainCompressionVelocityGradient(t, strainRate);
     T dt = 20;
     
-    // Take a step
-    polycrystal.step(L, dt);
+    // Take steps
+    for (int i=0; i<50; i++) {
+        polycrystalSpectral.step(L, dt);
+        polycrystalGSH.step(L, dt);
+    }
     
-    // Get output state
-    auto gshOut = polycrystal.getGSHCoeffs();
+    // Compare
+    auto gshSpectral = polycrystalSpectral.getGSHCoeffs();
+    auto gshGSH = polycrystalGSH.getGSHCoeffs();
+    std::cout << "SpectralPolycrystalCUDA" << std::endl;
+    std::cout << gshSpectral;
+    std::cout << "SpectralPolycrystalGSHCUDA" << std::endl;
+    std::cout << gshGSH;
 }
 
 } //END NAMESPACE HPP
@@ -48,7 +59,7 @@ void testPolycrystalGSHCUDA()
 int main(int argc, char *argv[]) 
 {
     // Test 
-    hpp::testPolycrystalGSHCUDA<float>(); 
+    hpp::testSpectralPolycrystalGSHCUDA<float>(); 
     
     // Return
     return 0;

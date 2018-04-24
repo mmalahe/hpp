@@ -185,19 +185,31 @@ void SpectralPolycrystalCUDA<T,N>::doSetup(std::vector<SpectralCrystalCUDA<T>>& 
     TCauchyGlobalD[0] = this->TCauchyGlobalH;
 }
 
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::setupDatabase(const SpectralDatabaseUnified<T>& dbIn) {
+    if (!useUnifiedDB) throw std::runtime_error("Constructing with unified db, but config says we're doing non-unified.");
+    std::vector<SpectralDatasetID> dsetIDs = defaultCrystalSpectralDatasetIDs();    
+    dbUnifiedH = SpectralDatabaseUnifiedCUDA<T,4,9>(dbIn, dsetIDs);    
+    dbUnifiedD = makeDeviceCopySharedPtr(this->dbUnifiedH);
+}
+
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::setupDatabase(const SpectralDatabase<T>& dbIn) {
+    if (useUnifiedDB) throw std::runtime_error("Constructing with non-unified db, but config says we're doing unified.");
+    std::vector<SpectralDatasetID> dsetIDs = defaultCrystalSpectralDatasetIDs();
+    dbH = SpectralDatabaseCUDA<T,4>(dbIn, dsetIDs);    
+    dbD = makeDeviceCopySharedPtr(this->dbH);
+}
+
 // WARNING: will modify the list of crystals to add padding crystals
 template <typename T, unsigned int N>
 SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabase<T>& dbIn){    
     // Not using unified database
     useUnifiedDB = false;
     
-    // Do general setup
+    // Do setup steps
     this->doSetup(crystals, crystalProps);
-    
-    // Set up database
-    std::vector<SpectralDatasetID> dsetIDs = defaultCrystalSpectralDatasetIDs();
-    dbH = SpectralDatabaseCUDA<T,4>(dbIn, dsetIDs);    
-    dbD = makeDeviceCopySharedPtr(this->dbH);
+    this->setupDatabase(dbIn);
     
     // Get memory usage
     maxMemUsedGB = getUsedMemoryGB();
@@ -208,13 +220,24 @@ SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(std::vector<SpectralCrysta
     // Using unified database
     useUnifiedDB = true;
     
-    // Do general setup
+    // Do setup steps
     this->doSetup(crystals, crystalProps);
+    this->setupDatabase(dbIn);
     
-    // Set up database
-    std::vector<SpectralDatasetID> dsetIDs = defaultCrystalSpectralDatasetIDs();    
-    dbUnifiedH = SpectralDatabaseUnifiedCUDA<T,4,9>(dbIn, dsetIDs);    
-    dbUnifiedD = makeDeviceCopySharedPtr(this->dbUnifiedH);
+    // Get memory usage
+    maxMemUsedGB = getUsedMemoryGB();
+}
+
+template <typename T, unsigned int N>
+SpectralPolycrystalCUDA<T,N>::SpectralPolycrystalCUDA(size_t ncrystals, T initS, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, unsigned int seed){    
+    // Using unified database
+    useUnifiedDB = true;
+    
+    // Do setup steps
+    std::vector<SpectralCrystalCUDA<T>> crystals(ncrystals);
+    this->doSetup(crystals, crystalProps);
+    this->resetRandomOrientations(initS, seed);
+    this->setupDatabase(dbIn);
     
     // Get memory usage
     maxMemUsedGB = getUsedMemoryGB();

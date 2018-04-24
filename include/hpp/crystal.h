@@ -49,6 +49,10 @@ enum CrystalType {
     CRYSTAL_TYPE_FCC    
 };
 
+constexpr SymmetryType toSymmetryType(CrystalType crystalType) {
+    return crystalType==CRYSTAL_TYPE_FCC ? SYMMETRY_TYPE_C4 : SYMMETRY_TYPE_NONE;
+}
+
 constexpr int nSlipSystems(CrystalType crystalType) {
     return crystalType==CRYSTAL_TYPE_FCC ? 12 : 0;
 }

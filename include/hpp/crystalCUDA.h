@@ -17,6 +17,7 @@ HPP_CHECK_CUDA_ENABLED_BUILD
 #include <hpp/tensorCUDA.h>
 #include <hpp/spectralUtilsCUDA.h>
 #include <hpp/gshCUDA.h>
+#include <hpp/crystal.h>
 
 namespace hpp
 {
@@ -206,10 +207,13 @@ public:
     SpectralPolycrystalCUDA(){;}
     SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabase<T>& dbIn);
     SpectralPolycrystalCUDA(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn);    
+    SpectralPolycrystalCUDA(size_t ncrystals, T initS, const CrystalPropertiesCUDA<T, N>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, unsigned int seed=0);
     
     // Construction helpers
     void doGPUSetup();
     void doSetup(std::vector<SpectralCrystalCUDA<T>>& crystals, const CrystalPropertiesCUDA<T,N>& crystalProps);
+    void setupDatabase(const SpectralDatabaseUnified<T>& dbIn);
+    void setupDatabase(const SpectralDatabase<T>& dbIn);
     
     // Simulation
     void resetRandomOrientations(T init_s, unsigned long int seed);
@@ -233,6 +237,7 @@ public:
     unsigned long long int getNTermsComputedHardware();
     
     // Automatically-generated getters
+    const Tensor2CUDA<T,3,3>& getTCauchy() const {return TCauchyGlobalH;}
     const std::vector<T>& getTHistory() const {return tHistory;}
 protected:
 
@@ -325,25 +330,15 @@ class SpectralPolycrystalGSHCUDA
 public:    
     // Constructors
     SpectralPolycrystalGSHCUDA(){;}    
-    SpectralPolycrystalGSHCUDA(const CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, const T init_s) {
-        // Number of points in the orientation space = 72*8^{r}, where r is the resolution
-        unsigned int orientationSpaceResolution = 5; 
-        switch (CRYSTAL_TYPE) {
-            case CRYSTAL_TYPE_NONE:
-                orientationSpace = SO3Discrete<T>(orientationSpaceResolution);
-                break;
-            case CRYSTAL_TYPE_FCC:
-                orientationSpace = SO3Discrete<T>(orientationSpaceResolution, SYMMETRY_TYPE_C4);
-                break;
-            default:
-                std::cerr << "No implementation for crystal type = " << CRYSTAL_TYPE << std::endl;
-                throw std::runtime_error("No implementation.");
-        }
+    SpectralPolycrystalGSHCUDA(const CrystalPropertiesCUDA<T, nSlipSystems(CRYSTAL_TYPE)>& crystalProps, const SpectralDatabaseUnified<T>& dbIn, const T initS, unsigned int orientationSpaceResolution = 5) {
+        // The number of points in the orientation is 72*8^{r}, where r is the resolution
+        orientationSpace = SO3Discrete<T>(orientationSpaceResolution, toSymmetryType(CRYSTAL_TYPE));
         
         // Generate representative crystals
+        this->initS = initS;
         auto crystals = std::vector<SpectralCrystalCUDA<T>>(orientationSpace.size());
         for (unsigned int i=0; i<orientationSpace.size(); i++) {
-            crystals[i].s = init_s;
+            crystals[i].s = this->initS;
             crystals[i].angles = orientationSpace.getEulerAngle(i);            
         }
         polycrystal = SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)>(crystals, crystalProps, dbIn);
@@ -358,6 +353,9 @@ public:
             angleList[i] = orientationSpace.getEulerAngle(i);            
         }
         polycrystal.resetGivenOrientations(init_s, angleList);
+    }    
+    void resetSamplingOrientations() {
+        this->resetSamplingOrientations(this->initS);
     }
     
     // Simulation
@@ -370,6 +368,9 @@ public:
             density = 1.0/orientationSpace.size();
         }
     }
+    void resetUniformRandomOrientations() {
+        this->resetUniformRandomOrientations(this->initS);
+    }
     
     void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
         // Orientation sampling points remain uniform
@@ -378,15 +379,77 @@ public:
         // Density at each point is determined by GSH coefficients
         densities = polycrystal.getDensitiesFromGSH(coeffs);
     }
+    void resetGivenGSHCoeffs(const GSHCoeffsCUDA<T>& coeffs) {
+        this->resetGivenGSHCoeffs(this->initS, coeffs);
+    }
     
     void step(const hpp::Tensor2<T>& L_next, T dt) {
         polycrystal.step(L_next, dt);
+    }    
+    
+    template <typename T, unsigned int N>
+    std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> SpectralPolycrystalCUDA<T,N>::getPoleHistogram(const VecCUDA<T,3>& pole) {
+        return polycrystal.getDensityWeightedPoleHistogram(pole, densities);
+    }
+    
+    /**
+     * @brief Evolve strictly though the GSH interface
+     * @detail Note here that we could for example just call the evolve method
+     * of the underlying spectral polycrystal, but the aim of this method is for
+     * testing the evolution of the system through a state defined by the GSH
+     * coefficients only.
+     * @param tStart
+     * @param tEnd
+     * @param dt
+     * @param t
+     * @param t
+     */
+    void evolve(T tStart, T tEnd, T dt, std::function<hpp::Tensor2<T>(T t)> F_of_t, std::function<hpp::Tensor2<T>(T t)> L_of_t) {
+        // Initial data
+        tHistory.push_back(tStart);
+        TCauchyHistory.push_back(polycrystal.getTCauchy());
+        
+        // Stepping
+        unsigned int nsteps = (tEnd-tStart)/dt;
+        poleHistogramHistory111.resize(nsteps+1);
+        poleHistogramHistory110.resize(nsteps+1);
+        poleHistogramHistory100.resize(nsteps+1);
+        poleHistogramHistory001.resize(nsteps+1);
+        poleHistogramHistory011.resize(nsteps+1);
+        getPoleHistogram(this->poleHistogramHistory111[0], VecCUDA<T,3>{1,1,1});
+        getPoleHistogram(this->poleHistogramHistory110[0], VecCUDA<T,3>{1,1,0});
+        getPoleHistogram(this->poleHistogramHistory100[0], VecCUDA<T,3>{1,0,0});
+        getPoleHistogram(this->poleHistogramHistory001[0], VecCUDA<T,3>{0,0,1});
+        getPoleHistogram(this->poleHistogramHistory011[0], VecCUDA<T,3>{0,1,1});
+        for (unsigned int i=0; i<nsteps; i++) {
+            // Inputs for the next step
+            T t = tStart + (i+1)*dt;
+            std::cout << "t = " << t << std::endl;
+            hpp::Tensor2<T> LNext = L_of_t(t);     
+            
+            // Step
+            auto gshPrev = this->getGSHCoeffs();
+            this->resetGivenGSHCoeffs(gshPrev);
+            this->step(LNext, dt);
+            
+            // Store quantities
+            tHistory.push_back(t);
+            TCauchyHistory.push_back(polycrystal.getTCauchy());
+            getPoleHistogram(this->poleHistogramHistory111[i+1], VecCUDA<T,3>{1,1,1});
+            getPoleHistogram(this->poleHistogramHistory110[i+1], VecCUDA<T,3>{1,1,0});
+            getPoleHistogram(this->poleHistogramHistory100[i+1], VecCUDA<T,3>{1,0,0});
+            getPoleHistogram(this->poleHistogramHistory001[i+1], VecCUDA<T,3>{0,0,1});
+            getPoleHistogram(this->poleHistogramHistory011[i+1], VecCUDA<T,3>{0,1,1});
+        }
     }
     
     // Output
     GSHCoeffsCUDA<T> getGSHCoeffs() {
         return polycrystal.getDensityWeightedGSH(densities);
     }
+    
+    // Conversions
+    unsigned int getNumRepresentativeCrystals(){return densities.size();}
 protected:
 
 private:
@@ -398,6 +461,18 @@ private:
     
     /// A dicrete colelction of points determining the orientation space for the crystal
     SO3Discrete<T> orientationSpace;
+    
+    /// Initial slip resistance
+    T initS;
+    
+    / Histories
+    std::vector<T> tHistory;
+    std::vector<Tensor2CUDA<T,3,3>> TCauchyHistory;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory111;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory110;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory100;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory001;
+    std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory011;
 };
 
 template <typename T>
