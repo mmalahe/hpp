@@ -6,13 +6,20 @@ namespace hpp {
  * @brief Creates a uniform grid on SO3
  * @detail The resolution parameter \f$ r \f$ specifies a grid with a total of
  * \f$ 72 \times 8^{r} \f$ points. 
- * @param resolution 
+ * @param resolution
+ * @todo Add and test accounting for C4 symmetry
  */
 template <typename T>
 SO3Discrete<T>::SO3Discrete(unsigned int resolution, SymmetryType symmetryType) {  
     if (resolution >= 7) {
         unsigned long int nPoints = 72*std::pow(8, resolution);
         std::cerr << "WARNING: you are about to contruct " << nPoints << " points." << std::endl; 
+    }
+    
+    if (symmetryType == SYMMETRY_TYPE_C4) {
+        std::cerr << "WARNING: C4 symmetry implementation is not complete." << std::endl;
+        std::cerr << "Proceeding without accounting for symmetries." << std::endl;
+        symmetryType = SYMMETRY_TYPE_NONE;
     }
     
     // Create base rotation list with quaternions

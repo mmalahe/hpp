@@ -355,6 +355,14 @@ __inline__ __host__ __device__ cuDoubleComplex operator+(cuDoubleComplex z, cuDo
     return cuCadd(z, w);
 }
 
+__inline__ __host__ __device__ cuFloatComplex operator-(cuFloatComplex z, cuFloatComplex w) {
+    return cuCsubf(z, w);
+}
+
+__inline__ __host__ __device__ cuDoubleComplex operator-(cuDoubleComplex z, cuDoubleComplex w) {
+    return cuCsub(z, w);
+}
+
 __inline__ __host__ __device__ void operator+=(cuFloatComplex& z, const cuFloatComplex& w) {
     z.x = z.x + w.x;
     z.y = z.y + w.y;

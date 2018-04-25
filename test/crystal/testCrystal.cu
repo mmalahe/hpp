@@ -19,17 +19,8 @@ template <typename T, hpp::CrystalType CRYSTAL_TYPE>
 void testPolycrystalGSHCUDAConversionIdentity(SpectralPolycrystalGSHCUDA<T, CRYSTAL_TYPE>& polycrystal, const GSHCoeffsCUDA<T>& gshIn) {
     polycrystal.reset(gshIn);
     auto gshOut = polycrystal.getGSHCoeffs();
-    auto gshInReals = gshIn.getReals();
-    auto gshOutReals = gshOut.getReals();
-    T relErr = 0.0;
-    T inNorm = 0.0;
-    for (unsigned int i=0; i<gshInReals.size(); i++) {
-        relErr += std::pow(gshOutReals[i]-gshInReals[i],2.0);
-        inNorm += std::pow(gshInReals[i],2.0);       
-    }
-    inNorm = std::sqrt(inNorm);
-    relErr = std::sqrt(relErr)/inNorm;
-    T tol = 100.0*std::numeric_limits<T>::epsilon();
+    auto relErr = (gshOut-gshIn).norm()/gshIn.norm();
+    T tol = 200000.0*std::numeric_limits<T>::epsilon();
     if (relErr > tol) {
         std::cerr << "testPolycrystalGSHCUDAConversionIdentity" << std::endl;
         std::cerr << "GSH In = " << std::endl;
@@ -61,7 +52,8 @@ void testSpectralPolycrystalGSHCUDA()
     SpectralDatabaseUnified<T> db(dbFilename, dsetIDs, nTerms, refinementMultiplier);
     
     // Polycrystals
-    auto polycrystalGSH = SpectralPolycrystalGSHCUDA<T, crystalType>(props, db, init.s_0);
+    unsigned int orientationSpaceResolution = 5;
+    auto polycrystalGSH = SpectralPolycrystalGSHCUDA<T, crystalType>(props, db, init.s_0, orientationSpaceResolution);
     auto ncrystals = polycrystalGSH.getNumRepresentativeCrystals();
     std::cout << "Comparison being done with " << ncrystals << " crystals" << std::endl;
     auto polycrystalSpectral = SpectralPolycrystalCUDA<T, nSlipSystems(crystalType)>(ncrystals, init.s_0, props, db);
@@ -93,10 +85,21 @@ void testSpectralPolycrystalGSHCUDA()
     // Compare
     auto gshSpectral = polycrystalSpectral.getGSHCoeffs();
     auto gshGSH = polycrystalGSH.getGSHCoeffs();
-//    std::cout << "SpectralPolycrystalCUDA" << std::endl;
-//    std::cout << gshSpectral;
-//    std::cout << "SpectralPolycrystalGSHCUDA" << std::endl;
-//    std::cout << gshGSH;
+    auto relErr = (gshGSH-gshSpectral).norm()/gshSpectral.norm();
+    T tol = 100000.0*std::numeric_limits<T>::epsilon();
+    if (relErr > tol) {
+        std::cerr << "testSpectralPolycrystalGSHCUDA" << std::endl;
+        std::cerr << "GSH Spectral = " << std::endl;
+        std::cerr << gshSpectral << std::endl;
+        std::cerr << "GSH GSH = " << std::endl;
+        std::cerr << gshGSH << std::endl;
+        auto densities = polycrystalGSH.getDensities();
+        std::cerr << "Min density = " << *std::min_element(densities.begin(), densities.end()) << std::endl;
+        std::cerr << "Max density = " << *std::max_element(densities.begin(), densities.end()) << std::endl;
+        std::cerr << "Relative error in GSH = " << relErr << std::endl;
+        std::cerr << "Tolerance = " << tol << std::endl;
+        throw std::runtime_error("Relative error too high.");
+    }
 }
 
 } //END NAMESPACE HPP

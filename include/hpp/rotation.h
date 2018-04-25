@@ -458,7 +458,19 @@ private:
     std::vector<EulerAngles<T>> eulerAngleList;
 };
 
+/**
+ * @brief Calculate the minimum orientation space resolution that will use at least the number of points given.
+ * @param nPointsInt
+ * @param symmetryType
+ * @return The resolution
+ * @todo Add and test accounting for C4 symmetry
+ */
 inline int orientationSpaceResolutionRequiredForNumberOfPoints(long int nPointsInt, SymmetryType symmetryType = SYMMETRY_TYPE_NONE) {
+    if (symmetryType == SYMMETRY_TYPE_C4) {
+        std::cerr << "WARNING: C4 symmetry implementation is not complete." << std::endl;
+        std::cerr << "Proceeding without accounting for symmetries." << std::endl;
+        symmetryType = SYMMETRY_TYPE_NONE;
+    }
     double nPoints = nPointsInt;
     double nPointsSymm;
     switch (symmetryType) {

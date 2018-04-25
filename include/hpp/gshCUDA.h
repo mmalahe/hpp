@@ -312,6 +312,16 @@ class GSHCoeffsCUDA {
             return this->getReals(5);
         }
         
+        __host__ T norm() const {
+            auto reals = this->getReals();
+            T norm = 0.0;
+            for (unsigned int i=0; i<reals.size(); i++) {
+                norm += std::pow(reals[i],2.0);       
+            }
+            norm = std::sqrt(norm);
+            return norm;
+        }
+        
         static const int nl0 = nGSHCoeffsInLevel(0);
         static const int nl1 = nGSHCoeffsInLevel(1);
         static const int nl2 = nGSHCoeffsInLevel(2);
@@ -351,6 +361,27 @@ __host__ __device__ GSHCoeffsCUDA<T> operator+(const GSHCoeffsCUDA<T>& coeffs1, 
     }
     for (int i=0; i<res.nl4; i++) {
         res.l4[i] = coeffs1.l4[i]+coeffs2.l4[i];
+    }
+    return res;
+}
+
+template <typename T>
+__host__ __device__ GSHCoeffsCUDA<T> operator-(const GSHCoeffsCUDA<T>& coeffs1, const GSHCoeffsCUDA<T>& coeffs2) {
+    GSHCoeffsCUDA<T> res;
+    for (int i=0; i<res.nl0; i++) {
+        res.l0[i] = coeffs1.l0[i]-coeffs2.l0[i];
+    }
+    for (int i=0; i<res.nl1; i++) {
+        res.l1[i] = coeffs1.l1[i]-coeffs2.l1[i];
+    }
+    for (int i=0; i<res.nl2; i++) {
+        res.l2[i] = coeffs1.l2[i]-coeffs2.l2[i];
+    }
+    for (int i=0; i<res.nl3; i++) {
+        res.l3[i] = coeffs1.l3[i]-coeffs2.l3[i];
+    }
+    for (int i=0; i<res.nl4; i++) {
+        res.l4[i] = coeffs1.l4[i]-coeffs2.l4[i];
     }
     return res;
 }
