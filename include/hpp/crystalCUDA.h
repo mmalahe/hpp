@@ -216,8 +216,9 @@ public:
     void setupDatabase(const SpectralDatabase<T>& dbIn);
     
     // Simulation
-    void resetRandomOrientations(T init_s, unsigned long int seed);
-    void resetGivenOrientations(T init_s, const std::vector<EulerAngles<T>>& angleList);
+    void setOrientations(const std::vector<EulerAngles<T>>& angleList);
+    void setToInitialConditionsRandomOrientations(T init_s, unsigned long int seed);
+    void setToInitialConditions(T init_s, const std::vector<EulerAngles<T>>& angleList);
     void resetHistories();
     void step(const hpp::Tensor2<T>& L_next, T dt);
     void step(const hpp::Tensor2<T>& F_next, const hpp::Tensor2<T>& L_next, T dt);
@@ -347,42 +348,35 @@ public:
         densities = std::vector<T>(orientationSpace.size(), 1.0/orientationSpace.size());
     }    
     
-    void resetSamplingOrientations(T init_s) {
-        std::vector<EulerAngles<T>> angleList(orientationSpace.size());
-        for (unsigned int i=0; i<orientationSpace.size(); i++) {
-            angleList[i] = orientationSpace.getEulerAngle(i);            
-        }
-        polycrystal.resetGivenOrientations(init_s, angleList);
+    // Setting slip resistances
+    void setSlipResistances(T s) {
+        throw std::runtime_error("Not implemented.");//polycrystal.setSlipResistances(s);
     }    
-    void resetSamplingOrientations() {
-        this->resetSamplingOrientations(this->initS);
+    void setSlipResistancesToInitialConditions() { 
+        this->setSlipResistances(this->initS);
+    }    
+    
+    // Setting orientations
+    void setOrientations(const GSHCoeffsCUDA<T>& coeffs) {
+        this->resetSamplingOrientations();
+        densities = polycrystal.getDensitiesFromGSH(coeffs);        
     }
     
-    // Simulation
-    void resetUniformRandomOrientations(T init_s) {
-        // Orientation sampling points remain uniform
-        this->resetSamplingOrientations(init_s);
-        
+    void setUniformRandomOrientations() {
+        this->resetSamplingOrientations();
         // Density at each point is uniform
         for (auto& density : densities) {
             density = 1.0/orientationSpace.size();
         }
     }
-    void resetUniformRandomOrientations() {
-        this->resetUniformRandomOrientations(this->initS);
+    
+    // Full resets
+    void setToInitialConditions(const GSHCoeffsCUDA<T>& coeffs) {
+        this->setOrientations(coeffs);
+        //this->resetSlipResistances();
     }
     
-    void reset(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
-        // Orientation sampling points remain uniform
-        this->resetSamplingOrientations(init_s);
-        
-        // Density at each point is determined by GSH coefficients
-        densities = polycrystal.getDensitiesFromGSH(coeffs);
-    }
-    void reset(const GSHCoeffsCUDA<T>& coeffs) {
-        this->reset(this->initS, coeffs);
-    }
-    
+    // Simulation
     void step(const hpp::Tensor2<T>& L_next, T dt) {
         polycrystal.step(L_next, dt);
     }    
@@ -448,6 +442,13 @@ public:
         return polycrystal.getDensityWeightedGSH(densities);
     }
     const std::vector<T>& getDensities() const {return densities;}
+    const T getDensitySum() const {
+        T sum = 0.0;
+        for (const auto& density : densities) {
+            sum += density;
+        }
+        return sum;
+    }
     
     // Conversions
     unsigned int getNumRepresentativeCrystals(){return densities.size();}
@@ -465,6 +466,15 @@ private:
     
     /// Initial slip resistance
     T initS;
+    
+    // Simulation
+    void resetSamplingOrientations() {
+        std::vector<EulerAngles<T>> angleList(orientationSpace.size());
+        for (unsigned int i=0; i<orientationSpace.size(); i++) {
+            angleList[i] = orientationSpace.getEulerAngle(i);            
+        }
+        polycrystal.setOrientations(angleList);
+    }
     
     // Histories
     std::vector<T> tHistory;

@@ -140,8 +140,8 @@ boost::python::class_<std::vector<hpp::Crystal<double>>>("CrystalDVec")
 
 boost::python::class_<hpp::Polycrystal<float>>("PolycrystalF", 
     boost::python::init<const std::vector<hpp::Crystal<float>>&>())
-    .def("resetRandomOrientations", &hpp::Polycrystal<float>::resetRandomOrientations)
-    .def("resetGivenOrientations", &hpp::Polycrystal<float>::resetGivenOrientations)
+    .def("setToInitialConditionsRandomOrientations", &hpp::Polycrystal<float>::setToInitialConditionsRandomOrientations)
+    .def("setToInitialConditions", &hpp::Polycrystal<float>::setToInitialConditions)
     .def("getEulerAnglesZXZActive", &hpp::Polycrystal<float>::getEulerAnglesZXZActive)
     .def("step", &hpp::Polycrystal<float>::stepVelocityGradient)
     .def("getGSHCoeffs", &hpp::Polycrystal<float>::getGSHCoeffs);
@@ -149,8 +149,8 @@ boost::python::class_<hpp::Polycrystal<float>>("PolycrystalF",
 //;
 boost::python::class_<hpp::Polycrystal<double>>("PolycrystalD", 
     boost::python::init<const std::vector<hpp::Crystal<double>>&>())
-    .def("resetRandomOrientations", &hpp::Polycrystal<double>::resetRandomOrientations)
-    .def("resetGivenOrientations", &hpp::Polycrystal<double>::resetGivenOrientations)
+    .def("setToInitialConditionsRandomOrientations", &hpp::Polycrystal<double>::setToInitialConditionsRandomOrientations)
+    .def("setToInitialConditions", &hpp::Polycrystal<double>::setToInitialConditions)
     .def("getEulerAnglesZXZActive", &hpp::Polycrystal<double>::getEulerAnglesZXZActive)
     .def("step", &hpp::Polycrystal<double>::stepVelocityGradient)
     .def("getGSHCoeffs", &hpp::Polycrystal<double>::getGSHCoeffs);

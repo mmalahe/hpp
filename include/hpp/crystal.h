@@ -482,8 +482,8 @@ public:
     
     // Higher level interface, meant for Python functionality
     void resetHistories();
-    void resetRandomOrientations(U init_s, unsigned long int seed);
-    void resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList);    
+    void setToInitialConditionsRandomOrientations(U init_s, unsigned long int seed);
+    void setToInitialConditions(U init_s, const std::vector<EulerAngles<U>>& angleList);    
     void stepVelocityGradient(hpp::Tensor2<U> L_next, U DeltaT);
     std::vector<EulerAngles<U>> getEulerAnglesZXZActive();
     GSHCoeffs<U> getGSHCoeffs();

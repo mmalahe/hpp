@@ -1511,7 +1511,7 @@ void Polycrystal<U>::resetHistories() {
 
 // Reset function
 template <typename U>
-void Polycrystal<U>::resetRandomOrientations(U init_s, unsigned long int seed) {
+void Polycrystal<U>::setToInitialConditionsRandomOrientations(U init_s, unsigned long int seed) {
     // Create new initial orientations
     Tensor2<U> R(3,3);
     std::mt19937 randgen(seed);    
@@ -1529,7 +1529,7 @@ void Polycrystal<U>::resetRandomOrientations(U init_s, unsigned long int seed) {
 }
 
 template <typename U>
-void Polycrystal<U>::resetGivenOrientations(U init_s, const std::vector<EulerAngles<U>>& angleList) {
+void Polycrystal<U>::setToInitialConditions(U init_s, const std::vector<EulerAngles<U>>& angleList) {
     // Check sizes
     if (angleList.size() != this->crystal_list.size()) {
         std::cerr << "Number of angles supplied = " << angleList.size() << std::endl;

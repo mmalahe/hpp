@@ -17,10 +17,10 @@ namespace hpp{
  */
 template <typename T, hpp::CrystalType CRYSTAL_TYPE>
 void testPolycrystalGSHCUDAConversionIdentity(SpectralPolycrystalGSHCUDA<T, CRYSTAL_TYPE>& polycrystal, const GSHCoeffsCUDA<T>& gshIn) {
-    polycrystal.reset(gshIn);
+    polycrystal.setOrientations(gshIn);
     auto gshOut = polycrystal.getGSHCoeffs();
     auto relErr = (gshOut-gshIn).norm()/gshIn.norm();
-    T tol = 200000.0*std::numeric_limits<T>::epsilon();
+    T tol = 5000.0*std::numeric_limits<T>::epsilon();
     if (relErr > tol) {
         std::cerr << "testPolycrystalGSHCUDAConversionIdentity" << std::endl;
         std::cerr << "GSH In = " << std::endl;
@@ -30,6 +30,7 @@ void testPolycrystalGSHCUDAConversionIdentity(SpectralPolycrystalGSHCUDA<T, CRYS
         auto densities = polycrystal.getDensities();
         std::cerr << "Min density = " << *std::min_element(densities.begin(), densities.end()) << std::endl;
         std::cerr << "Max density = " << *std::max_element(densities.begin(), densities.end()) << std::endl;
+        std::cerr << "Density sum = " << polycrystal.getDensitySum() << std::endl;
         std::cerr << "Relative error in GSH = " << relErr << std::endl;
         std::cerr << "Tolerance = " << tol << std::endl;
         throw std::runtime_error("Relative error too high.");
@@ -59,16 +60,20 @@ void testSpectralPolycrystalGSHCUDA()
     auto polycrystalSpectral = SpectralPolycrystalCUDA<T, nSlipSystems(crystalType)>(ncrystals, init.s_0, props, db);
     
     // Single-class tests
-    unsigned long int randomSeed = 0;
-    polycrystalSpectral.resetRandomOrientations(init.s_0, randomSeed);
+    GSHCoeffsCUDA<T> gshHardcoded;
+    gshHardcoded.set(0,0,0,make_cuComplex((T)1.0,(T)0.0));
+    gshHardcoded.set(1,-1,1,make_cuComplex((T)1.23,(T)0.0));
+    gshHardcoded.set(2,1,-1,make_cuComplex((T)-4.56,(T)0.0));
+    gshHardcoded.set(3,0,0,make_cuComplex((T)7.89,(T)0.0));
+    gshHardcoded.set(4,0,0,make_cuComplex((T)1.01,(T)0.0));
+    testPolycrystalGSHCUDAConversionIdentity<T, crystalType>(polycrystalGSH, gshHardcoded);    
     auto gshUniform = uniformOrientationGSHCoeffsCUDA<T>();
-    auto gshRandom = polycrystalSpectral.getGSHCoeffs();
-    testPolycrystalGSHCUDAConversionIdentity<T, crystalType>(polycrystalGSH, gshUniform);
-    testPolycrystalGSHCUDAConversionIdentity<T, crystalType>(polycrystalGSH, gshRandom);
+    testPolycrystalGSHCUDAConversionIdentity<T, crystalType>(polycrystalGSH, gshUniform);    
     
     // Prepare for comparison tests
-    polycrystalSpectral.resetRandomOrientations(init.s_0, randomSeed);
-    polycrystalGSH.resetUniformRandomOrientations(init.s_0);
+    unsigned long int randomSeed = 0;
+    polycrystalSpectral.setToInitialConditionsRandomOrientations(init.s_0, randomSeed);
+    polycrystalGSH.setUniformRandomOrientations();
     
     // Applied deformation
     T t = 0.0;
@@ -79,6 +84,7 @@ void testSpectralPolycrystalGSHCUDA()
     // Take steps
     for (int i=0; i<50; i++) {
         polycrystalSpectral.step(L, dt);
+        polycrystalGSH.setOrientations(polycrystalGSH.getGSHCoeffs());
         polycrystalGSH.step(L, dt);
     }
     
