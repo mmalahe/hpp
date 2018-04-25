@@ -325,6 +325,16 @@ class GSHCoeffsCUDA {
 };
 
 template <typename T>
+__host__ __device__ GSHCoeffsCUDA<T> uniformOrientationGSHCoeffsCUDA() {
+    GSHCoeffsCUDA<T> coeffs;
+    typename cuTypes<T>::complex one;
+    one.x = 1.0;
+    one.y = 0.0;
+    coeffs.set(0,0,0,one);
+    return coeffs;
+}
+
+template <typename T>
 __host__ __device__ GSHCoeffsCUDA<T> operator+(const GSHCoeffsCUDA<T>& coeffs1, const GSHCoeffsCUDA<T>& coeffs2) {
     GSHCoeffsCUDA<T> res;
     for (int i=0; i<res.nl0; i++) {

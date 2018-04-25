@@ -372,24 +372,24 @@ public:
         this->resetUniformRandomOrientations(this->initS);
     }
     
-    void resetGivenGSHCoeffs(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
+    void reset(T init_s, const GSHCoeffsCUDA<T>& coeffs) {
         // Orientation sampling points remain uniform
         this->resetSamplingOrientations(init_s);
         
         // Density at each point is determined by GSH coefficients
         densities = polycrystal.getDensitiesFromGSH(coeffs);
     }
-    void resetGivenGSHCoeffs(const GSHCoeffsCUDA<T>& coeffs) {
-        this->resetGivenGSHCoeffs(this->initS, coeffs);
+    void reset(const GSHCoeffsCUDA<T>& coeffs) {
+        this->reset(this->initS, coeffs);
     }
     
     void step(const hpp::Tensor2<T>& L_next, T dt) {
         polycrystal.step(L_next, dt);
     }    
     
-    template <typename T, unsigned int N>
-    std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> SpectralPolycrystalCUDA<T,N>::getPoleHistogram(const VecCUDA<T,3>& pole) {
-        return polycrystal.getDensityWeightedPoleHistogram(pole, densities);
+    std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> getPoleHistogram(const VecCUDA<T,3>& pole) {
+        throw std::runtime_error("Not implemented.");
+        //return polycrystal.getDensityWeightedPoleHistogram(pole, densities);
     }
     
     /**
@@ -429,7 +429,7 @@ public:
             
             // Step
             auto gshPrev = this->getGSHCoeffs();
-            this->resetGivenGSHCoeffs(gshPrev);
+            this->reset(gshPrev);
             this->step(LNext, dt);
             
             // Store quantities
@@ -447,6 +447,7 @@ public:
     GSHCoeffsCUDA<T> getGSHCoeffs() {
         return polycrystal.getDensityWeightedGSH(densities);
     }
+    const std::vector<T>& getDensities() const {return densities;}
     
     // Conversions
     unsigned int getNumRepresentativeCrystals(){return densities.size();}
@@ -465,7 +466,7 @@ private:
     /// Initial slip resistance
     T initS;
     
-    / Histories
+    // Histories
     std::vector<T> tHistory;
     std::vector<Tensor2CUDA<T,3,3>> TCauchyHistory;
     std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory111;
