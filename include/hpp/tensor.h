@@ -178,8 +178,8 @@ class TensorError: public std::runtime_error
  * the second index
  */
 struct idx2d{
-    unsigned int i;
-    unsigned int j;
+    int i;
+    int j;
 };
 
 inline idx2d unflat(unsigned int flatIdx, unsigned int n1, unsigned int n2) 

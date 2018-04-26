@@ -242,7 +242,9 @@ public:
     
     // Automatically-generated getters
     const Tensor2CUDA<T,3,3>& getTCauchy() const {return TCauchyGlobalH;}
-    const std::vector<T>& getTHistory() const {return tHistory;}
+    const std::vector<T>& getTHistory() const {return tHistory;}    
+    double getMaxMemUsedGB() const {return maxMemUsedGB;}
+    const hpp::Timer& getSolveTimer() const {return solveTimer;}
 protected:
 
 private:
@@ -293,7 +295,9 @@ private:
     
     // Texture history
     std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> getPoleHistogram(const VecCUDA<T,3>& pole);
+    std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> getPoleHistogramDensityWeighted(const VecCUDA<T,3>& pole, const std::vector<T>& densities);
     void getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole);
+    void getPoleHistogramDensityWeighted(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole, const std::vector<T>& densities);
     void writePoleHistogramHistoryHDF5(H5::H5File& outfile, std::string dsetBaseName, std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>>& history, const VecCUDA<T,3>& pole);
     std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory111;
     std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> poleHistogramHistory110;
@@ -386,8 +390,7 @@ public:
     }    
     
     std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> getPoleHistogram(const VecCUDA<T,3>& pole) {
-        throw std::runtime_error("Not implemented.");
-        //return polycrystal.getDensityWeightedPoleHistogram(pole, densities);
+        return polycrystal.getDensityWeightedPoleHistogram(pole, densities);
     }
     
     /**
@@ -414,11 +417,11 @@ public:
         poleHistogramHistory100.resize(nsteps+1);
         poleHistogramHistory001.resize(nsteps+1);
         poleHistogramHistory011.resize(nsteps+1);
-        getPoleHistogram(this->poleHistogramHistory111[0], VecCUDA<T,3>{1,1,1});
-        getPoleHistogram(this->poleHistogramHistory110[0], VecCUDA<T,3>{1,1,0});
-        getPoleHistogram(this->poleHistogramHistory100[0], VecCUDA<T,3>{1,0,0});
-        getPoleHistogram(this->poleHistogramHistory001[0], VecCUDA<T,3>{0,0,1});
-        getPoleHistogram(this->poleHistogramHistory011[0], VecCUDA<T,3>{0,1,1});
+        this->getPoleHistogram(this->poleHistogramHistory111[0], VecCUDA<T,3>{1,1,1});
+        this->getPoleHistogram(this->poleHistogramHistory110[0], VecCUDA<T,3>{1,1,0});
+        this->getPoleHistogram(this->poleHistogramHistory100[0], VecCUDA<T,3>{1,0,0});
+        this->getPoleHistogram(this->poleHistogramHistory001[0], VecCUDA<T,3>{0,0,1});
+        this->getPoleHistogram(this->poleHistogramHistory011[0], VecCUDA<T,3>{0,1,1});
         for (unsigned int i=0; i<nsteps; i++) {
             // Inputs for the next step
             T t = tStart + (i+1)*dt;
@@ -426,18 +429,18 @@ public:
             hpp::Tensor2<T> LNext = L_of_t(t);     
             
             // Step
-            auto gshPrev = this->getGSHCoeffs();
-            this->reset(gshPrev);
+            this->setOrientations(this->getGSHCoeffs());
+            this->setSlipResistances(this->getSlipResistanceGSHCoeffs());
             this->step(LNext, dt);
             
             // Store quantities
             tHistory.push_back(t);
             TCauchyHistory.push_back(polycrystal.getTCauchy());
-            getPoleHistogram(this->poleHistogramHistory111[i+1], VecCUDA<T,3>{1,1,1});
-            getPoleHistogram(this->poleHistogramHistory110[i+1], VecCUDA<T,3>{1,1,0});
-            getPoleHistogram(this->poleHistogramHistory100[i+1], VecCUDA<T,3>{1,0,0});
-            getPoleHistogram(this->poleHistogramHistory001[i+1], VecCUDA<T,3>{0,0,1});
-            getPoleHistogram(this->poleHistogramHistory011[i+1], VecCUDA<T,3>{0,1,1});
+            this->getPoleHistogram(this->poleHistogramHistory111[i+1], VecCUDA<T,3>{1,1,1});
+            this->getPoleHistogram(this->poleHistogramHistory110[i+1], VecCUDA<T,3>{1,1,0});
+            this->getPoleHistogram(this->poleHistogramHistory100[i+1], VecCUDA<T,3>{1,0,0});
+            this->getPoleHistogram(this->poleHistogramHistory001[i+1], VecCUDA<T,3>{0,0,1});
+            this->getPoleHistogram(this->poleHistogramHistory011[i+1], VecCUDA<T,3>{0,1,1});
         }
     }
     
@@ -460,6 +463,39 @@ public:
             sum += density;
         }
         return sum;
+    }
+    
+    void writeResultHDF5(std::string filename)
+    {
+        H5::H5File outfile(filename.c_str(), H5F_ACC_TRUNC);
+        
+        // Stress history
+        writeVectorToHDF5Array(outfile, "tHistory", this->tHistory);    
+        std::vector<hsize_t> timeDims = {this->TCauchyHistory.size()};
+        std::vector<hsize_t> tensorDims = {3,3};
+        H5::DataSet TCauchyDset = createHDF5GridOfArrays<T>(outfile, "TCauchyHistory", timeDims, tensorDims);
+        for (unsigned int i=0; i<this->TCauchyHistory.size(); i++) {
+            std::vector<hsize_t> offset = {i};
+            this->TCauchyHistory[i].writeToExistingHDF5Dataset(TCauchyDset, offset);
+        }
+        
+        // Pole figure histograms
+        std::string poleHistBasename = "poleHistogram";
+        this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory111, VecCUDA<T,3>{1,1,1});   
+        this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory110, VecCUDA<T,3>{1,1,0});
+        this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory100, VecCUDA<T,3>{1,0,0});
+        this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory001, VecCUDA<T,3>{0,0,1});
+        this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory011, VecCUDA<T,3>{0,1,1});
+        
+        // Scalar attributes
+        addAttribute(outfile, "spectralPolycrystalSolveTime", polycrystal.getSolveTimer().getDuration());
+        addAttribute(outfile, "nTimestepsTaken", polycrystal.getNTimestepsTaken());
+        addAttribute(outfile, "nComponents", polycrystal.getNComponents());
+        addAttribute(outfile, "nFourierTermsComputedHardware", polycrystal.getNTermsComputedHardware());
+        addAttribute(outfile, "maxMemUsedGB", polycrystal.getMaxMemUsedGB());
+     
+        // Close
+        outfile.close();
     }
     
     // Conversions
@@ -496,7 +532,12 @@ private:
             slip = s;
         }
         this->setSlipResistances(slipResistances);
-    }    
+    }
+    
+    // Output
+    void getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole) {
+        polycrystal.getPoleHistogramDensityWeighted(hist, pole, densities);
+    }
     
     // Histories
     std::vector<T> tHistory;

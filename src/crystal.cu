@@ -2441,6 +2441,37 @@ __global__ void GET_GSH_OF_PER_CRYSTAL_SCALAR(const SpectralCrystalCUDA<T>* crys
     }
 }
 
+template <typename T>
+__device__ idx2d getPoleHistogramIndicesEqualArea(const SpectralCrystalCUDA<T>& crystal, const VecCUDA<T,3>& planeNormal, int nbins) {
+    T maxR = (1.00001)*2*sinIntr(M_PI/4);
+    Tensor2CUDA<T,3,3> ROrientation = EulerZXZRotationMatrixCUDA(crystal.angles);
+        
+    // Active rotation
+    VecCUDA<T,3> pole = ROrientation*planeNormal;
+    VecCUDA<T,3> poleSpherical = cartesianToSpherical(pole);
+    T theta = poleSpherical(1);
+    T phi = poleSpherical(2);
+    
+    // Equal-area projection
+    T R = 2*sinIntr(phi/2);
+    T x, y;
+    sincosIntr(theta, &y, &x);
+    x *= R;
+    y *= R;
+    
+    // Histogram index
+    T xMin = -maxR;
+    T xMax = maxR;
+    T yMin = xMin;
+    T yMax = xMax;
+    T binwidthX = (xMax-xMin)/nbins;
+    T binwidthY = (yMax-yMin)/nbins;
+    idx2d histIdx;
+    histIdx.i = (int) ((x-xMin)/binwidthX);
+    histIdx.j = (int) ((y-yMin)/binwidthY);
+    return histIdx;
+}
+
 template<typename T, unsigned int N>
 __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const SpectralCrystalCUDA<T>* crystals, VecCUDA<T,3>* planeNormalG, Tensor2CUDA<T,N,N>* histG) {
     // Get absolute thread index
@@ -2448,46 +2479,38 @@ __global__ void HISTOGRAM_POLES_EQUAL_AREA(unsigned int nCrystals, const Spectra
     
     // Read in normal from global memory
     VecCUDA<T,3> planeNormal = *planeNormalG;
-
-    // Maximum R value from northern hemisphere projection
-    T maxR = (1.00001)*2*sinIntr(M_PI/4);
     
     // Grid stride loop over crystals
     for (unsigned int idx=baseIdx; idx<nCrystals; idx+=blockDim.x*gridDim.x) {
-        // Get orientation of the crystal
-        SpectralCrystalCUDA<T> crystal = crystals[idx];
-        Tensor2CUDA<T,3,3> ROrientation = EulerZXZRotationMatrixCUDA(crystal.angles);
-        
-        // Active rotation
-        VecCUDA<T,3> pole = ROrientation*planeNormal;
-        VecCUDA<T,3> poleSpherical = cartesianToSpherical(pole);
-        T theta = poleSpherical(1);
-        T phi = poleSpherical(2);
-        
-        // Equal-area projection
-        T R = 2*sinIntr(phi/2);
-        T x, y;
-        sincosIntr(theta, &y, &x);
-        x *= R;
-        y *= R;
-        
-        // Histogram index
-        T xMin = -maxR;
-        T xMax = maxR;
-        T yMin = xMin;
-        T yMax = xMax;
-        T binwidthX = (xMax-xMin)/N;
-        T binwidthY = (yMax-yMin)/N;
-        int ix = (int) ((x-xMin)/binwidthX);
-        int iy = (int) ((y-yMin)/binwidthY);
+        idx2d histIdx = getPoleHistogramIndicesEqualArea(crystals[idx], planeNormal, N);
         
         // Add points to histogram
-        if (ix >=0 && ix < N && iy>=0 && iy < N) {
-            atomicAdd(&((*histG)(ix,iy)), 1.0);
+        if (histIdx.i >=0 && histIdx.i < N && histIdx.j>=0 && histIdx.j < N) {
+            atomicAdd(&((*histG)(histIdx.i, histIdx.j)), 1.0);
         }
         __syncthreads();
     }    
-} 
+}
+
+template<typename T, unsigned int N>
+__global__ void HISTOGRAM_POLES_EQUAL_AREA_DENSITY_WEIGHTED(unsigned int nCrystals, const SpectralCrystalCUDA<T>* crystals, VecCUDA<T,3>* planeNormalG, T* densities, Tensor2CUDA<T,N,N>* histG) {
+    // Get absolute thread index
+    unsigned int baseIdx = blockDim.x*blockIdx.x + threadIdx.x;
+    
+    // Read in normal from global memory
+    VecCUDA<T,3> planeNormal = *planeNormalG;
+    
+    // Grid stride loop over crystals
+    for (unsigned int idx=baseIdx; idx<nCrystals; idx+=blockDim.x*gridDim.x) {
+        idx2d histIdx = getPoleHistogramIndicesEqualArea(crystals[idx], planeNormal, N);
+        
+        // Add points to histogram
+        if (histIdx.i >=0 && histIdx.i < N && histIdx.j>=0 && histIdx.j < N) {
+            atomicAdd(&((*histG)(histIdx.i, histIdx.j)), densities[idx]);
+        }
+        __syncthreads();
+    }    
+}
 
 // Reset host function
 template <typename T, unsigned int N>
@@ -2717,6 +2740,28 @@ std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> Spec
 }
 
 template <typename T, unsigned int N>
+std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> SpectralPolycrystalCUDA<T,N>::getPoleHistogramDensityWeighted(const VecCUDA<T,3>& pole, const std::vector<T>& densities) {
+    // Histogram configuration
+    const unsigned int histDim = HPP_POLE_FIG_HIST_DIM;
+    CudaKernelConfig histKernelCfg = getKernelConfigMaxOccupancy(devProp, (void*)HISTOGRAM_POLES_EQUAL_AREA_DENSITY_WEIGHTED<T, histDim>, nCrystals);
+    dim3 dG = histKernelCfg.dG;
+    dim3 dB = histKernelCfg.dB;
+      
+    // Generate histogram
+    auto densitiesD = makeDeviceCopyVecSharedPtr<T>(densities);
+    std::shared_ptr<VecCUDA<T,3>> poleD = makeDeviceCopySharedPtr(pole);    
+    std::shared_ptr<Tensor2CUDA<T,histDim,histDim>> histHSharedPtr(new Tensor2CUDA<T,histDim,histDim>);
+    std::shared_ptr<Tensor2CUDA<T,histDim,histDim>> histD = makeDeviceCopySharedPtrFromPtr(histHSharedPtr.get());        
+    CUDA_CHK(cudaDeviceSynchronize());
+    HISTOGRAM_POLES_EQUAL_AREA_DENSITY_WEIGHTED<T, histDim><<<dG,dB>>>(nCrystals, crystalsD.data().get(), poleD.get(), densitiesD.get(), histD.get());
+    CUDA_CHK(cudaDeviceSynchronize());
+    copyToHost(histD, histHSharedPtr.get());
+    
+    // Return
+    return histHSharedPtr;
+}
+
+template <typename T, unsigned int N>
 Tensor2<T> SpectralPolycrystalCUDA<T,N>::getPoleHistogram(int p0, int p1, int p2) {
     VecCUDA<T,3> pole;
     pole(0) = (T)p0;
@@ -2880,6 +2925,16 @@ std::vector<T> SpectralPolycrystalCUDA<T,N>::getPerCrystalScalarFromGSH(const GS
 template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::getPoleHistogram(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole) {
     auto histHSharedPtr = this->getPoleHistogram(pole);
+    hist = *(histHSharedPtr.get());
+}
+
+/**
+ * @brief Generate a pole histogram
+ * @param hist
+ */
+template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::getPoleHistogramDensityWeighted(Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>& hist, const VecCUDA<T,3>& pole, const std::vector<T>& densities) {
+    auto histHSharedPtr = this->getPoleHistogramDensityWeighted(pole, densities);
     hist = *(histHSharedPtr.get());
 }
 
