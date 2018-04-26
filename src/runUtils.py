@@ -170,7 +170,10 @@ class SpectralSolveRun(GenericRun):
         else:
             bin_dir = getBinDir("release")
         if self['use_gpu']:
-            self.executable = os.path.join(bin_dir,"spectralSolveCUDA")
+            if self['use_gsh']:
+                self.executable = os.path.join(bin_dir,"spectralSolveGSHCUDA")
+            else:
+                self.executable = os.path.join(bin_dir,"spectralSolveCUDA")            
         else:
             self.executable = os.path.join(bin_dir,"spectralSolve")
         
@@ -221,7 +224,8 @@ class SpectralSolveRun(GenericRun):
         
         # Unified coefficient ordering or not
         if self['use_unified_coeff_order']:
-            args += ["-u"]
+            if not self['use_gsh']:
+                args += ["-u"]
         
         # OpenMP for CPU implementation
         if not self['use_gpu']:

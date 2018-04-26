@@ -94,6 +94,7 @@ spectral_solve_params.update(spectral_db_params)
 spectral_solve_params.update(plotting_params)
 spectral_solve_params['n_omp_threads'] = multiprocessing.cpu_count()
 spectral_solve_params['use_gpu'] = True
+spectral_solve_params['use_gsh'] = True # the reduced state space generalized spherical harmonic solver
 spectral_solve_params['n_terms'] = 2**13
 #~ spectral_solve_params['n_terms'] = [2**10, 2**13, 2**16]
 #~ spectral_solve_params['n_terms'] = [2**i for i in range(1,17)]
