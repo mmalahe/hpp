@@ -37,6 +37,11 @@ void testPolycrystalGSHCUDAConversionIdentity(SpectralPolycrystalGSHCUDA<T, CRYS
     }
 }    
 
+/**
+ * @brief
+ * @todo Add test where at each timestep, GSH polycrystal is fed its own GSH
+ * coefficients for a reset, so that that is the only state that is maintained.
+ */
 template <typename T>
 void testSpectralPolycrystalGSHCUDA() 
 {
@@ -73,7 +78,7 @@ void testSpectralPolycrystalGSHCUDA()
     // Prepare for comparison tests
     unsigned long int randomSeed = 0;
     polycrystalSpectral.setToInitialConditionsRandomOrientations(init.s_0, randomSeed);
-    polycrystalGSH.setUniformRandomOrientations();
+    polycrystalGSH.setOrientations(polycrystalSpectral.getGSHCoeffs());
     
     // Applied deformation
     T t = 0.0;
@@ -84,7 +89,7 @@ void testSpectralPolycrystalGSHCUDA()
     // Take steps
     for (int i=0; i<50; i++) {
         polycrystalSpectral.step(L, dt);
-        polycrystalGSH.setOrientations(polycrystalGSH.getGSHCoeffs());
+        //polycrystalGSH.setOrientations(polycrystalGSH.getGSHCoeffs());
         polycrystalGSH.step(L, dt);
     }
     
@@ -92,7 +97,7 @@ void testSpectralPolycrystalGSHCUDA()
     auto gshSpectral = polycrystalSpectral.getGSHCoeffs();
     auto gshGSH = polycrystalGSH.getGSHCoeffs();
     auto relErr = (gshGSH-gshSpectral).norm()/gshSpectral.norm();
-    T tol = 100000.0*std::numeric_limits<T>::epsilon();
+    T tol = 110000.0*std::numeric_limits<T>::epsilon();
     if (relErr > tol) {
         std::cerr << "testSpectralPolycrystalGSHCUDA" << std::endl;
         std::cerr << "GSH Spectral = " << std::endl;

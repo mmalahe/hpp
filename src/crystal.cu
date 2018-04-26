@@ -618,6 +618,21 @@ __global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const Spectr
     P = one*(T)0.707106781186548*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1);
     density += P*expMult*coeffs.get(l, m, n);
 
+    m=1, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.5*powFull(-cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.707106781186548*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.5*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
     /////////
     // l=2 //
     /////////
@@ -696,6 +711,56 @@ __global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const Spectr
     m=0, n=2;
     expMult = expIntr(Iim*(n*phi1+m*phi2));
     P = one*(T)-0.612372435695794*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.5*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*-powFull(-cosIntr(Phi) + (T)1, (T)1.0)*((T)1.0*cosIntr(Phi) + (T)0.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)1.22474487139159*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*cosIntr(Phi);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*((T)1.0*cosIntr(Phi) - (T)0.5)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.5*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.25*powFull(-cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.5*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.612372435695794*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.5*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.25*powFull(cosIntr(Phi) + (T)1, (T)2.0);
     density += P*expMult*coeffs.get(l, m, n);
 
     /////////
@@ -841,6 +906,111 @@ __global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const Spectr
     m=0, n=3;
     expMult = expIntr(Iim*(n*phi1+m*phi2));
     P = one*(T)-0.559016994374947*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*-Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)1.18585412256314*cosIntr(Phi) + (T)0.395284707521047);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*((T)-1.875*powFull(cosIntr(Phi), (T)2) - (T)1.25*cosIntr(Phi) + (T)0.125);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)2.1650635094611*powFull(cosIntr(Phi), (T)2) - (T)0.433012701892219);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(cosIntr(Phi) + (T)1, (T)1.0)*((T)1.875*powFull(cosIntr(Phi), (T)2) - (T)1.25*cosIntr(Phi) - (T)0.125);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*((T)1.18585412256314*cosIntr(Phi) - (T)0.395284707521047);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*((T)0.75*cosIntr(Phi) + (T)0.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*-Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)1.18585412256314*cosIntr(Phi) + (T)0.395284707521047);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-1.36930639376292*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0)*cosIntr(Phi);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*((T)1.18585412256314*cosIntr(Phi) - (T)0.395284707521047);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*((T)0.75*cosIntr(Phi) - (T)0.5)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.125*powFull(-cosIntr(Phi) + (T)1, (T)3.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.559016994374947*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.484122918275927*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.306186217847897*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.125*powFull(cosIntr(Phi) + (T)1, (T)3.0);
     density += P*expMult*coeffs.get(l, m, n);
 
     /////////
@@ -1071,6 +1241,186 @@ __global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const Spectr
     m=0, n=4;
     expMult = expIntr(Iim*(n*phi1+m*phi2));
     P = one*(T)0.522912516583797*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.467707173346743*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0)*((T)1.3228756555323*cosIntr(Phi) + (T)0.330718913883074);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)-2.47487373415292*powFull(cosIntr(Phi), (T)2) - (T)1.23743686707646*cosIntr(Phi) + (T)0.176776695296637);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*((T)-3.5*powFull(cosIntr(Phi), (T)3) - (T)2.625*powFull(cosIntr(Phi), (T)2) + (T)0.75*cosIntr(Phi) + (T)0.375);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)3.91311896062463*powFull(cosIntr(Phi), (T)2) - (T)1.67705098312484)*cosIntr(Phi);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(cosIntr(Phi) + (T)1, (T)1.0)*((T)3.5*powFull(cosIntr(Phi), (T)3) - (T)2.625*powFull(cosIntr(Phi), (T)2) - (T)0.75*cosIntr(Phi) + (T)0.375);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*((T)2.47487373415292*powFull(cosIntr(Phi), (T)2) - (T)1.23743686707646*cosIntr(Phi) - (T)0.176776695296637);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*((T)-1.3228756555323*cosIntr(Phi) + (T)0.330718913883074)*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=1, n=4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.467707173346743*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.330718913883074*powFull(-cosIntr(Phi) + (T)1, (T)3.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*((T)0.935414346693485*cosIntr(Phi) + (T)0.467707173346743)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*((T)1.75*powFull(cosIntr(Phi), (T)2) + (T)1.75*cosIntr(Phi) + (T)0.25);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*sqrtIntr(cosIntr(Phi) + (T)1)*((T)-2.47487373415292*powFull(cosIntr(Phi), (T)2) - (T)1.23743686707646*cosIntr(Phi) + (T)0.176776695296637);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0)*((T)-2.76699295264733*powFull(cosIntr(Phi), (T)2) + (T)0.395284707521047);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*((T)2.47487373415292*powFull(cosIntr(Phi), (T)2) - (T)1.23743686707646*cosIntr(Phi) - (T)0.176776695296637);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(cosIntr(Phi) + (T)1, (T)2.0)*((T)1.75*powFull(cosIntr(Phi), (T)2) - (T)1.75*cosIntr(Phi) + (T)0.25);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*((T)0.935414346693485*cosIntr(Phi) - (T)0.467707173346743)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=2, n=4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.330718913883074*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)3.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.176776695296637*Iim*powFull(-cosIntr(Phi) + (T)1, (T)3.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*-powFull(-cosIntr(Phi) + (T)1, (T)3.0)*((T)0.5*cosIntr(Phi) + (T)0.375);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*((T)0.935414346693485*cosIntr(Phi) + (T)0.467707173346743)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0)*((T)1.3228756555323*cosIntr(Phi) + (T)0.330718913883074);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-1.4790199457749*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5)*cosIntr(Phi);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*((T)-1.3228756555323*cosIntr(Phi) + (T)0.330718913883074)*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*((T)0.935414346693485*cosIntr(Phi) - (T)0.467707173346743)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*((T)0.5*cosIntr(Phi) - (T)0.375)*powFull(cosIntr(Phi) + (T)1, (T)3.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=3, n=4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.176776695296637*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)3.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=-4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.0625*powFull(-cosIntr(Phi) + (T)1, (T)4.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=-3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.176776695296637*Iim*powFull(-cosIntr(Phi) + (T)1, (T)3.5)*sqrtIntr(cosIntr(Phi) + (T)1);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=-2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.330718913883074*powFull(-cosIntr(Phi) + (T)1, (T)3.0)*powFull(cosIntr(Phi) + (T)1, (T)1.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=-1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.467707173346743*Iim*powFull(-cosIntr(Phi) + (T)1, (T)2.5)*powFull(cosIntr(Phi) + (T)1, (T)1.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=0;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.522912516583797*powFull(-cosIntr(Phi) + (T)1, (T)2.0)*powFull(cosIntr(Phi) + (T)1, (T)2.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=1;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.467707173346743*Iim*powFull(-cosIntr(Phi) + (T)1, (T)1.5)*powFull(cosIntr(Phi) + (T)1, (T)2.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=2;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)-0.330718913883074*powFull(-cosIntr(Phi) + (T)1, (T)1.0)*powFull(cosIntr(Phi) + (T)1, (T)3.0);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=3;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.176776695296637*Iim*sqrtIntr(-cosIntr(Phi) + (T)1)*powFull(cosIntr(Phi) + (T)1, (T)3.5);
+    density += P*expMult*coeffs.get(l, m, n);
+
+    m=4, n=4;
+    expMult = expIntr(Iim*(n*phi1+m*phi2));
+    P = one*(T)0.0625*powFull(cosIntr(Phi) + (T)1, (T)4.0);
     density += P*expMult*coeffs.get(l, m, n);
     
     // Scale and store density
