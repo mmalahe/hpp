@@ -22,7 +22,7 @@
 #include <hpp/crystalCUDA.h>
 
 template <typename U>
-void solve(std::string experimentName, std::string databaseFilename, bool unifiedCoeffOrder, unsigned int refinementMultiplier, unsigned int ncrystals, unsigned int nTerms, std::string outputFilename, bool defaultSeed=false)
+void solve(std::string experimentName, std::string databaseFilename, unsigned int refinementMultiplier, unsigned int ncrystals, unsigned int nTerms, std::string outputFilename, bool defaultSeed=false)
 {    
     // Experiment parameters
     hpp::Experiment<U> experiment(experimentName);
@@ -42,7 +42,7 @@ void solve(std::string experimentName, std::string databaseFilename, bool unifie
     hpp::SpectralDatabaseUnified<U> db(databaseFilename, dsetIDs, nTerms, refinementMultiplier);
     
     // Create polycrystal
-    const CrystalType crystalType = CRYSTAL_TYPE_FCC;
+    const hpp::CrystalType crystalType = hpp::CRYSTAL_TYPE_FCC;
     auto orientationSpaceResolution = hpp::orientationSpaceResolutionRequiredForNumberOfPoints(ncrystals, hpp::toSymmetryType(crystalType));
     auto polycrystal = hpp::SpectralPolycrystalGSHCUDA<U, crystalType>(props, db, init.s_0, orientationSpaceResolution);
     

@@ -2944,8 +2944,8 @@ void SpectralPolycrystalCUDA<T,N>::getPoleHistogramDensityWeighted(Tensor2CUDA<T
  * @param outfile the output file
  * @param poles the poles to plot
  */
-template <typename T, unsigned int N>
-void SpectralPolycrystalCUDA<T,N>::writePoleHistogramHistoryHDF5(H5::H5File& outfile, std::string dsetBaseName, std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>>& history, const VecCUDA<T,3>& pole) {
+template <typename T>
+void writePoleHistogramHistoryHDF5(H5::H5File& outfile, std::string dsetBaseName, std::vector<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>>& history, const VecCUDA<T,3>& pole) {
     // Data dimensions
     const unsigned int nTimesteps = history.size();
     const unsigned int histDim = HPP_POLE_FIG_HIST_DIM;
@@ -2982,11 +2982,11 @@ void SpectralPolycrystalCUDA<T,N>::writeResultHDF5(std::string filename)
     
     // Pole figure histograms
     std::string poleHistBasename = "poleHistogram";
-    this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory111, VecCUDA<T,3>{1,1,1});   
-    this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory110, VecCUDA<T,3>{1,1,0});
-    this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory100, VecCUDA<T,3>{1,0,0});
-    this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory001, VecCUDA<T,3>{0,0,1});
-    this->writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory011, VecCUDA<T,3>{0,1,1});
+    writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory111, VecCUDA<T,3>{1,1,1});   
+    writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory110, VecCUDA<T,3>{1,1,0});
+    writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory100, VecCUDA<T,3>{1,0,0});
+    writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory001, VecCUDA<T,3>{0,0,1});
+    writePoleHistogramHistoryHDF5(outfile, poleHistBasename, this->poleHistogramHistory011, VecCUDA<T,3>{0,1,1});
     
     // Scalar attributes
     addAttribute(outfile, "spectralPolycrystalSolveTime", solveTimer.getDuration());

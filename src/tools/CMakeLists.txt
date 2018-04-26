@@ -21,6 +21,8 @@ target_link_libraries(spectralSolve hpp)
 if (${HPP_USE_CUDA})
     CUDA_ADD_EXECUTABLE(spectralSolveCUDA spectralSolveCUDA.cu)
     target_link_libraries(spectralSolveCUDA hpp)
+    CUDA_ADD_EXECUTABLE(spectralSolveGSHCUDA spectralSolveGSHCUDA.cu)
+    target_link_libraries(spectralSolveGSHCUDA hpp)
 endif()
 
 # Build directories for external tools to read

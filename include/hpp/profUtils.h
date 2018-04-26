@@ -17,7 +17,7 @@ public:
     Timer();
     void start();
     void stop();
-    double getDuration(){return duration;}
+    double getDuration() const {return duration;}
 private:
     double duration = 0.0;
     bool running = false;
