@@ -174,7 +174,7 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T eD
 
 // GSH conversions
 template<typename T>
-__global__ void GET_ODF_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, T* densities);
+__global__ void GET_PER_CRYSTAL_SCALAR_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, T* densities);
 
 template<typename T>
 __global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
@@ -227,8 +227,9 @@ public:
     // Output
     std::vector<EulerAngles<T>> getEulerAnglesZXZActive();
     GSHCoeffsCUDA<T> getGSHCoeffs();
-    GSHCoeffsCUDA<T> getDensityWeightedGSH(const std::vector<T>& densities);
-    std::vector<T> getDensitiesFromGSH(const GSHCoeffsCUDA<T> coeffs);    
+    GSHCoeffsCUDA<T> getGSHOfPerCrystalScalar(const std::vector<T>& scalars);
+    GSHCoeffsCUDA<T> getGSHOfCrystalDensities(const std::vector<T>& densities);
+    std::vector<T> getPerCrystalScalarFromGSH(const GSHCoeffsCUDA<T> coeffs);    
     Tensor2<T> getPoleHistogram(int p0, int p1, int p2);
     void writeResultHDF5(std::string filename);
     
@@ -354,12 +355,16 @@ public:
     }    
     void setSlipResistancesToInitialConditions() { 
         this->setSlipResistances(this->initS);
-    }    
+    }
+//    void setSlipResistances(const GSHCoeffsCUDA<T>& coeffs) {
+//        this->resetSamplingOrientations();
+//        
+//    }
     
     // Setting orientations
-    void setOrientations(const GSHCoeffsCUDA<T>& coeffs) {
+    void setOrientations(const GSHCoeffsCUDA<T>& densityCoeffs) {
         this->resetSamplingOrientations();
-        densities = polycrystal.getDensitiesFromGSH(coeffs);        
+        densities = polycrystal.getPerCrystalScalarFromGSH(densityCoeffs);        
     }
     
     void setUniformRandomOrientations() {
@@ -438,9 +443,13 @@ public:
     }
     
     // Output
-    GSHCoeffsCUDA<T> getGSHCoeffs() {
-        return polycrystal.getDensityWeightedGSH(densities);
+    GSHCoeffsCUDA<T> getDensityGSHCoeffs() {
+        return polycrystal.getGSHOfPerCrystalScalar(densities);
     }
+    GSHCoeffsCUDA<T> getGSHCoeffs() {
+        return this->getDensityGSHCoeffs();
+    }
+
     const std::vector<T>& getDensities() const {return densities;}
     const T getDensitySum() const {
         T sum = 0.0;
@@ -458,8 +467,11 @@ private:
     /// The underlying spectral polycrystal
     SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)> polycrystal;
     
-    /// The density of each of the crystals
+    /// The density associated with each representative crystal
     std::vector<T> densities;
+    
+    /// The slip resistance associated with each representative crystal
+    std::vector<T> slipResistances;
     
     /// A dicrete colelction of points determining the orientation space for the crystal
     SO3Discrete<T> orientationSpace;
