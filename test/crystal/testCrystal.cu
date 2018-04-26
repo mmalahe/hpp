@@ -87,9 +87,10 @@ void testSpectralPolycrystalGSHCUDA()
     T dt = 20;
     
     // Take steps
-    for (int i=0; i<50; i++) {
+    for (int i=0; i<10; i++) {
         polycrystalSpectral.step(L, dt);
-        //polycrystalGSH.setOrientations(polycrystalGSH.getGSHCoeffs());
+        polycrystalGSH.setOrientations(polycrystalGSH.getGSHCoeffs());
+        polycrystalGSH.setSlipResistances(polycrystalGSH.getSlipResistanceGSHCoeffs());
         polycrystalGSH.step(L, dt);
     }
     

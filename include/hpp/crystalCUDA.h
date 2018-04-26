@@ -217,6 +217,8 @@ public:
     
     // Simulation
     void setOrientations(const std::vector<EulerAngles<T>>& angleList);
+    void setSlipResistances(const std::vector<T>& slipResistances);
+    std::vector<T> getSlipResistances() const;
     void setToInitialConditionsRandomOrientations(T init_s, unsigned long int seed);
     void setToInitialConditions(T init_s, const std::vector<EulerAngles<T>>& angleList);
     void resetHistories();
@@ -341,7 +343,7 @@ public:
         auto crystals = std::vector<SpectralCrystalCUDA<T>>(orientationSpace.size());
         for (unsigned int i=0; i<orientationSpace.size(); i++) {
             crystals[i].s = this->initS;
-            crystals[i].angles = orientationSpace.getEulerAngle(i);            
+            crystals[i].angles = orientationSpace.getEulerAngle(i);          
         }
         polycrystal = SpectralPolycrystalCUDA<T, nSlipSystems(CRYSTAL_TYPE)>(crystals, crystalProps, dbIn);
         
@@ -350,16 +352,13 @@ public:
     }    
     
     // Setting slip resistances
-    void setSlipResistances(T s) {
-        throw std::runtime_error("Not implemented.");//polycrystal.setSlipResistances(s);
-    }    
+    void setSlipResistances(const GSHCoeffsCUDA<T>& slipResistanceCoeffs) {
+        this->resetSamplingOrientations();
+        this->setSlipResistances(polycrystal.getPerCrystalScalarFromGSH(slipResistanceCoeffs));
+    }
     void setSlipResistancesToInitialConditions() { 
         this->setSlipResistances(this->initS);
     }
-//    void setSlipResistances(const GSHCoeffsCUDA<T>& coeffs) {
-//        this->resetSamplingOrientations();
-//        
-//    }
     
     // Setting orientations
     void setOrientations(const GSHCoeffsCUDA<T>& densityCoeffs) {
@@ -378,7 +377,7 @@ public:
     // Full resets
     void setToInitialConditions(const GSHCoeffsCUDA<T>& coeffs) {
         this->setOrientations(coeffs);
-        //this->resetSlipResistances();
+        this->setSlipResistancesToInitialConditions();
     }
     
     // Simulation
@@ -446,6 +445,10 @@ public:
     GSHCoeffsCUDA<T> getDensityGSHCoeffs() {
         return polycrystal.getGSHOfPerCrystalScalar(densities);
     }
+    GSHCoeffsCUDA<T> getSlipResistanceGSHCoeffs() {
+        auto slipResistances = polycrystal.getSlipResistances();
+        return polycrystal.getGSHOfPerCrystalScalar(slipResistances);
+    }
     GSHCoeffsCUDA<T> getGSHCoeffs() {
         return this->getDensityGSHCoeffs();
     }
@@ -470,9 +473,6 @@ private:
     /// The density associated with each representative crystal
     std::vector<T> densities;
     
-    /// The slip resistance associated with each representative crystal
-    std::vector<T> slipResistances;
-    
     /// A dicrete colelction of points determining the orientation space for the crystal
     SO3Discrete<T> orientationSpace;
     
@@ -487,6 +487,16 @@ private:
         }
         polycrystal.setOrientations(angleList);
     }
+    void setSlipResistances(const std::vector<T>& slipResistances) {
+        polycrystal.setSlipResistances(slipResistances);
+    }
+    void setSlipResistances(T s) {
+        std::vector<T> slipResistances(orientationSpace.size());
+        for (auto& slip : slipResistances) {
+            slip = s;
+        }
+        this->setSlipResistances(slipResistances);
+    }    
     
     // Histories
     std::vector<T> tHistory;

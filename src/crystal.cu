@@ -2528,6 +2528,33 @@ void SpectralPolycrystalCUDA<T,N>::setOrientations(const std::vector<EulerAngles
 }
 
 template <typename T, unsigned int N>
+void SpectralPolycrystalCUDA<T,N>::setSlipResistances(const std::vector<T>& slipResistances) {
+    // Check sizes
+    if (slipResistances.size() != this->nCrystals) {
+        std::cerr << "Number of resistances supplied = " << slipResistances.size() << std::endl;
+        std::cerr << "Number of crystals = " << this->nCrystals << std::endl;
+        throw std::runtime_error("Mismatch in angles supplied vs. number of crystals.");
+    }
+    
+    // Apply angles
+    thrust::host_vector<SpectralCrystalCUDA<T>> crystalsH = crystalsD;
+    for (unsigned int i=0; i<this->nCrystals; i++) {       
+        crystalsH[i].s = slipResistances[i];
+    }
+    crystalsD = crystalsH;
+}
+
+template <typename T, unsigned int N>
+std::vector<T> SpectralPolycrystalCUDA<T,N>::getSlipResistances() const {
+    std::vector<T> slipResistances(this->nCrystals);
+    thrust::host_vector<SpectralCrystalCUDA<T>> crystalsH = crystalsD;
+    for (unsigned int i=0; i<this->nCrystals; i++) {       
+        slipResistances[i] = crystalsH[i].s;
+    }
+    return slipResistances;
+}
+
+template <typename T, unsigned int N>
 void SpectralPolycrystalCUDA<T,N>::setToInitialConditions(T init_s, const std::vector<EulerAngles<T>>& angleList) {
     // Check sizes
     if (angleList.size() != this->nCrystals) {
