@@ -483,7 +483,7 @@ inline int orientationSpaceResolutionRequiredForNumberOfPoints(long int nPointsI
         default:
             throw std::runtime_error("Don't know about this symmetry type.");
     }
-    double res = std::log(nPointsSymm*72)/std::log(8.0);
+    double res = std::log(nPointsSymm/72)/std::log(8.0);
     int resInt = std::ceil(res);
     return resInt;
 }
