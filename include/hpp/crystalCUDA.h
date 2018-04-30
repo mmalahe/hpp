@@ -174,10 +174,10 @@ Tensor2CUDA<T,3,3> RStretchingTensor, Tensor2AsymmCUDA<T,3> WNext, T theta, T eD
 
 // GSH conversions
 template<typename T>
-__global__ void GET_PER_CRYSTAL_SCALAR_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, T* densities);
+__global__ void GET_PER_CRYSTAL_SCALAR_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, const unsigned int ncrystals, T* densities);
 
 template<typename T>
-__global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
+__global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, const unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums);
 
 // Average kernel
 template<typename T>
@@ -230,11 +230,11 @@ public:
     void evolve(T t_start, T t_end, T dt, std::function<hpp::Tensor2<T>(T t)> F_of_t, std::function<hpp::Tensor2<T>(T t)> L_of_t);
     
     // Output
-    std::vector<EulerAngles<T>> getEulerAnglesZXZActive();
-    GSHCoeffsCUDA<T> getGSHCoeffs();
-    GSHCoeffsCUDA<T> getGSHOfPerCrystalScalar(const std::vector<T>& scalars);
-    GSHCoeffsCUDA<T> getGSHOfCrystalDensities(const std::vector<T>& densities);
-    std::vector<T> getPerCrystalScalarFromGSH(const GSHCoeffsCUDA<T> coeffs);    
+    std::vector<EulerAngles<T>> getEulerAnglesZXZActive() const;
+    GSHCoeffsCUDA<T> getGSHCoeffs() const;
+    GSHCoeffsCUDA<T> getGSHOfPerCrystalScalar(const std::vector<T>& scalars) const;
+    GSHCoeffsCUDA<T> getGSHOfCrystalDensities(const std::vector<T>& densities) const;
+    std::vector<T> getPerCrystalScalarFromGSH(const GSHCoeffsCUDA<T> coeffs) const;    
     
     // Pole histograms
     std::shared_ptr<Tensor2CUDA<T,HPP_POLE_FIG_HIST_DIM,HPP_POLE_FIG_HIST_DIM>> getPoleHistogram(const VecCUDA<T,3>& pole);
@@ -319,6 +319,55 @@ private:
 template <typename T>
 GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<T>>& crystals);
 
+template <typename T, CrystalType CRYSTAL_TYPE, int N_GSH_LEVELS>
+class SpectralPolycrystalGSHCUDAState {
+template <typename, CrystalType, int> friend class SpectralPolycrystalGSHCUDA;
+public:
+    SpectralPolycrystalGSHCUDAState(const std::vector<T>& stateIn) {
+        // Check size for full state vector
+        int perGSHDim = nGSHReals(N_GSH_LEVELS);
+        int stateDim = 2*perGSHDim;
+        if (stateIn.size() != stateDim) {
+            std::cerr << "Number of GSH levels = " << N_GSH_LEVELS << std::endl;
+            std::cerr << "Requires a vector of length = " << perGSHDim << std::endl;
+            std::cerr << "We need two of these (odf and slip resistance), so length = " << stateDim << std::endl;
+            std::cerr << "Actual state vector length = " << stateIn.size() << std::endl;
+            throw std::runtime_error("Wrong size for state vector.");
+        }
+        
+        // Break state into ODF part and slip resistance part
+        std::vector<T> stateVecODF(stateIn.begin(), stateIn.begin()+perGSHDim);
+        std::vector<T> stateVecSlipResistances(stateIn.begin()+perGSHDim, stateIn.end());
+        if (stateVecODF.size() != perGSHDim || stateVecSlipResistances.size() != perGSHDim) {
+            throw std::runtime_error("Wrong sizes for state vectors.");
+        }
+        
+        // Populate state
+        odf = GSHCoeffsCUDA<T>(stateVecODF, N_GSH_LEVELS);
+        slipResistances = GSHCoeffsCUDA<T>(stateVecSlipResistances, N_GSH_LEVELS);
+    }
+    
+    SpectralPolycrystalGSHCUDAState(const GSHCoeffsCUDA<T>& odf, const GSHCoeffsCUDA<T>& slipResistances) {
+        this->odf = odf;
+        this->slipResistances = slipResistances;
+    }
+    
+    std::vector<T> toStateVec() const {
+        auto stateVecODF = odf.getReals(N_GSH_LEVELS);
+        auto stateVecSlipResistances = slipResistances.getReals(N_GSH_LEVELS);
+        std::vector<T> stateVec(stateVecODF);
+        stateVec.insert(stateVec.end(), stateVecSlipResistances.begin(), stateVecSlipResistances.end());
+        return stateVec;
+    }
+    
+    const GSHCoeffsCUDA<T>& getODF() const {return odf;}
+    const GSHCoeffsCUDA<T>& getSlipResistances() const {return slipResistances;}
+    
+private:
+    GSHCoeffsCUDA<T> odf;
+    GSHCoeffsCUDA<T> slipResistances;
+};
+
 /**
  * @class SpectralPolycrystalGSHCUDA
  * @author Michael Malahe
@@ -338,7 +387,7 @@ GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystal
  * @tparam T scalar type
  * @tparam N number of slip systems in the polycrystal
  */
-template <typename T, CrystalType CRYSTAL_TYPE>
+template <typename T, CrystalType CRYSTAL_TYPE, int N_GSH_LEVELS=5>
 class SpectralPolycrystalGSHCUDA
 {
 public:    
@@ -435,8 +484,7 @@ public:
             hpp::Tensor2<T> LNext = L_of_t(t);     
             
             // Step
-            this->setOrientations(this->getGSHCoeffs());
-            this->setSlipResistances(this->getSlipResistanceGSHCoeffs());
+            this->setState(this->getState());
             this->step(LNext, dt);
             
             // Store quantities
@@ -451,14 +499,14 @@ public:
     }
     
     // Output
-    GSHCoeffsCUDA<T> getDensityGSHCoeffs() {
+    GSHCoeffsCUDA<T> getDensityGSHCoeffs() const {
         return polycrystal.getGSHOfPerCrystalScalar(densities);
     }
-    GSHCoeffsCUDA<T> getSlipResistanceGSHCoeffs() {
+    GSHCoeffsCUDA<T> getSlipResistanceGSHCoeffs() const {
         auto slipResistances = polycrystal.getSlipResistances();
         return polycrystal.getGSHOfPerCrystalScalar(slipResistances);
     }
-    GSHCoeffsCUDA<T> getGSHCoeffs() {
+    GSHCoeffsCUDA<T> getGSHCoeffs() const {
         return this->getDensityGSHCoeffs();
     }
 
@@ -506,6 +554,16 @@ public:
     
     // Conversions
     unsigned int getNumRepresentativeCrystals(){return densities.size();}
+    
+    // Getting and setting full state
+    SpectralPolycrystalGSHCUDAState<T,CRYSTAL_TYPE,N_GSH_LEVELS> getState() const {
+        return SpectralPolycrystalGSHCUDAState<T,CRYSTAL_TYPE,N_GSH_LEVELS>(this->getDensityGSHCoeffs(), this->getSlipResistanceGSHCoeffs());
+    }
+    
+    void setState(const SpectralPolycrystalGSHCUDAState<T,CRYSTAL_TYPE,N_GSH_LEVELS>& stateIn) {
+        this->setOrientations(stateIn.getODF());
+        this->setSlipResistances(stateIn.getSlipResistances());
+    }
     
     // Auto generated getters    
     const std::vector<T>& getTHistory() const {return tHistory;}

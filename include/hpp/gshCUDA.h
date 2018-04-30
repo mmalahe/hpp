@@ -541,7 +541,7 @@ inline __device__ GSHCoeffsCUDA<T> blockReduceSumGSHCoeffs(GSHCoeffsCUDA<T> val)
 }
 
 template <typename T>
-__global__ void BLOCK_REDUCE_KEPLER_GSH_COEFFS(GSHCoeffsCUDA<T> *in, GSHCoeffsCUDA<T> *out, int nTerms) {
+__global__ void BLOCK_REDUCE_KEPLER_GSH_COEFFS(const GSHCoeffsCUDA<T> *in, GSHCoeffsCUDA<T> *out, int nTerms) {
     GSHCoeffsCUDA<T> sum;
     //reduce multiple elements per thread
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i<nTerms; i += blockDim.x * gridDim.x) {

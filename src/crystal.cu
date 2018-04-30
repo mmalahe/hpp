@@ -544,7 +544,7 @@ __global__ void GET_AVERAGE_TCAUCHY(unsigned int nCrystals, const SpectralCrysta
  * @param coeffsPerBlockSums
  */
 template<typename T>
-__global__ void GET_PER_CRYSTAL_SCALAR_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, T* scalars) {
+__global__ void GET_PER_CRYSTAL_SCALAR_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPtr, const SpectralCrystalCUDA<T>* crystals, const unsigned int ncrystals, T* scalars) {
     // Get absolute crystal/thread index
     unsigned int idx = blockDim.x*blockIdx.x + threadIdx.x;
     bool doAddContribution = true;
@@ -1436,7 +1436,7 @@ __global__ void GET_PER_CRYSTAL_SCALAR_FROM_GSH(const GSHCoeffsCUDA<T>* coeffsPt
  * @param coeffs The GSH coefficients
  */
 template<typename T>
-__global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums) {
+__global__ void GET_GSH_FROM_ORIENTATIONS(const SpectralCrystalCUDA<T>* crystals, const unsigned int ncrystals, GSHCoeffsCUDA<T>* coeffsPerBlockSums) {
     // Get absolute crystal/thread index
     unsigned int idx = blockDim.x*blockIdx.x + threadIdx.x;
     bool doAddContribution = true;
@@ -2782,7 +2782,7 @@ Tensor2<T> SpectralPolycrystalCUDA<T,N>::getPoleHistogram(int p0, int p1, int p2
  * @brief Get the Euler angles of the crystals
  */
 template <typename T, unsigned int N>
-std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActive() {
+std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActive() const {
     thrust::host_vector<SpectralCrystalCUDA<T>> crystalsH = this->crystalsD;
     std::vector<EulerAngles<T>> anglesVec(crystalsH.size());
     for (unsigned int i=0; i<crystalsH.size(); i++) {
@@ -2792,24 +2792,26 @@ std::vector<EulerAngles<T>> SpectralPolycrystalCUDA<T,N>::getEulerAnglesZXZActiv
 }
 
 template <typename T, unsigned int N>
-GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() { 
+GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHCoeffs() const { 
     GSHCoeffsCUDA<T> coeffsH;
     auto coeffsSumD = makeDeviceCopySharedPtr(coeffsH);
     
     // Compute coefficients
     dim3 dG = gshKernelCfg.dG;
     dim3 dB = gshKernelCfg.dB;
-    GET_GSH_FROM_ORIENTATIONS<<<dG,dB>>>(crystalsD.data().get(), nCrystals, gshPerBlockSums.data().get());
+    auto dummyGshPerBlockSums = gshPerBlockSums;
+    GET_GSH_FROM_ORIENTATIONS<<<dG,dB>>>(crystalsD.data().get(), nCrystals, dummyGshPerBlockSums.data().get());
     
     // Single level reduction
     unsigned int nBlocksGSH = gshKernelCfg.dG.x;
     if (gshReduceKernelLevel0Cfg.dG.x <= 1) {
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.data().get(), coeffsSumD.get(), nBlocksGSH);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(dummyGshPerBlockSums.data().get(), coeffsSumD.get(), nBlocksGSH);
     }
     // Two level reduction
-    else{        
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.data().get(), gshLevel0Sums.data().get(), nBlocksGSH);
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(gshLevel0Sums.data().get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
+    else{
+        auto dummyLevel0Sums = gshLevel0Sums;
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(dummyGshPerBlockSums.data().get(), dummyLevel0Sums.data().get(), nBlocksGSH);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(dummyLevel0Sums.data().get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
     }
     
     // Sync before transfers
@@ -2857,7 +2859,7 @@ void enforceUnitDensitySum(std::vector<T>& densities) {
 }
 
 template <typename T, unsigned int N>
-GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHOfPerCrystalScalar(const std::vector<T>& scalarsIn) { 
+GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHOfPerCrystalScalar(const std::vector<T>& scalarsIn) const { 
     // Check scalars
     auto scalars = scalarsIn;
     if (scalars.size() != nCrystals) {
@@ -2873,17 +2875,19 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHOfPerCrystalScalar(const st
     // Compute coefficients
     dim3 dG = gshKernelCfg.dG;
     dim3 dB = gshKernelCfg.dB;
-    GET_GSH_OF_PER_CRYSTAL_SCALAR<<<dG,dB>>>(crystalsD.data().get(), nCrystals, scalarsD.get(), gshPerBlockSums.data().get());
+    auto dummyGshPerBlockSums = gshPerBlockSums;
+    GET_GSH_OF_PER_CRYSTAL_SCALAR<<<dG,dB>>>(crystalsD.data().get(), nCrystals, scalarsD.get(), dummyGshPerBlockSums.data().get());
     
     // Single level reduction
     unsigned int nBlocksGSH = gshKernelCfg.dG.x;
     if (gshReduceKernelLevel0Cfg.dG.x <= 1) {
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.data().get(), coeffsSumD.get(), nBlocksGSH);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(dummyGshPerBlockSums.data().get(), coeffsSumD.get(), nBlocksGSH);
     }
     // Two level reduction
-    else{        
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(gshPerBlockSums.data().get(), gshLevel0Sums.data().get(), nBlocksGSH);
-        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(gshLevel0Sums.data().get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
+    else{
+        auto dummyLevel0Sums = gshLevel0Sums;
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel0Cfg.dG, gshReduceKernelLevel0Cfg.dB>>>(dummyGshPerBlockSums.data().get(), dummyLevel0Sums.data().get(), nBlocksGSH);
+        BLOCK_REDUCE_KEPLER_GSH_COEFFS<<<gshReduceKernelLevel1Cfg.dG, gshReduceKernelLevel1Cfg.dB>>>(dummyLevel0Sums.data().get(), coeffsSumD.get(), gshReduceKernelLevel0Cfg.dG.x);
     }
     
     // Sync before transfers
@@ -2895,13 +2899,13 @@ GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHOfPerCrystalScalar(const st
 }
 
 template <typename T, unsigned int N>
-GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHOfCrystalDensities(const std::vector<T>& densities) { 
+GSHCoeffsCUDA<T> SpectralPolycrystalCUDA<T,N>::getGSHOfCrystalDensities(const std::vector<T>& densities) const { 
     assertUnitDensitySum(densities);
     return getGSHOfPerCrystalScalar(densities);
 }
 
 template <typename T, unsigned int N>
-std::vector<T> SpectralPolycrystalCUDA<T,N>::getPerCrystalScalarFromGSH(const GSHCoeffsCUDA<T> coeffsH) {
+std::vector<T> SpectralPolycrystalCUDA<T,N>::getPerCrystalScalarFromGSH(const GSHCoeffsCUDA<T> coeffsH) const {
     auto coeffsD = makeDeviceCopySharedPtr(coeffsH);
     auto scalarsD = allocDeviceMemorySharedPtr<T>(nCrystals);    
     
