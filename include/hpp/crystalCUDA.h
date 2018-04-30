@@ -321,6 +321,10 @@ private:
 template <typename T>
 GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<T>>& crystals);
 
+constexpr int spectralPolycrystalGSHCUDAStateDim(int nGSHLevels) {
+    return 2*nGSHReals(nGSHLevels);
+}
+
 template <typename T, CrystalType CRYSTAL_TYPE, int N_GSH_LEVELS>
 class SpectralPolycrystalGSHCUDAState {
 template <typename, CrystalType, int> friend class SpectralPolycrystalGSHCUDA;
@@ -328,7 +332,7 @@ public:
     SpectralPolycrystalGSHCUDAState(const std::vector<T>& stateIn) {
         // Check size for full state vector
         int perGSHDim = nGSHReals(N_GSH_LEVELS);
-        int stateDim = 2*perGSHDim;
+        int stateDim = spectralPolycrystalGSHCUDAStateDim(N_GSH_LEVELS);
         if (stateIn.size() != stateDim) {
             std::cerr << "Number of GSH levels = " << N_GSH_LEVELS << std::endl;
             std::cerr << "Requires a vector of length = " << perGSHDim << std::endl;
@@ -354,7 +358,7 @@ public:
         this->slipResistances = slipResistances;
     }
     
-    std::vector<T> toStateVec() const {
+    std::vector<T> toStdVec() const {
         auto stateVecODF = odf.getReals(N_GSH_LEVELS);
         auto stateVecSlipResistances = slipResistances.getReals(N_GSH_LEVELS);
         std::vector<T> stateVec(stateVecODF);
@@ -369,6 +373,16 @@ private:
     GSHCoeffsCUDA<T> odf;
     GSHCoeffsCUDA<T> slipResistances;
 };
+
+template <typename T, CrystalType CRYSTAL_TYPE, int N_GSH_LEVELS>
+inline std::ostream& operator<<(std::ostream& out, const SpectralPolycrystalGSHCUDAState<T, CRYSTAL_TYPE, N_GSH_LEVELS>& state)
+{
+    out << "ODF = " << std::endl;
+    out << state.getODF() << std::endl;
+    out << "Slip resistances = " << std::endl;
+    out << state.getSlipResistances() << std::endl;
+    return out;
+}
 
 /**
  * @class SpectralPolycrystalGSHCUDA
