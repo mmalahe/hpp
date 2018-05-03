@@ -8,7 +8,7 @@ DIR=`dirname "$(readlink -f "$0")"`
 
 # Install the dependencies available from the package manager
 sudo apt update
-sudo apt install --yes $(cat ${DIR}/mandatory_pkglist_xenial.txt)
+sudo DEBIAN_FRONTEND=noninteractive apt install --yes $(cat ${DIR}/mandatory_pkglist_xenial.txt)
 
 # Install the dependencies that require a manual installation
 mkdir -p deps
