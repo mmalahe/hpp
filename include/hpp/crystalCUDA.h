@@ -321,7 +321,7 @@ private:
 template <typename T>
 GSHCoeffsCUDA<T> getGSHFromCrystalOrientations(const std::vector<SpectralCrystalCUDA<T>>& crystals);
 
-constexpr int spectralPolycrystalGSHCUDAStateDim(int nGSHLevels) {
+constexpr unsigned int spectralPolycrystalGSHCUDAStateDim(unsigned int nGSHLevels) {
     return 2*nGSHReals(nGSHLevels);
 }
 
